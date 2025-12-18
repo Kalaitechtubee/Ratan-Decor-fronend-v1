@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FaEnvelope, FaShieldAlt } from 'react-icons/fa';
+import { FaEnvelope, FaShieldAlt, FaArrowLeft } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { forgotPassword } from '../authSlice';

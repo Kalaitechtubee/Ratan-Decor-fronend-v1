@@ -123,14 +123,18 @@ export default function DesktopNavbar({
                 </div>
                 <Link
                   to="/about"
-                  className={`px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${isActiveRoute('/about')
-                    ? 'text-[#ff4747] bg-[#ff4747]/10'
-                    : 'text-gray-700 hover:text-[#ff4747]'
-                    }`}
+                  className={`px-3 py-2 text-base font-medium rounded-lg
+    underline-animation font-roboto transition-colors duration-200
+    ${isActiveRoute('/about')
+                      ? 'text-[#ff4747]'                // active: text only
+                      : 'text-gray-700 hover:text-[#ff4747]' // hover: text only
+                    }
+  `}
                   aria-label="Go to about page"
                 >
                   Company
                 </Link>
+
 
                 <button
                   onClick={onOpenVideoCallPopup}
@@ -143,20 +147,22 @@ export default function DesktopNavbar({
                   <FaVideo className="text-lg" />
                   Shop on call
                 </button>
-<Link
-  to="/cart"
-  aria-label="Go to cart"
-  className={`flex items-center gap-2 px-3 py-2 text-base font-medium rounded-lg
-    underline-animation font-roboto transition-all duration-200
-    ${
-      isActiveRoute('/cart')
-        ? 'text-[#ff4747] bg-[#ff4747]/10'
-        : 'text-gray-700 hover:text-[#ff4747]'
-    }`}
->
-  <FaShoppingCart className="text-lg" />
-  <h1 className='mr-2'>Cart</h1>
-</Link>
+                <Link
+                  to="/cart"
+                  aria-label="Go to cart"
+                  className={`flex items-center gap-2 px-3 py-2 text-base font-medium rounded-lg
+    underline-animation font-roboto transition-colors duration-200
+    ${isActiveRoute('/cart')
+                      ? 'text-[#ff4747]'        // active: red text
+                      : 'text-gray-700 hover:text-[#ff4747]' // hover: text only
+                    }
+  `}
+                >
+                  <FaShoppingCart className="text-lg" />
+                  <h1 className="mr-2">Cart</h1>
+                </Link>
+
+
 
 
               </div>

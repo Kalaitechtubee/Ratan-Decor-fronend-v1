@@ -1,3 +1,4 @@
+// components/AdvancedProductFilters.jsx (corrected and integrated)
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -6,7 +7,8 @@ import {
   ChevronRight,
   Filter,
   Layers,
-  RefreshCw
+  RefreshCw,
+  Search
 } from 'lucide-react';
 
 // Function to recursively collect all categories and subcategories
@@ -14,26 +16,22 @@ function getAllCategories(categories) {
   if (!Array.isArray(categories)) {
     return [];
   }
-
   const allCategories = [];
   categories.forEach(category => {
     if (!category || typeof category !== 'object') return;
-
     allCategories.push({
       id: category.id ?? '',
       name: category.name ?? 'Unnamed Category',
       productCount: category.productCount ?? 0
     });
-
     if (Array.isArray(category.subCategories) && category.subCategories.length > 0) {
       allCategories.push(...getAllCategories(category.subCategories));
     }
   });
-
   return allCategories;
 }
 
-export default function AdvancedProductFilters({ 
+export default function AdvancedProductFilters({
   categories = [],
   filters = {},
   onFilterChange,
@@ -47,49 +45,78 @@ export default function AdvancedProductFilters({
   const [collapsedSections, setCollapsedSections] = useState(new Set()); // Categories section open by default
   const [minDesignNumber, setMinDesignNumber] = useState(filters.minDesignNumber || '');
   const [maxDesignNumber, setMaxDesignNumber] = useState(filters.maxDesignNumber || '');
+  const [designSearch, setDesignSearch] = useState(filters.designNumber || ''); // Added exact/partial search
   const [minPrice, setMinPrice] = useState(parseFloat(filters.minPrice) || 0);
-  const [maxPrice, setMaxPrice] = useState(parseFloat(filters.maxPrice) || 10000);
+  const [maxPrice, setMaxPrice] = useState(parseFloat(filters.maxPrice) || 50000);
   const [isDragging, setIsDragging] = useState(null);
-
   // Refs for price slider
   const sliderRef = useRef(null);
   const designNumberTimeoutRef = useRef(null);
   const priceTimeoutRef = useRef(null);
-
-  const MAX_PRICE = 10000;
+  // Refs to track latest price values for event listeners
+  const minPriceRef = useRef(minPrice);
+  const maxPriceRef = useRef(maxPrice);
+  const MAX_PRICE = 50000;
   const MIN_PRICE = 0;
-
   // Sync external filter changes
   useEffect(() => {
-    if (filters.categoryId !== selectedCategory) {
-      setSelectedCategory(filters.categoryId || '');
+    // Helper to safely convert to string
+    const toStr = (val) => (val === null || val === undefined) ? '' : String(val);
+
+    const filterCategoryId = toStr(filters.categoryId);
+    if (filterCategoryId !== selectedCategory) {
+      setSelectedCategory(filterCategoryId);
     }
-    if (filters.minDesignNumber !== minDesignNumber) {
-      setMinDesignNumber(filters.minDesignNumber || '');
+
+    const filterMinDesign = toStr(filters.minDesignNumber);
+    if (filterMinDesign !== minDesignNumber) {
+      setMinDesignNumber(filterMinDesign);
     }
-    if (filters.maxDesignNumber !== maxDesignNumber) {
-      setMaxDesignNumber(filters.maxDesignNumber || '');
+
+    const filterMaxDesign = toStr(filters.maxDesignNumber);
+    if (filterMaxDesign !== maxDesignNumber) {
+      setMaxDesignNumber(filterMaxDesign);
     }
-    if (parseFloat(filters.minPrice) !== minPrice && !isDragging) {
-      setMinPrice(parseFloat(filters.minPrice) || 0);
+
+    const filterDesign = toStr(filters.designNumber);
+    if (filterDesign !== designSearch) {
+      setDesignSearch(filterDesign);
     }
-    if (parseFloat(filters.maxPrice) !== maxPrice && !isDragging) {
-      setMaxPrice(parseFloat(filters.maxPrice) || 10000);
+
+    const filterMinPrice = parseFloat(filters.minPrice);
+    if (!isNaN(filterMinPrice) && filterMinPrice !== minPrice && !isDragging) {
+      setMinPrice(filterMinPrice);
+    }
+
+    const filterMaxPrice = parseFloat(filters.maxPrice);
+    if (!isNaN(filterMaxPrice) && filterMaxPrice !== maxPrice && !isDragging) {
+      setMaxPrice(filterMaxPrice);
+    } else if (isNaN(filterMaxPrice) && !isDragging) {
+      // Reset to max if filter is cleared/invalid
+      setMaxPrice(50000);
     }
   }, [filters]);
 
-  // Debounced design number changes
+  // Sync refs with state
+  useEffect(() => {
+    minPriceRef.current = minPrice;
+    maxPriceRef.current = maxPrice;
+  }, [minPrice, maxPrice]);
+  // Debounced design number changes (now includes exact search)
   useEffect(() => {
     if (designNumberTimeoutRef.current) {
       clearTimeout(designNumberTimeoutRef.current);
     }
-
     designNumberTimeoutRef.current = setTimeout(() => {
+      const currentSearch = designSearch.trim();
       const currentMin = minDesignNumber.trim();
       const currentMax = maxDesignNumber.trim();
-      const filterMin = (filters.minDesignNumber || '').toString().trim();
-      const filterMax = (filters.maxDesignNumber || '').toString().trim();
-
+      const filterSearch = (filters.designNumber || '').trim();
+      const filterMin = (filters.minDesignNumber || '').trim();
+      const filterMax = (filters.maxDesignNumber || '').trim();
+      if (currentSearch !== filterSearch) {
+        onFilterChange('designNumber', currentSearch || '');
+      }
       if (currentMin !== filterMin || currentMax !== filterMax) {
         if (currentMin) onFilterChange('minDesignNumber', currentMin);
         if (currentMax) onFilterChange('maxDesignNumber', currentMax);
@@ -97,14 +124,12 @@ export default function AdvancedProductFilters({
         if (!currentMax && filterMax) onFilterChange('maxDesignNumber', '');
       }
     }, 500);
-
     return () => {
       if (designNumberTimeoutRef.current) {
         clearTimeout(designNumberTimeoutRef.current);
       }
     };
-  }, [minDesignNumber, maxDesignNumber]);
-
+  }, [designSearch, minDesignNumber, maxDesignNumber]);
   // Auto-expand categories with selected subcategories
   useEffect(() => {
     if (selectedCategory && categories.length > 0) {
@@ -120,35 +145,31 @@ export default function AdvancedProductFilters({
         }
         return null;
       };
-
       const path = findCategoryPath(categories, selectedCategory);
       if (path) {
         setExpandedCategories(new Set(path));
       }
     }
   }, [selectedCategory, categories]);
-
   // Price slider helper functions
   const priceToPercent = (price) => {
     return ((price - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
   };
-
   const pixelToPrice = (pixel, rect) => {
     const percentage = Math.max(0, Math.min(1, pixel / rect.width));
     return Math.round(MIN_PRICE + (percentage * (MAX_PRICE - MIN_PRICE)));
   };
-
   // Handle mouse events for dragging price slider
   const handleMouseDown = (type, e) => {
     e.preventDefault();
     setIsDragging(type);
-    
+
     const handleMouseMove = (e) => {
       if (!sliderRef.current) return;
-      
+
       const rect = sliderRef.current.getBoundingClientRect();
       const newPrice = pixelToPrice(e.clientX - rect.left, rect);
-      
+
       if (type === 'min') {
         const constrainedPrice = Math.min(newPrice, maxPrice - 100);
         const finalPrice = Math.max(MIN_PRICE, constrainedPrice);
@@ -159,39 +180,40 @@ export default function AdvancedProductFilters({
         setMaxPrice(finalPrice);
       }
     };
-    
+
     const handleMouseUp = () => {
       setIsDragging(null);
-      
+
       // Debounce the filter change
       if (priceTimeoutRef.current) {
         clearTimeout(priceTimeoutRef.current);
       }
       priceTimeoutRef.current = setTimeout(() => {
-        onFilterChange('minPrice', minPrice.toString());
-        onFilterChange('maxPrice', maxPrice.toString());
+        onFilterChange({
+          minPrice: minPriceRef.current.toString(),
+          maxPrice: maxPriceRef.current.toString()
+        });
       }, 300);
-      
+
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-    
+
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   };
-
   // Handle touch events for mobile
   const handleTouchStart = (type, e) => {
     e.preventDefault();
     setIsDragging(type);
-    
+
     const handleTouchMove = (e) => {
       if (!sliderRef.current) return;
-      
+
       const rect = sliderRef.current.getBoundingClientRect();
       const touch = e.touches[0];
       const newPrice = pixelToPrice(touch.clientX - rect.left, rect);
-      
+
       if (type === 'min') {
         const constrainedPrice = Math.min(newPrice, maxPrice - 100);
         setMinPrice(Math.max(MIN_PRICE, constrainedPrice));
@@ -200,36 +222,37 @@ export default function AdvancedProductFilters({
         setMaxPrice(Math.min(MAX_PRICE, constrainedPrice));
       }
     };
-    
+
     const handleTouchEnd = () => {
       setIsDragging(null);
-      
+
       if (priceTimeoutRef.current) {
         clearTimeout(priceTimeoutRef.current);
       }
       priceTimeoutRef.current = setTimeout(() => {
-        onFilterChange('minPrice', minPrice.toString());
-        onFilterChange('maxPrice', maxPrice.toString());
+        onFilterChange({
+          minPrice: minPriceRef.current.toString(),
+          maxPrice: maxPriceRef.current.toString()
+        });
       }, 300);
-      
+
       document.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('touchend', handleTouchEnd);
     };
-    
+
     document.addEventListener('touchmove', handleTouchMove);
     document.addEventListener('touchend', handleTouchEnd);
   };
-
   // Handle clicking on the track
   const handleTrackClick = (e) => {
     if (!sliderRef.current) return;
-    
+
     const rect = sliderRef.current.getBoundingClientRect();
     const clickPrice = pixelToPrice(e.clientX - rect.left, rect);
-    
+
     const distToMin = Math.abs(clickPrice - minPrice);
     const distToMax = Math.abs(clickPrice - maxPrice);
-    
+
     if (distToMin < distToMax) {
       const newMinPrice = Math.min(clickPrice, maxPrice - 100);
       setMinPrice(newMinPrice);
@@ -240,11 +263,10 @@ export default function AdvancedProductFilters({
       onFilterChange('maxPrice', newMaxPrice.toString());
     }
   };
-
   // Handle keyboard navigation
   const handleKeyDown = (type, e) => {
     const step = e.shiftKey ? 1000 : 100;
-    
+
     switch (e.key) {
       case 'ArrowLeft':
       case 'ArrowDown':
@@ -274,14 +296,12 @@ export default function AdvancedProductFilters({
         break;
     }
   };
-
   // Handle category selection
   const handleCategorySelect = (categoryId) => {
     const newCategoryId = selectedCategory === categoryId.toString() ? '' : categoryId.toString();
     setSelectedCategory(newCategoryId);
     onFilterChange('categoryId', newCategoryId);
   };
-
   const toggleCategoryExpansion = (categoryId) => {
     const newExpanded = new Set(expandedCategories);
     if (newExpanded.has(categoryId)) {
@@ -291,7 +311,6 @@ export default function AdvancedProductFilters({
     }
     setExpandedCategories(newExpanded);
   };
-
   const toggleSection = (sectionName) => {
     const newCollapsed = new Set(collapsedSections);
     if (newCollapsed.has(sectionName)) {
@@ -301,55 +320,73 @@ export default function AdvancedProductFilters({
     }
     setCollapsedSections(newCollapsed);
   };
-
   // Handle price preset buttons
   const handlePricePreset = (min, max) => {
     setMinPrice(min);
     setMaxPrice(max);
-    onFilterChange('minPrice', min.toString());
-    onFilterChange('maxPrice', max.toString());
+    onFilterChange({
+      minPrice: min.toString(),
+      maxPrice: max.toString()
+    });
   };
-
   // Handle manual price input
   const handleMinPriceInput = (e) => {
     const value = Math.max(MIN_PRICE, Math.min(maxPrice - 100, parseInt(e.target.value) || 0));
     setMinPrice(value);
     onFilterChange('minPrice', value.toString());
   };
-
   const handleMaxPriceInput = (e) => {
     const value = Math.min(MAX_PRICE, Math.max(minPrice + 100, parseInt(e.target.value) || 0));
     setMaxPrice(value);
     onFilterChange('maxPrice', value.toString());
   };
-
   // Reset price range
   const resetPriceRange = () => {
     setMinPrice(MIN_PRICE);
     setMaxPrice(MAX_PRICE);
-    onFilterChange('minPrice', '');
-    onFilterChange('maxPrice', '');
+    onFilterChange({
+      minPrice: '',
+      maxPrice: ''
+    });
   };
-
+  // Handle design search input
+  const handleDesignSearchInput = (e) => {
+    const value = e.target.value;
+    setDesignSearch(value);
+    // Clear range if exact search is used (optional logic; adjust as needed)
+    if (value && (minDesignNumber || maxDesignNumber)) {
+      setMinDesignNumber('');
+      setMaxDesignNumber('');
+      onFilterChange('minDesignNumber', '');
+      onFilterChange('maxDesignNumber', '');
+    }
+  };
+  // Clear design filters
+  const clearDesignFilters = () => {
+    setDesignSearch('');
+    setMinDesignNumber('');
+    setMaxDesignNumber('');
+    onFilterChange('designNumber', '');
+    onFilterChange('minDesignNumber', '');
+    onFilterChange('maxDesignNumber', '');
+  };
   // Recursive category tree rendering
   const renderCategoryTree = (cats, level = 0) => {
     return cats.map(category => (
       <div key={category.id} className="mb-1">
         <div
-          className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all duration-200 ${
-            selectedCategory === category.id.toString()
-              ? 'bg-accent/10 text-accent border border-accent/20'
-              : 'hover:bg-gray-50'
-          }`}
+          className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all duration-200 ${selectedCategory === category.id.toString()
+            ? 'bg-accent/10 text-accent border border-accent/20'
+            : 'hover:bg-gray-50'
+            }`}
           style={{ paddingLeft: `${0.75 + level * 1.5}rem` }}
         >
           <div
             className="flex items-center flex-1 min-w-0"
             onClick={() => handleCategorySelect(category.id)}
           >
-            <span className={`text-sm font-medium truncate ${
-              selectedCategory === category.id.toString() ? 'text-accent' : 'text-gray-700'
-            }`}>
+            <span className={`text-sm font-medium truncate ${selectedCategory === category.id.toString() ? 'text-accent' : 'text-gray-700'
+              }`}>
               {category.name}
             </span>
           </div>
@@ -369,7 +406,6 @@ export default function AdvancedProductFilters({
             </button>
           )}
         </div>
-
         <AnimatePresence>
           {expandedCategories.has(category.id) && category.subCategories?.length > 0 && (
             <motion.div
@@ -386,7 +422,6 @@ export default function AdvancedProductFilters({
       </div>
     ));
   };
-
   const renderSection = (title, Icon, content, sectionName) => (
     <div className="mb-4">
       <button
@@ -397,9 +432,8 @@ export default function AdvancedProductFilters({
           {Icon && <Icon className="w-4 h-4 text-gray-600" />}
           <span className="font-medium text-gray-800">{title}</span>
         </div>
-        <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${
-          collapsedSections.has(sectionName) ? 'rotate-180' : ''
-        }`} />
+        <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${collapsedSections.has(sectionName) ? 'rotate-180' : ''
+          }`} />
       </button>
       <AnimatePresence>
         {!collapsedSections.has(sectionName) && (
@@ -416,7 +450,6 @@ export default function AdvancedProductFilters({
       </AnimatePresence>
     </div>
   );
-
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-4 w-full">
       <div className="flex items-center justify-between mb-6">
@@ -434,7 +467,6 @@ export default function AdvancedProductFilters({
           </button>
         )}
       </div>
-
       {/* Category Section */}
       {renderSection(
         'Categories',
@@ -450,7 +482,6 @@ export default function AdvancedProductFilters({
         </div>,
         'categories'
       )}
-
       {/* Price Range Section */}
       {renderSection(
         'Price (₹)',
@@ -459,11 +490,11 @@ export default function AdvancedProductFilters({
           {/* Interactive Dual Range Slider */}
           <div className="px-2">
             <div className="relative h-8 mb-4" ref={sliderRef}>
-              <div 
+              <div
                 className="absolute top-1/2 w-full h-2 bg-gray-200 rounded-full -translate-y-1/2 cursor-pointer"
                 onClick={handleTrackClick}
               />
-              <div 
+              <div
                 className="absolute top-1/2 h-2 bg-accent rounded-full -translate-y-1/2 pointer-events-none"
                 style={{
                   left: `${priceToPercent(minPrice)}%`,
@@ -471,9 +502,8 @@ export default function AdvancedProductFilters({
                 }}
               />
               <div
-                className={`absolute top-1/2 w-6 h-6 bg-accent border-4 border-white rounded-full shadow-lg cursor-grab transform -translate-y-1/2 -translate-x-3 transition-all duration-150 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 z-20 ${
-                  isDragging === 'min' ? 'scale-110 cursor-grabbing' : ''
-                }`}
+                className={`absolute top-1/2 w-6 h-6 bg-accent border-4 border-white rounded-full shadow-lg cursor-grab transform -translate-y-1/2 -translate-x-3 transition-all duration-150 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 z-20 ${isDragging === 'min' ? 'scale-110 cursor-grabbing' : ''
+                  }`}
                 style={{ left: `${priceToPercent(minPrice)}%` }}
                 tabIndex={0}
                 role="slider"
@@ -486,9 +516,8 @@ export default function AdvancedProductFilters({
                 onKeyDown={(e) => handleKeyDown('min', e)}
               />
               <div
-                className={`absolute top-1/2 w-6 h-6 bg-accent border-4 border-white rounded-full shadow-lg cursor-grab transform -translate-y-1/2 -translate-x-3 transition-all duration-150 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 z-10 ${
-                  isDragging === 'max' ? 'scale-110 cursor-grabbing' : ''
-                }`}
+                className={`absolute top-1/2 w-6 h-6 bg-accent border-4 border-white rounded-full shadow-lg cursor-grab transform -translate-y-1/2 -translate-x-3 transition-all duration-150 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 z-10 ${isDragging === 'max' ? 'scale-110 cursor-grabbing' : ''
+                  }`}
                 style={{ left: `${priceToPercent(maxPrice)}%` }}
                 tabIndex={0}
                 role="slider"
@@ -501,7 +530,7 @@ export default function AdvancedProductFilters({
                 onKeyDown={(e) => handleKeyDown('max', e)}
               />
             </div>
-            
+
             {/* Price Display */}
             <div className="flex justify-between items-center text-sm font-medium text-gray-700 mb-2">
               <span className="px-2 py-1 bg-accent/10 text-accent rounded">
@@ -512,14 +541,13 @@ export default function AdvancedProductFilters({
                 ₹{maxPrice.toLocaleString('en-IN')}
               </span>
             </div>
-            
+
             {/* Min/Max Labels */}
             <div className="flex justify-between text-xs text-gray-400 mb-4">
               <span>₹{MIN_PRICE.toLocaleString('en-IN')}</span>
               <span>₹{MAX_PRICE.toLocaleString('en-IN')}</span>
             </div>
           </div>
-
           {/* Manual Input */}
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div>
@@ -555,33 +583,7 @@ export default function AdvancedProductFilters({
               </div>
             </div>
           </div>
-
           {/* Quick Price Buttons */}
-          <div className="grid grid-cols-3 gap-2 pt-3 border-t border-gray-100">
-            {[
-              { label: 'Under ₹1,000', min: 0, max: 1000 },
-              { label: '₹1,000-₹2,500', min: 1000, max: 2500 },
-              { label: '₹2,500-₹5,000', min: 2500, max: 5000 },
-              { label: '₹5,000-₹7,500', min: 5000, max: 7500 },
-              { label: '₹7,500-₹10,000', min: 7500, max: 10000 },
-              { label: 'All Prices', min: 0, max: 10000 }
-            ].map((range, index) => {
-              const isSelected = minPrice === range.min && maxPrice === range.max;
-              return (
-                <button
-                  key={index}
-                  onClick={() => handlePricePreset(range.min, range.max)}
-                  className={`px-2 py-1.5 text-xs rounded border transition-all duration-200 ${
-                    isSelected
-                      ? 'bg-accent text-white border-accent'
-                      : 'bg-white border-gray-200 text-gray-600 hover:border-accent hover:bg-accent/5'
-                  }`}
-                >
-                  {range.label}
-                </button>
-              );
-            })}
-          </div>
 
           {/* Clear Filter */}
           {(minPrice > MIN_PRICE || maxPrice < MAX_PRICE) && (
@@ -595,12 +597,28 @@ export default function AdvancedProductFilters({
         </div>,
         'priceRange'
       )}
-
       {/* Design Number Filter Section */}
       {renderSection(
         'Design Number',
-        null,
+        Search,
         <div className="space-y-4">
+          {/* Exact/Partial Search Input */}
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Search Design Number
+            </label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                value={designSearch}
+                onChange={handleDesignSearchInput}
+                placeholder="e.g., 12345 or partial"
+                className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:border-transparent"
+              />
+            </div>
+          </div>
+          {/* Range Filters */}
           <div className="grid grid-cols-2 gap-3">
             {/* Minimum Design Number Dropdown */}
             <div>
@@ -636,7 +654,6 @@ export default function AdvancedProductFilters({
                 <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               </div>
             </div>
-
             {/* Maximum Design Number Dropdown */}
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">
@@ -672,32 +689,26 @@ export default function AdvancedProductFilters({
               </div>
             </div>
           </div>
-
-          {(minDesignNumber || maxDesignNumber) && (
+          {(designSearch || minDesignNumber || maxDesignNumber) && (
             <button
-              onClick={() => {
-                setMinDesignNumber('');
-                setMaxDesignNumber('');
-                onFilterChange('minDesignNumber', '');
-                onFilterChange('maxDesignNumber', '');
-              }}
+              onClick={clearDesignFilters}
               className="w-full py-2 text-sm border border-gray-200 text-gray-600 rounded hover:bg-gray-50 transition-colors"
             >
               Clear Design Filter
             </button>
           )}
-
-          {(minDesignNumber || maxDesignNumber) && (
+          {(designSearch || minDesignNumber || maxDesignNumber) && (
             <div className="text-xs text-accent bg-accent/10 p-2 rounded">
+              {designSearch ? `Searching: ${designSearch}` : ''}
+              {designSearch && (minDesignNumber || maxDesignNumber) ? ' | ' : ''}
               {minDesignNumber === maxDesignNumber && minDesignNumber
-                ? `Filtering by design number: ${minDesignNumber}`
-                : `Range: ${minDesignNumber || '∞'} - ${maxDesignNumber || '∞'}`}
+                ? `Exact: ${minDesignNumber}`
+                : `Range: ${minDesignNumber || 'Any'} - ${maxDesignNumber || 'Any'}`}
             </div>
           )}
         </div>,
         'designNumberFilter'
       )}
-
       {/* Product Count Display */}
       <div className="mt-4 text-center text-sm text-gray-500">
         {isLoading ? (
@@ -713,9 +724,9 @@ export default function AdvancedProductFilters({
                 Category filter active
               </div>
             )}
-            {(minDesignNumber || maxDesignNumber) && (
+            {(designSearch || minDesignNumber || maxDesignNumber) && (
               <div className="mt-2 px-2 py-1 bg-accent/10 text-accent rounded-md text-xs">
-                Design number filter active
+                Design filter active
               </div>
             )}
             {(minPrice > MIN_PRICE || maxPrice < MAX_PRICE) && (
@@ -726,7 +737,6 @@ export default function AdvancedProductFilters({
           </>
         )}
       </div>
-
       {/* Custom scrollbar styles */}
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {

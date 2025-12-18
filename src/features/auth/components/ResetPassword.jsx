@@ -9,8 +9,8 @@ function ResetPassword() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { state } = useLocation();
-  const resetToken = state?.resetToken || '';
   const email = state?.email || '';
+  const otp = state?.otp || '';
   const [formData, setFormData] = useState({
     newPassword: '',
     confirmPassword: '',
@@ -33,7 +33,8 @@ function ResetPassword() {
     }
     setLoading(true);
     try {
-      await dispatch(resetPassword({ resetToken, newPassword: formData.newPassword })).unwrap();
+      // Backend expects: { email, otp, newPassword }
+      await dispatch(resetPassword({ email, otp, newPassword: formData.newPassword })).unwrap();
       setShowSuccess(true);
       setTimeout(() => navigate('/login', { state: { message: 'Password reset successfully! Please log in.' } }), 1500);
     } catch (err) {

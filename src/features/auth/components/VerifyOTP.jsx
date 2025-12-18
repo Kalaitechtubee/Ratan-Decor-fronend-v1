@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FaCheckCircle } from 'react-icons/fa';
+import { FaCheckCircle, FaArrowLeft } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { verifyOTP } from '../authSlice';
@@ -23,7 +23,8 @@ function VerifyOTP() {
     try {
       const result = await dispatch(verifyOTP({ email, otp })).unwrap();
       setMessage('OTP verified successfully.');
-      setTimeout(() => navigate('/reset-password', { state: { resetToken: result.resetToken, email } }), 1500);
+      // Pass email and otp to reset-password page (backend expects email + otp + newPassword)
+      setTimeout(() => navigate('/reset-password', { state: { email, otp } }), 1500);
     } catch (err) {
       setError(err.message || 'Invalid OTP. Please try again.');
     } finally {

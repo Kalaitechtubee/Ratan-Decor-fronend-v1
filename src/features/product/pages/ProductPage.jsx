@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef, useMemo } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
+import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Filter, Grid, List, X, Loader2, AlertCircle } from 'lucide-react';
@@ -7,11 +7,11 @@ import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
 import ProductGrid, { ProductGridSkeleton } from '../components/ProductGrid';
 import AdvancedProductFilters from '../components/AdvancedProductFilters';
-import { 
-  fetchProducts, 
-  fetchCategories, 
-  setFilters, 
-  setPage, 
+import {
+  fetchProducts,
+  fetchCategories,
+  setFilters,
+  setPage,
   setViewMode,
   clearFilters,
   resetProductsState
@@ -23,21 +23,21 @@ function ProductPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { userRole } = useAuth();
   const { userType } = useSelector((state) => state.userType);
-  
-  const { 
-    products, 
-    categories, 
-    filters, 
-    currentPage, 
-    totalPages, 
-    status, 
-    error, 
+
+  const {
+    products,
+    categories,
+    filters,
+    currentPage,
+    totalPages,
+    status,
+    error,
     viewMode,
     count,
     totalCount,
     activeCount,
     inactiveCount
-  } = useSelector((state) => state.products);
+  } = useSelector((state) => state.products, shallowEqual);
 
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -50,7 +50,7 @@ function ProductPage() {
   const isFirstMountRef = useRef(true);
   const isFetchingRef = useRef(false);
 
-  const getCurrentUserType = () => userType || localStorage.getItem('userType') || 'General';
+  const getCurrentUserType = useCallback(() => userType || localStorage.getItem('userType') || 'General', [userType]);
 
   // Fetch categories ONCE on mount
   useEffect(() => {
@@ -70,13 +70,28 @@ function ProductPage() {
         if (urlParams.categoryId) newFilters.categoryId = urlParams.categoryId;
         if (urlParams.minPrice) newFilters.minPrice = urlParams.minPrice;
         if (urlParams.maxPrice) newFilters.maxPrice = urlParams.maxPrice;
+        if (urlParams.designNumber) newFilters.designNumber = urlParams.designNumber;
         if (urlParams.minDesignNumber) newFilters.minDesignNumber = urlParams.minDesignNumber;
         if (urlParams.maxDesignNumber) newFilters.maxDesignNumber = urlParams.maxDesignNumber;
         dispatch(setFilters(newFilters));
       }
       isFirstMountRef.current = false;
     }
-  }, []); // Empty dependency array - runs once
+  }, [dispatch, filters, searchParams]); // Added searchParams to deps for safety
+
+  // Memoized fetch params to avoid unnecessary re-renders
+  const fetchParams = useMemo(() => {
+    const activeUserType = getCurrentUserType();
+    const storedUserRole = userRole || 'customer';
+    return {
+      ...filters,
+      page: currentPage,
+      userType: activeUserType,
+      userRole: storedUserRole,
+      limit: 12,
+      categoryId: filters.categoryId || ''
+    };
+  }, [filters, currentPage, userRole, getCurrentUserType]);
 
   // Single unified effect for fetching products
   useEffect(() => {
@@ -89,18 +104,6 @@ function ProductPage() {
     if (isFetchingRef.current) {
       return;
     }
-
-    const activeUserType = getCurrentUserType();
-    const storedUserRole = userRole || 'customer';
-    
-    const fetchParams = { 
-      ...filters, 
-      page: currentPage, 
-      userType: activeUserType, 
-      userRole: storedUserRole, 
-      limit: 12,
-      categoryId: filters.categoryId || ''
-    };
 
     // Check if params have actually changed
     const paramsString = JSON.stringify(fetchParams);
@@ -121,7 +124,8 @@ function ProductPage() {
           setRetryCount(0);
           setIsInitialLoad(false);
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error('Fetch products error:', err);
           setIsInitialLoad(false);
         })
         .finally(() => {
@@ -134,7 +138,7 @@ function ProductPage() {
         clearTimeout(fetchTimeoutRef.current);
       }
     };
-  }, [dispatch, currentPage, userType, userRole, filters, isInitialLoad]);
+  }, [dispatch, fetchParams, isInitialLoad]); // Use memoized fetchParams
 
   // Handle storage change for userType
   useEffect(() => {
@@ -147,9 +151,10 @@ function ProductPage() {
     };
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, [dispatch]);
+  }, [dispatch, getCurrentUserType]);
 
-  // Update URL search params (passive, no side effects)
+  // Update URL search params (passive, no side effects) - memoized filters string
+  const filtersString = useMemo(() => JSON.stringify(filters), [filters]);
   useEffect(() => {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
@@ -159,57 +164,63 @@ function ProductPage() {
     });
     if (currentPage > 1) params.set('page', currentPage.toString());
     if (viewMode !== 'grid') params.set('viewMode', viewMode);
-    
+
     const newSearch = params.toString();
     const currentSearch = searchParams.toString();
-    
+
     if (newSearch !== currentSearch) {
       setSearchParams(params, { replace: true, preventScrollReset: true });
     }
-  }, [filters, currentPage, viewMode]); // Removed setSearchParams from dependencies
+  }, [filtersString, currentPage, viewMode, setSearchParams, searchParams]); // Use filtersString to avoid object ref issues
 
   // Calculate applied filters count
   const appliedFiltersCount = useMemo(() => {
     let count = 0;
     if (filters.categoryId && filters.categoryId !== '') count++;
     if (filters.search && filters.search.trim()) count++;
-    if (filters.minPrice) count++;
-    if (filters.maxPrice && filters.maxPrice !== 10000) count++;
-    if (filters.minDesignNumber) count++;
-    if (filters.maxDesignNumber) count++;
+    if (filters.minPrice && parseFloat(filters.minPrice) > 0) count++;
+    if (filters.maxPrice && parseFloat(filters.maxPrice) < 10000) count++;
+    if (filters.designNumber && filters.designNumber.trim()) count++;
+    if (filters.minDesignNumber && filters.minDesignNumber.trim()) count++;
+    if (filters.maxDesignNumber && filters.maxDesignNumber.trim()) count++;
     return count;
   }, [filters]);
 
   // Optimized handlers - no duplicate fetches
-  const handleFilterChange = (key, value) => {
-    const newFilters = { ...filters, [key]: value };
+  const handleFilterChange = useCallback((keyOrUpdates, value) => {
+    let newFilters;
+    if (typeof keyOrUpdates === 'object' && keyOrUpdates !== null) {
+      newFilters = { ...filters, ...keyOrUpdates };
+    } else {
+      newFilters = { ...filters, [keyOrUpdates]: value };
+    }
     dispatch(setFilters(newFilters));
     dispatch(setPage(1));
     lastFetchParamsRef.current = null; // Force re-fetch with new params
-  };
+  }, [dispatch, filters]);
 
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     dispatch(clearFilters());
     dispatch(setPage(1));
     lastFetchParamsRef.current = null;
-  };
+  }, [dispatch]);
 
-  const handlePageChange = (page) => {
+  const handlePageChange = useCallback((page) => {
     dispatch(setPage(page));
     window.scrollTo({ top: 0, behavior: 'smooth' });
     lastFetchParamsRef.current = null;
-  };
+  }, [dispatch]);
 
-  const handleViewModeChange = (mode) => {
+  const handleViewModeChange = useCallback((mode) => {
     dispatch(setViewMode(mode));
-  };
+  }, [dispatch]);
 
-  const handleRetry = () => {
+  const handleRetry = useCallback(() => {
     setRetryCount(prev => prev + 1);
     lastFetchParamsRef.current = null;
     isFetchingRef.current = false;
     dispatch(resetProductsState());
-  };
+  }, [dispatch]);
 
   // Loading state for initial load
   if (isInitialLoad && status === 'loading') {
@@ -335,18 +346,21 @@ function ProductPage() {
                 <button
                   onClick={() => handleViewModeChange('grid')}
                   className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+                  aria-label="Grid view"
                 >
                   <Grid className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => handleViewModeChange('list')}
                   className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+                  aria-label="List view"
                 >
                   <List className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => setShowMobileFilters(true)}
                   className="lg:hidden flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  aria-label="Open filters"
                 >
                   <Filter className="w-5 h-5 text-gray-600" />
                   <span>Filters</span>
@@ -360,17 +374,18 @@ function ProductPage() {
             </div>
 
             <motion.div
-              key={`${currentPage}-${status}`}
+              key={`${currentPage}-${status}-${JSON.stringify(filters)}`} // Key on filters to remount on changes
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <ProductGrid 
-                products={products} 
+              <ProductGrid
+                products={products}
                 viewMode={viewMode}
                 status={status}
                 error={error}
                 onRetry={handleRetry}
+                retryCount={retryCount}
               />
             </motion.div>
 
@@ -386,20 +401,21 @@ function ProductPage() {
                     onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
                     className="px-3 py-2 text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+                    aria-label="Previous page"
                   >
                     Previous
                   </button>
                   {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
-                    let page = currentPage <= 4 ? i + 1 : currentPage >= totalPages - 3 ? totalPages - 6 + i : currentPage - 3 + i;
+                    let pageNum = currentPage <= 4 ? i + 1 : currentPage >= totalPages - 3 ? totalPages - 6 + i : currentPage - 3 + i;
                     return (
                       <button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
-                        className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                          currentPage === page ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'
-                        }`}
+                        key={pageNum}
+                        onClick={() => handlePageChange(pageNum)}
+                        className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${currentPage === pageNum ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'
+                          }`}
+                        aria-label={`Page ${pageNum}`}
                       >
-                        {page}
+                        {pageNum}
                       </button>
                     );
                   })}
@@ -407,6 +423,7 @@ function ProductPage() {
                     onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
                     className="px-3 py-2 text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+                    aria-label="Next page"
                   >
                     Next
                   </button>
