@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   FaEllipsisH, FaBuilding, FaPhone, FaVideo, FaUser, FaChevronDown,
   FaQuestionCircle, FaCookie, FaExclamationTriangle, FaShieldAlt,
   FaUndo, FaFileContract, FaHome
@@ -18,11 +18,11 @@ export default function MoreMenu({
   // Animation variants
   const overlayVariants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
       opacity: 1,
       transition: { duration: 0.2 }
     },
-    exit: { 
+    exit: {
       opacity: 0,
       transition: { duration: 0.2 }
     }
@@ -30,13 +30,13 @@ export default function MoreMenu({
 
   const moreMenuVariants = {
     hidden: { y: '100%', opacity: 0 },
-    visible: { 
-      y: 0, 
+    visible: {
+      y: 0,
       opacity: 1,
       transition: { type: 'spring', damping: 25, stiffness: 300 }
     },
-    exit: { 
-      y: '100%', 
+    exit: {
+      y: '100%',
       opacity: 0,
       transition: { duration: 0.3, ease: "easeInOut" }
     }
@@ -71,7 +71,7 @@ export default function MoreMenu({
             role="button"
             aria-label="Close more menu"
           />
-          
+
           {/* Slide-Up Menu */}
           <motion.div
             variants={moreMenuVariants}
@@ -95,7 +95,7 @@ export default function MoreMenu({
                 className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 touch-target"
                 aria-label="Close more menu"
               >
-                <MdClose className="text-base text-gray-600" />
+                <MdClose className="text-base text-[#ff4747]" />
               </button>
             </div>
 
@@ -113,26 +113,24 @@ export default function MoreMenu({
                   >
                     <Link
                       to={item.path}
-                      className={`flex items-center gap-4 p-3 rounded-xl text-sm font-normal transition-all duration-300 font-roboto touch-target group ${
-                        isActive
+                      className={`flex items-center gap-4 p-3 rounded-xl text-sm font-normal transition-all duration-300 font-roboto touch-target group ${isActive
                           ? 'bg-[#ff4747]/10 text-[#ff4747] border border-[#ff4747]/20'
                           : 'bg-gray-50 text-gray-800 hover:bg-[#ff4747]/10 hover:text-[#ff4747] border border-transparent'
-                      }`}
+                        }`}
                       onClick={() => setIsMoreMenuOpen(false)}
                       aria-label={`Go to ${item.label.toLowerCase()}`}
                     >
-                      <div className={`p-2 rounded-lg transition-all duration-300 flex-shrink-0 ${
-                        isActive 
-                          ? 'bg-[#ff4747] text-white shadow-lg' 
+                      <div className={`p-2 rounded-lg transition-all duration-300 flex-shrink-0 ${isActive
+                          ? 'bg-[#ff4747] text-white shadow-lg'
                           : 'bg-white text-[#ff4747] group-hover:bg-[#ff4747] group-hover:text-white shadow-sm'
-                      }`}>
+                        }`}>
                         <Icon className="text-sm" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-normal truncate text-sm">{item.label}</p>
                         <p className="text-xs text-gray-600 truncate">{item.description}</p>
                       </div>
-                      <FaChevronDown className="text-xs text-gray-400 transform -rotate-90 group-hover:text-[#ff4747] transition-colors duration-300 flex-shrink-0" />
+                      <FaChevronDown className="text-xs text-[#ff4747]/40 transform -rotate-90 group-hover:text-[#ff4747] transition-colors duration-300 flex-shrink-0" />
                     </Link>
                   </motion.div>
                 );

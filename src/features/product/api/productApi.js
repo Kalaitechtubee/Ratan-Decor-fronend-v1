@@ -7,6 +7,7 @@ export const getProducts = async ({
   userType,
   userRole,
   categoryId,
+  subcategoryId,
   minPrice,
   maxPrice,
   search,
@@ -17,12 +18,18 @@ export const getProducts = async ({
   maxDesignNumber
 }) => {
   const params = { page, limit };
- 
+
   // Add optional parameters only if they have meaningful values
   if (userType && userType !== '') params.userType = userType;
   if (userRole && userRole !== '') params.userRole = userRole;
-  if (categoryId && categoryId !== '' && categoryId !== 'all') params.categoryId = categoryId;
-  
+
+  // Category filter - if subcategoryId is set, use it; otherwise use categoryId
+  if (subcategoryId && subcategoryId !== '' && subcategoryId !== 'all') {
+    params.subcategoryId = subcategoryId;
+  } else if (categoryId && categoryId !== '' && categoryId !== 'all') {
+    params.categoryId = categoryId;
+  }
+
   // FIXED: Ensure price values are properly sent as numbers
   if (minPrice !== undefined && minPrice !== null && minPrice !== '') {
     const minPriceNum = Number(minPrice);
@@ -30,35 +37,35 @@ export const getProducts = async ({
       params.minPrice = minPriceNum;
     }
   }
-  
+
   if (maxPrice !== undefined && maxPrice !== null && maxPrice !== '') {
     const maxPriceNum = Number(maxPrice);
     if (!isNaN(maxPriceNum) && maxPriceNum > 0 && maxPriceNum !== 50000) {
       params.maxPrice = maxPriceNum;
     }
   }
-  
+
   if (search && search.trim() !== '') params.search = search.trim();
   if (sortBy && sortBy !== 'featured') params.sortBy = sortBy;
   if (isActive !== undefined) params.isActive = isActive;
   if (designNumber && designNumber.trim() !== '') params.designNumber = designNumber.trim();
   if (minDesignNumber && minDesignNumber.trim() !== '') params.minDesignNumber = minDesignNumber.trim();
   if (maxDesignNumber && maxDesignNumber.trim() !== '') params.maxDesignNumber = maxDesignNumber.trim();
-  
+
   // Debug logging in development
   if (import.meta.env.DEV) {
     console.log('Fetching products with params:', params);
   }
-  
+
   try {
     const response = await api.get('/products', { params });
-   
+
     if (response.data) {
       // Debug logging in development
       if (import.meta.env.DEV && response.data.appliedPriceRange) {
         console.log('Price filtering applied:', response.data.appliedPriceRange);
       }
-      
+
       return {
         products: response.data.products || [],
         totalPages: response.data.totalPages || 1,
@@ -108,9 +115,9 @@ export const getProductById = async ({ id, userRole, userType }) => {
     const params = {};
     if (userRole && userRole !== '') params.userRole = userRole;
     if (userType && userType !== '') params.userType = userType;
-   
+
     const response = await api.get(`/products/${id}`, { params });
-   
+
     // Handle different response formats
     if (response.data.product) {
       return { product: response.data.product };
@@ -137,9 +144,9 @@ export const searchProductsByName = async ({ name, userType, page = 1, limit = 2
   try {
     const params = { name, page, limit };
     if (userType && userType !== '') params.userType = userType;
-   
+
     const response = await api.get('/products/search', { params });
-   
+
     return {
       products: response.data.products || [],
       totalPages: response.data.totalPages || 1,
@@ -157,9 +164,9 @@ export const getProductByName = async ({ name, userType }) => {
   try {
     const params = {};
     if (userType && userType !== '') params.userType = userType;
-   
+
     const response = await api.get(`/products/name/${encodeURIComponent(name)}`, { params });
-   
+
     return {
       product: response.data.product || response.data,
       userType: response.data.userType,
@@ -182,9 +189,9 @@ export const getCategories = async (filters = {}) => {
       sortOrder = 'ASC',
       includeSubcategories = true
     } = filters;
-    
+
     let response;
-    
+
     // If parentId provided, use subcategories endpoint
     if (parentId !== null && parentId !== undefined) {
       const parentPath = parentId === null ? 'null' : parentId;
@@ -193,7 +200,7 @@ export const getCategories = async (filters = {}) => {
       if (sortBy) params.sortBy = sortBy;
       if (sortOrder) params.sortOrder = sortOrder;
       response = await api.get(`/categories/subcategories/${parentPath}`, { params });
-      
+
       if (response.data.success) {
         return {
           success: true,
@@ -228,7 +235,7 @@ export const getCategories = async (filters = {}) => {
         }
       }
     }
-    
+
     // Fallback
     return {
       success: true,
@@ -250,7 +257,7 @@ export const getCategories = async (filters = {}) => {
 export const getCategoryById = async (id) => {
   try {
     const response = await api.get(`/categories/${id}`);
-   
+
     if (response.data.success && response.data.category) {
       return response.data.category;
     } else {
@@ -278,9 +285,9 @@ export const getSubCategories = async (parentId, filters = {}) => {
     if (search) params.q = search; // Align with backend search param
     if (sortBy) params.sortBy = sortBy;
     if (sortOrder) params.sortOrder = sortOrder;
-    
+
     const response = await api.get(`/categories/subcategories/${parentPath}`, { params });
-   
+
     return {
       success: true,
       subcategories: response.data.subcategories || [],
@@ -295,7 +302,7 @@ export const getSubCategories = async (parentId, filters = {}) => {
 export const searchCategories = async (query) => {
   try {
     const response = await api.get('/categories/search', { params: { q: query } });
-   
+
     return {
       results: response.data.categories || [], // Align with backend response
       count: response.data.totalResults || 0,
@@ -311,7 +318,7 @@ export const getProductRatings = async (productId, page = 1, limit = 10) => {
   try {
     const params = { page, limit };
     const response = await api.get(`/products/${productId}/ratings`, { params });
-   
+
     return {
       ratings: response.data.ratings || [],
       total: response.data.total || 0,

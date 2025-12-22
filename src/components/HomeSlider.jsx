@@ -725,7 +725,6 @@
 // };
 
 // export default EnhancedResponsiveSlider;
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiGet } from '../utils/apiUtils';
@@ -777,7 +776,8 @@ const EnhancedResponsiveSlider = () => {
           title: slider.title || '',
           subtitle: slider.subtitle || '',
           desc: slider.desc || '',
-          cta: slider.cta || 'Learn More'
+          cta: slider.cta || 'Learn More',
+          ctaUrl: slider.ctaUrl || '/products'
         }));
 
         // Preload all images before setting slides
@@ -870,6 +870,17 @@ const EnhancedResponsiveSlider = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [nextSlide, prevSlide, isAutoplay]);
+
+  const handleCtaClick = (ctaUrl) => {
+    if (!ctaUrl) return;
+    if (ctaUrl.startsWith('http://') || ctaUrl.startsWith('https://')) {
+      // For external URLs, navigate in the same tab (replace current page)
+      window.location.href = ctaUrl;
+    } else {
+      // For internal routes, use React Router navigate
+      navigate(ctaUrl);
+    }
+  };
 
   if (!isClient || isLoading) {
     return (
@@ -970,7 +981,7 @@ const EnhancedResponsiveSlider = () => {
                                 gap-2 sm:gap-2.5 md:gap-3 lg:gap-4 xl:gap-5
                                 sm:space-y-0">
                     <button
-                      onClick={() => navigate('/products')}
+                      onClick={() => handleCtaClick(slide.ctaUrl)}
                       className="group relative px-3 py-1.5 sm:px-4 sm:py-2 md:px-5 md:py-2.5 lg:px-6 lg:py-3
                                      xl:px-8 xl:py-3.5 2xl:px-10 2xl:py-4
                                      bg-white text-black font-semibold rounded-full overflow-hidden
@@ -981,8 +992,8 @@ const EnhancedResponsiveSlider = () => {
                                      min-h-[32px] sm:min-h-[36px] md:min-h-[40px] lg:min-h-[44px] xl:min-h-[48px] 2xl:min-h-[52px]
                                      flex items-center justify-center"
                     >
-                      <span className="relative z-10 whitespace-nowrap">Shop Now</span>
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600
+                      <span className="relative z-10 whitespace-nowrap">{slide.cta}</span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#ff4747] to-[#dc2626]
                                     scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                     </button>
                   </div>

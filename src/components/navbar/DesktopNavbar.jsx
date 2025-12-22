@@ -76,7 +76,7 @@ export default function DesktopNavbar({
                     )}
                   </span>
                   <svg
-                    className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition"
+                    className="w-4 h-4 text-[#ff4747] group-hover:text-[#ff4747]/80 transition"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
@@ -117,7 +117,7 @@ export default function DesktopNavbar({
                   >
                     <span>Products</span>
                     <FaChevronDown
-                      className={`text-sm transition-transform duration-300 ${isCategoryDropdownOpen ? 'rotate-180' : ''}`}
+                      className={`text-[#ff4747] text-sm transition-transform duration-300 ${isCategoryDropdownOpen ? 'rotate-180' : ''}`}
                     />
                   </button>
                 </div>
@@ -144,7 +144,7 @@ export default function DesktopNavbar({
                     }`}
                   aria-label="Open video call scheduler popup"
                 >
-                  <FaVideo className="text-lg" />
+                  <FaVideo className="text-[#ff4747] text-lg" />
                   Shop on call
                 </button>
                 <Link
@@ -158,7 +158,7 @@ export default function DesktopNavbar({
                     }
   `}
                 >
-                  <FaShoppingCart className="text-lg" />
+                  <FaShoppingCart className="text-[#ff4747] text-lg" />
                   <h1 className="mr-2">Cart</h1>
                 </Link>
 
@@ -180,7 +180,7 @@ export default function DesktopNavbar({
                       <FaUser className="text-sm" />
                     </div>
                     <span className="hidden lg:block text-sm font-semibold font-roboto truncate max-w-24">{user?.name || 'User'}</span>
-                    <FaChevronDown className={`text-sm transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`} />
+                    <FaChevronDown className={`text-[#ff4747] text-sm transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`} />
                   </button>
                   <AnimatePresence>
                     {isProfileOpen && (

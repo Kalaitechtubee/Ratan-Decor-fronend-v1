@@ -1,8 +1,8 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useCallback, useMemo } from 'react';
-import { 
-  fetchProducts, 
-  fetchCategories, 
+import {
+  fetchProducts,
+  fetchCategories,
   fetchProduct,
   searchProducts,
   setFilters,
@@ -35,7 +35,7 @@ import {
 
 export default function useProducts() {
   const dispatch = useDispatch();
-  
+
   // Selectors
   const products = useSelector(selectProducts);
   const categories = useSelector(selectCategories);
@@ -46,7 +46,7 @@ export default function useProducts() {
   const pagination = useSelector(selectPagination);
   const viewMode = useSelector(selectViewMode);
   const appliedFilters = useSelector(selectAppliedFilters);
-  
+
   // Additional state
   const searchResults = useSelector((state) => state.products.searchResults);
   const searchStatus = useSelector((state) => state.products.searchStatus);
@@ -63,7 +63,7 @@ export default function useProducts() {
   // Applied filters count
   const appliedFiltersCount = useMemo(() => {
     let count = 0;
-    if (filters.categoryId && filters.categoryId !== '') count++;
+    if (filters.categoryIds && filters.categoryIds.length > 0) count += filters.categoryIds.length;
     if (filters.subcategoryId && filters.subcategoryId !== '') count++;
     if (filters.search && filters.search.trim() !== '') count++;
     if (filters.minPrice !== null && filters.minPrice !== '') count++;
@@ -78,7 +78,7 @@ export default function useProducts() {
   // Categories with "All" option
   const categoriesWithAll = useMemo(() => {
     return [
-     
+
       ...categories
     ];
   }, [categories, pagination.count]);
@@ -214,13 +214,13 @@ export default function useProducts() {
   }, [products]);
 
   const getProductsByPriceRange = useCallback((min, max) => {
-    return products.filter(product => 
+    return products.filter(product =>
       product.price >= min && product.price <= max
     );
   }, [products]);
 
   const getProductsByDesignNumber = useCallback((designNumber) => {
-    return products.filter(product => 
+    return products.filter(product =>
       product.designNumber?.toLowerCase().includes(designNumber.toLowerCase())
     );
   }, [products]);
@@ -248,7 +248,7 @@ export default function useProducts() {
     pagination,
     viewMode,
     appliedFilters,
-    
+
     // Status
     status,
     searchStatus,
@@ -258,18 +258,18 @@ export default function useProducts() {
     hasProducts,
     isEmpty,
     appliedFiltersCount,
-    
+
     // Metadata
     userTypeFilter,
     userRoleFilter,
     lastFetchParams,
-    
+
     // Actions
     loadProducts,
     loadCategories,
     loadProduct,
     performSearch,
-    
+
     // Filter management
     updateFilters,
     updateFilter,
@@ -281,20 +281,20 @@ export default function useProducts() {
     filterByDesignNumber,
     filterByDesignNumberRange,
     clearDesignFilters,
-    
+
     // Pagination
     changePage,
     goToNextPage,
     goToPrevPage,
-    
+
     // View management
     changeViewMode,
     changeSortBy,
-    
+
     // State management
     resetState,
     dismissError,
-    
+
     // Utility functions
     getProductById,
     getCategoryById,

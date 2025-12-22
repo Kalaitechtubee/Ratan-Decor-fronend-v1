@@ -8,17 +8,17 @@ const pendingThunks = new Map();
 function createDedupedThunk(typePrefix, payloadCreator) {
   return createAsyncThunk(typePrefix, async (arg, thunkAPI) => {
     const key = JSON.stringify({ type: typePrefix, arg });
-    
+
     // If there's already a pending request with the same params, wait for it
     if (pendingThunks.has(key)) {
       console.log(`[Redux] Reusing pending thunk: ${typePrefix}`);
       return pendingThunks.get(key);
     }
-    
+
     // Create new request promise
     const promise = payloadCreator(arg, thunkAPI);
     pendingThunks.set(key, promise);
-    
+
     try {
       const result = await promise;
       return result;
@@ -36,7 +36,7 @@ export const fetchProducts = createDedupedThunk(
     limit = 8,
     userType,
     userRole,
-    categoryId,
+    categoryIds, // Changed from categoryId to categoryIds (array)
     subcategoryId,
     minPrice,
     maxPrice,
@@ -49,6 +49,12 @@ export const fetchProducts = createDedupedThunk(
   }, { rejectWithValue }) => {
     try {
       const normalizedUserType = userType ? userType.toLowerCase() : null;
+
+      // Convert categoryIds array to comma-separated string for API
+      const categoryId = Array.isArray(categoryIds) && categoryIds.length > 0
+        ? categoryIds.join(',')
+        : '';
+
       console.log('[Redux] Fetching products with params:', {
         page, limit, userType: normalizedUserType, userRole, categoryId, subcategoryId,
         minPrice, maxPrice, search, sortBy, isActive, designNumber, minDesignNumber, maxDesignNumber
@@ -59,7 +65,7 @@ export const fetchProducts = createDedupedThunk(
         limit,
         userType: normalizedUserType,
         userRole,
-        categoryId,
+        categoryId, // API expects categoryId (comma-separated if multiple)
         subcategoryId,
         minPrice,
         maxPrice,
@@ -98,7 +104,7 @@ export const fetchCategories = createDedupedThunk(
       // Check if categories are already loaded (only if no filters provided)
       const hasFilters = filters && Object.keys(filters).length > 0;
       const state = getState();
-      
+
       if (!hasFilters && state.products.categories.length > 0 && state.products.categoriesLastFetch) {
         const timeSinceLastFetch = Date.now() - state.products.categoriesLastFetch;
         // If categories were fetched less than 5 minutes ago, return cached data
@@ -193,7 +199,7 @@ const initialState = {
 
   // Filtering and display
   filters: {
-    categoryId: '',
+    categoryIds: [], // Changed from categoryId string to categoryIds array for multi-select
     subcategoryId: '',
     minPrice: null,
     maxPrice: null,
@@ -236,7 +242,7 @@ const productSlice = createSlice({
 
     clearFilters: (state) => {
       state.filters = {
-        categoryId: '',
+        categoryIds: [], // Changed from categoryId
         subcategoryId: '',
         minPrice: null,
         maxPrice: null,
@@ -294,8 +300,24 @@ const productSlice = createSlice({
     },
 
     setCategoryFilter: (state, action) => {
-      state.filters.categoryId = action.payload;
-      if (action.payload !== state.filters.categoryId) {
+      const categoryId = action.payload.toString();
+      const currentIds = state.filters.categoryIds || [];
+
+      if (categoryId === '') {
+        // Clear all categories
+        state.filters.categoryIds = [];
+        state.filters.subcategoryId = '';
+      } else {
+        // Toggle the category
+        const index = currentIds.indexOf(categoryId);
+        if (index > -1) {
+          // Remove if already selected
+          state.filters.categoryIds = currentIds.filter(id => id !== categoryId);
+        } else {
+          // Add if not selected
+          state.filters.categoryIds = [...currentIds, categoryId];
+        }
+        // Clear subcategory when categories change
         state.filters.subcategoryId = '';
       }
     },

@@ -67,7 +67,13 @@ function ProductPage() {
       if (Object.keys(urlParams).length > 0) {
         const newFilters = { ...filters };
         if (urlParams.search) newFilters.search = urlParams.search;
-        if (urlParams.categoryId) newFilters.categoryId = urlParams.categoryId;
+        // Handle categoryIds - can be comma-separated in URL
+        if (urlParams.categoryIds) {
+          newFilters.categoryIds = urlParams.categoryIds.split(',').filter(Boolean);
+        } else if (urlParams.categoryId) {
+          // Backward compatibility with single categoryId
+          newFilters.categoryIds = [urlParams.categoryId];
+        }
         if (urlParams.minPrice) newFilters.minPrice = urlParams.minPrice;
         if (urlParams.maxPrice) newFilters.maxPrice = urlParams.maxPrice;
         if (urlParams.designNumber) newFilters.designNumber = urlParams.designNumber;
@@ -89,7 +95,7 @@ function ProductPage() {
       userType: activeUserType,
       userRole: storedUserRole,
       limit: 12,
-      categoryId: filters.categoryId || ''
+      categoryIds: filters.categoryIds || []
     };
   }, [filters, currentPage, userRole, getCurrentUserType]);
 
@@ -158,7 +164,10 @@ function ProductPage() {
   useEffect(() => {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
-      if (value && value !== '' && value !== 'featured') {
+      // Handle categoryIds array specially
+      if (key === 'categoryIds' && Array.isArray(value) && value.length > 0) {
+        params.set(key, value.join(','));
+      } else if (value && value !== '' && value !== 'featured' && !Array.isArray(value)) {
         params.set(key, value.toString());
       }
     });
@@ -176,7 +185,7 @@ function ProductPage() {
   // Calculate applied filters count
   const appliedFiltersCount = useMemo(() => {
     let count = 0;
-    if (filters.categoryId && filters.categoryId !== '') count++;
+    if (filters.categoryIds && filters.categoryIds.length > 0) count += filters.categoryIds.length;
     if (filters.search && filters.search.trim()) count++;
     if (filters.minPrice && parseFloat(filters.minPrice) > 0) count++;
     if (filters.maxPrice && parseFloat(filters.maxPrice) < 10000) count++;
@@ -191,6 +200,26 @@ function ProductPage() {
     let newFilters;
     if (typeof keyOrUpdates === 'object' && keyOrUpdates !== null) {
       newFilters = { ...filters, ...keyOrUpdates };
+    } else if (keyOrUpdates === 'categoryId') {
+      // Handle category toggle for multi-select
+      const currentIds = filters.categoryIds || [];
+      const categoryId = value.toString();
+
+      if (categoryId === '') {
+        // Clear all categories
+        newFilters = { ...filters, categoryIds: [] };
+      } else {
+        // Toggle the category
+        const isSelected = currentIds.includes(categoryId);
+        if (isSelected) {
+          newFilters = { ...filters, categoryIds: currentIds.filter(id => id !== categoryId) };
+        } else {
+          newFilters = { ...filters, categoryIds: [...currentIds, categoryId] };
+        }
+      }
+    } else if (keyOrUpdates === 'categoryIds') {
+      // Direct setting of categoryIds array (e.g., clearing all)
+      newFilters = { ...filters, categoryIds: Array.isArray(value) ? value : [] };
     } else {
       newFilters = { ...filters, [keyOrUpdates]: value };
     }

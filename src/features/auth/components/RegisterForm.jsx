@@ -160,9 +160,12 @@ function RegisterForm() {
                 className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-[#e2202b] focus:border-1 transition-colors"
                 required
               >
-                <option value="customer">Customer</option>
-                <option value="Architect">Architect</option>
-                <option value="Dealer">Dealer</option>
+                <option value="customer">End Consumer</option>
+                <option value="Architect">Architect / Interior Designer</option>
+                <option value="Dealer">Dealer / Distributor</option>
+                <option value="customer">Others</option>
+
+                
               </select> 
             </div>
           </div>

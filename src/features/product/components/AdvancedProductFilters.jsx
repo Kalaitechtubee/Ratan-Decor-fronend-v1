@@ -41,7 +41,10 @@ export default function AdvancedProductFilters({
   isLoading = false
 }) {
   const [expandedCategories, setExpandedCategories] = useState(new Set());
-  const [selectedCategory, setSelectedCategory] = useState(filters.categoryId || '');
+  // Changed to array for multi-select
+  const [selectedCategories, setSelectedCategories] = useState(
+    Array.isArray(filters.categoryIds) ? filters.categoryIds.map(String) : []
+  );
   const [collapsedSections, setCollapsedSections] = useState(new Set()); // Categories section open by default
   const [minDesignNumber, setMinDesignNumber] = useState(filters.minDesignNumber || '');
   const [maxDesignNumber, setMaxDesignNumber] = useState(filters.maxDesignNumber || '');
@@ -60,13 +63,18 @@ export default function AdvancedProductFilters({
   const MIN_PRICE = 0;
   // Sync external filter changes
   useEffect(() => {
+    // Sync categoryIds from filters
+    const filterCategoryIds = Array.isArray(filters.categoryIds)
+      ? filters.categoryIds.map(String)
+      : [];
+    const currentSelected = selectedCategories.join(',');
+    const filterSelected = filterCategoryIds.join(',');
+    if (filterSelected !== currentSelected) {
+      setSelectedCategories(filterCategoryIds);
+    }
+
     // Helper to safely convert to string
     const toStr = (val) => (val === null || val === undefined) ? '' : String(val);
-
-    const filterCategoryId = toStr(filters.categoryId);
-    if (filterCategoryId !== selectedCategory) {
-      setSelectedCategory(filterCategoryId);
-    }
 
     const filterMinDesign = toStr(filters.minDesignNumber);
     if (filterMinDesign !== minDesignNumber) {
@@ -132,7 +140,7 @@ export default function AdvancedProductFilters({
   }, [designSearch, minDesignNumber, maxDesignNumber]);
   // Auto-expand categories with selected subcategories
   useEffect(() => {
-    if (selectedCategory && categories.length > 0) {
+    if (selectedCategories.length > 0 && categories.length > 0) {
       const findCategoryPath = (cats, targetId, path = []) => {
         for (const cat of cats) {
           if (cat.id.toString() === targetId.toString()) {
@@ -145,12 +153,18 @@ export default function AdvancedProductFilters({
         }
         return null;
       };
-      const path = findCategoryPath(categories, selectedCategory);
-      if (path) {
-        setExpandedCategories(new Set(path));
-      }
+
+      // Expand paths for all selected categories
+      const allPaths = new Set();
+      selectedCategories.forEach(categoryId => {
+        const path = findCategoryPath(categories, categoryId);
+        if (path) {
+          path.forEach(id => allPaths.add(id));
+        }
+      });
+      setExpandedCategories(allPaths);
     }
-  }, [selectedCategory, categories]);
+  }, [selectedCategories, categories]);
   // Price slider helper functions
   const priceToPercent = (price) => {
     return ((price - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
@@ -296,11 +310,28 @@ export default function AdvancedProductFilters({
         break;
     }
   };
-  // Handle category selection
+  // Handle category selection (multi-select toggle)
   const handleCategorySelect = (categoryId) => {
-    const newCategoryId = selectedCategory === categoryId.toString() ? '' : categoryId.toString();
-    setSelectedCategory(newCategoryId);
-    onFilterChange('categoryId', newCategoryId);
+    const categoryIdStr = categoryId.toString();
+    const isSelected = selectedCategories.includes(categoryIdStr);
+
+    let newSelectedCategories;
+    if (isSelected) {
+      // Remove if already selected
+      newSelectedCategories = selectedCategories.filter(id => id !== categoryIdStr);
+    } else {
+      // Add if not selected
+      newSelectedCategories = [...selectedCategories, categoryIdStr];
+    }
+
+    setSelectedCategories(newSelectedCategories);
+    // Call onFilterChange with 'categoryId' which triggers toggle behavior in slice
+    onFilterChange('categoryId', categoryIdStr);
+  };
+
+  // Check if a category is selected
+  const isCategorySelected = (categoryId) => {
+    return selectedCategories.includes(categoryId.toString());
   };
   const toggleCategoryExpansion = (categoryId) => {
     const newExpanded = new Set(expandedCategories);
@@ -352,6 +383,10 @@ export default function AdvancedProductFilters({
   // Handle design search input
   const handleDesignSearchInput = (e) => {
     const value = e.target.value;
+    // Only allow numbers
+    if (value !== '' && !/^\d+$/.test(value)) {
+      return;
+    }
     setDesignSearch(value);
     // Clear range if exact search is used (optional logic; adjust as needed)
     if (value && (minDesignNumber || maxDesignNumber)) {
@@ -370,58 +405,110 @@ export default function AdvancedProductFilters({
     onFilterChange('minDesignNumber', '');
     onFilterChange('maxDesignNumber', '');
   };
-  // Recursive category tree rendering
-  const renderCategoryTree = (cats, level = 0) => {
-    return cats.map(category => (
-      <div key={category.id} className="mb-1">
-        <div
-          className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all duration-200 ${selectedCategory === category.id.toString()
-            ? 'bg-accent/10 text-accent border border-accent/20'
-            : 'hover:bg-gray-50'
-            }`}
-          style={{ paddingLeft: `${0.75 + level * 1.5}rem` }}
-        >
-          <div
-            className="flex items-center flex-1 min-w-0"
-            onClick={() => handleCategorySelect(category.id)}
-          >
-            <span className={`text-sm font-medium truncate ${selectedCategory === category.id.toString() ? 'text-accent' : 'text-gray-700'
-              }`}>
-              {category.name}
-            </span>
-          </div>
-          {category.subCategories?.length > 0 && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleCategoryExpansion(category.id);
-              }}
-              className="p-1 hover:bg-gray-200 rounded transition-colors"
-            >
-              {expandedCategories.has(category.id) ? (
-                <ChevronDown className="w-4 h-4 text-gray-500" />
-              ) : (
-                <ChevronRight className="w-4 h-4 text-gray-500" />
-              )}
-            </button>
-          )}
-        </div>
-        <AnimatePresence>
-          {expandedCategories.has(category.id) && category.subCategories?.length > 0 && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden"
-            >
-              {renderCategoryTree(category.subCategories, level + 1)}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    ));
+
+  // Clear category filter
+  const clearCategoryFilter = () => {
+    setSelectedCategories([]);
+    onFilterChange('categoryIds', []);
   };
+
+  // Recursive category tree rendering with checkboxes
+  const renderCategoryTree = (cats, level = 0) => {
+    return cats.map(category => {
+      const isSelected = isCategorySelected(category.id);
+
+      return (
+        <div key={category.id} className="mb-1">
+          <div
+            className={`flex items-center justify-between p-2 rounded-lg transition-all duration-200 ${isSelected
+              ? 'bg-accent/10 border border-accent/20'
+              : 'hover:bg-gray-50 border border-transparent'
+              }`}
+            style={{ paddingLeft: `${0.75 + level * 1.5}rem` }}
+          >
+            <div
+              className="flex items-center flex-1 min-w-0 gap-2 cursor-pointer"
+              onClick={() => handleCategorySelect(category.id)}
+            >
+              {/* Checkbox */}
+              <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${isSelected
+                ? 'bg-accent border-accent'
+                : 'border-gray-300 hover:border-accent'
+                }`}>
+                {isSelected && (
+                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </div>
+              <span className={`text-sm font-medium truncate ${isSelected ? 'text-accent' : 'text-gray-700'
+                }`}>
+                {category.name}
+              </span>
+              {/* Show product count if available */}
+              {category.productCount !== undefined && category.productCount > 0 && (
+                <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">
+                  {category.productCount}
+                </span>
+              )}
+            </div>
+            {category.subCategories?.length > 0 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleCategoryExpansion(category.id);
+                }}
+                className="p-1 hover:bg-gray-200 rounded transition-colors flex items-center gap-1"
+              >
+                <span className="text-xs text-gray-400">{category.subCategories.length}</span>
+                {expandedCategories.has(category.id) ? (
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 text-gray-500" />
+                )}
+              </button>
+            )}
+          </div>
+          <AnimatePresence>
+            {expandedCategories.has(category.id) && category.subCategories?.length > 0 && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                {renderCategoryTree(category.subCategories, level + 1)}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      );
+    });
+  };
+
+  // Render All Categories option at the top
+  const renderAllCategoriesOption = () => (
+    <div
+      className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all duration-200 mb-2 ${selectedCategories.length === 0
+        ? 'bg-accent/10 text-accent border border-accent/20'
+        : 'hover:bg-gray-50 border border-transparent'
+        }`}
+      onClick={clearCategoryFilter}
+    >
+      <div className="flex items-center gap-2">
+        <Layers className="w-4 h-4" />
+        <span className={`text-sm font-medium ${selectedCategories.length === 0 ? 'text-accent' : 'text-gray-700'}`}>
+          All Categories
+        </span>
+      </div>
+      {selectedCategories.length > 0 && (
+        <span className="text-xs text-accent bg-accent/10 px-2 py-0.5 rounded-full">
+          {selectedCategories.length} selected - Clear
+        </span>
+      )}
+    </div>
+  );
   const renderSection = (title, Icon, content, sectionName) => (
     <div className="mb-4">
       <button
@@ -472,6 +559,7 @@ export default function AdvancedProductFilters({
         'Categories',
         Layers,
         <div className="max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+          {renderAllCategoriesOption()}
           {Array.isArray(categories) && categories.length > 0 ? (
             renderCategoryTree(categories)
           ) : (
@@ -719,9 +807,9 @@ export default function AdvancedProductFilters({
         ) : (
           <>
             {productCount} products found
-            {selectedCategory && (
+            {selectedCategories.length > 0 && (
               <div className="mt-2 px-2 py-1 bg-accent/10 text-accent rounded-md text-xs">
-                Category filter active
+                {selectedCategories.length} {selectedCategories.length === 1 ? 'category' : 'categories'} selected
               </div>
             )}
             {(designSearch || minDesignNumber || maxDesignNumber) && (

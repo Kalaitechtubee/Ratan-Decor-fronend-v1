@@ -10,7 +10,7 @@ const DownArrowIcon = () => (
     width="16"
     height="12"
     viewBox="0 0 10 6"
-    fill="#000000"
+    fill="#ff4747"
     xmlns="http://www.w3.org/2000/svg"
   >
     <path d="M0 0 L5 6 L10 0 Z" />

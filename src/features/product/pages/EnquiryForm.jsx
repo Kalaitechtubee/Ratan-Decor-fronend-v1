@@ -21,13 +21,11 @@ const FormInput = ({ label, name, type = 'text', value, onChange, hasError, requ
       value={value}
       onChange={onChange}
       readOnly={readOnly}
-      className={`w-full px-3 py-2 rounded-lg border transition-shadow ${
-        readOnly ? 'bg-gray-100 cursor-not-allowed' : ''
-      } ${
-        hasError
+      className={`w-full px-3 py-2 rounded-lg border transition-shadow ${readOnly ? 'bg-gray-100 cursor-not-allowed' : ''
+        } ${hasError
           ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-transparent'
           : 'border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent'
-      }`}
+        }`}
       {...props}
     />
     {hasError && <p className="mt-1 text-sm text-red-600">{hasError}</p>}
@@ -138,11 +136,10 @@ const LocationSelector = ({
             value={pincode}
             onChange={handlePincodeChange}
             placeholder="Enter 6-digit pincode"
-            className={`w-full px-3 py-2 pr-10 rounded-lg border transition-all ${
-              errors.pincode
-                ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-transparent'
-                : 'border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent'
-            }`}
+            className={`w-full px-3 py-2 pr-10 rounded-lg border transition-all ${errors.pincode
+              ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-transparent'
+              : 'border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent'
+              }`}
             maxLength={6}
           />
           {loading && (
@@ -191,11 +188,10 @@ const LocationSelector = ({
             type="text"
             value={state}
             onChange={(e) => onLocationChange({ state: e.target.value, city })}
-            className={`w-full px-3 py-2 rounded-lg border transition-all ${
-              errors.state
-                ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-transparent'
-                : 'border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent'
-            } ${!manualOverride && pincode.length === 6 ? 'bg-blue-50' : ''}`}
+            className={`w-full px-3 py-2 rounded-lg border transition-all ${errors.state
+              ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-transparent'
+              : 'border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent'
+              } ${!manualOverride && pincode.length === 6 ? 'bg-blue-50' : ''}`}
             placeholder="Enter state"
             readOnly={!manualOverride && suggestions.length > 0}
           />
@@ -209,11 +205,10 @@ const LocationSelector = ({
             type="text"
             value={city}
             onChange={(e) => onLocationChange({ state, city: e.target.value })}
-            className={`w-full px-3 py-2 rounded-lg border transition-all ${
-              errors.city
-                ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-transparent'
-                : 'border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent'
-            } ${!manualOverride && pincode.length === 6 ? 'bg-blue-50' : ''}`}
+            className={`w-full px-3 py-2 rounded-lg border transition-all ${errors.city
+              ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-transparent'
+              : 'border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent'
+              } ${!manualOverride && pincode.length === 6 ? 'bg-blue-50' : ''}`}
             placeholder="Enter city or district"
             readOnly={!manualOverride && suggestions.length > 0}
           />
@@ -246,7 +241,7 @@ const EnquiryForm = ({ isOpen, onClose, product, user }) => {
     state: user?.state || '',
     city: user?.city || '',
     pincode: user?.pincode || '',
-    productDesignNumber: product?.id ? String(product.id) : '',
+    productDesignNumber: product?.designNumber || (product?.id ? String(product.id) : ''),
     productName: product?.name || '',
     productDescription: product?.description || '',
     notes: '',
@@ -254,25 +249,29 @@ const EnquiryForm = ({ isOpen, onClose, product, user }) => {
     role: user?.role || 'Customer',
   });
 
+  // Pre-fill form data when modal opens
   useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      name: user?.name || '',
-      email: user?.email || '',
-      phoneNo: user?.phone || user?.phoneNo || '',
-      state: user?.state || '',
-      city: user?.city || '',
-      pincode: user?.pincode || '',
-      userType: user?.userType || '',
-      role: user?.role || 'Customer',
-      productDesignNumber: product?.id ? String(product.id) : '',
-      productName: product?.name || '',
-      productDescription: product?.description || '',
-    }));
-  }, [user, product]);
+    if (isOpen) {
+      setFormData((prev) => ({
+        ...prev,
+        name: user?.name || '',
+        email: user?.email || '',
+        phoneNo: user?.mobile || user?.phone || user?.phoneNo || '',
+        state: user?.state || '',
+        city: user?.city || '',
+        pincode: user?.pincode || '',
+        userType: user?.userType || '',
+        role: user?.role || 'Customer',
+        productDesignNumber: product?.designNumber || (product?.id ? String(product.id) : ''),
+        productName: product?.name || '',
+        productDescription: product?.description || '',
+      }));
+    }
+  }, [isOpen]); // Only run when isOpen changes to true
 
+  // Sync userType once when userTypes are loaded if not already set or if it's the initial load
   useEffect(() => {
-    if (userTypes.length > 0 && user?.userType) {
+    if (isOpen && userTypes.length > 0 && user?.userType && !formData.userType) {
       const match = userTypes.find(
         (type) =>
           type.id?.toString().toLowerCase() === user.userType?.toString().toLowerCase() ||
@@ -283,14 +282,9 @@ const EnquiryForm = ({ isOpen, onClose, product, user }) => {
           ...prev,
           userType: match.id || match.name
         }));
-      } else {
-        setFormData((prev) => ({
-          ...prev,
-          userType: user.userType
-        }));
       }
     }
-  }, [userTypes, user?.userType]);
+  }, [userTypes, user?.userType, isOpen]);
 
   useEffect(() => {
     const fetchUserTypes = async () => {
@@ -467,7 +461,7 @@ const EnquiryForm = ({ isOpen, onClose, product, user }) => {
         {/* Modal Header */}
         <div className="flex justify-between items-center p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">Enquire</h2>
-          <button 
+          <button
             onClick={handleClose}
             disabled={submitting}
             className="text-gray-500 hover:text-gray-700 disabled:opacity-50 transition-colors"
@@ -521,11 +515,10 @@ const EnquiryForm = ({ isOpen, onClose, product, user }) => {
                     <select
                       value={formData.userType}
                       onChange={(e) => handleInputChange('userType', e.target.value)}
-                      className={`w-full px-3 py-2 rounded-lg border transition-shadow ${
-                        validationErrors.userType
-                          ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-transparent'
-                          : 'border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent'
-                      }`}
+                      className={`w-full px-3 py-2 rounded-lg border transition-shadow ${validationErrors.userType
+                        ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-transparent'
+                        : 'border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent'
+                        }`}
                     >
                       <option value="">Select User Type</option>
                       {userTypes.map((type) => (
@@ -540,11 +533,10 @@ const EnquiryForm = ({ isOpen, onClose, product, user }) => {
                       value={formData.userType}
                       onChange={(e) => handleInputChange('userType', e.target.value)}
                       placeholder="Enter user type"
-                      className={`w-full px-3 py-2 rounded-lg border transition-shadow ${
-                        validationErrors.userType
-                          ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-transparent'
-                          : 'border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent'
-                      }`}
+                      className={`w-full px-3 py-2 rounded-lg border transition-shadow ${validationErrors.userType
+                        ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-transparent'
+                        : 'border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent'
+                        }`}
                     />
                   )}
                   {validationErrors.userType && (
