@@ -236,8 +236,9 @@ const EnquiryForm = ({ isOpen, onClose, product, user }) => {
   const [loadingUserTypes, setLoadingUserTypes] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
+    companyName: user?.companyName || user?.company || '',
     email: user?.email || '',
-    phoneNo: user?.phone || user?.phoneNo || '',
+    phoneNo: user?.mobile || user?.phone || user?.phoneNo || '',
     state: user?.state || '',
     city: user?.city || '',
     pincode: user?.pincode || '',
@@ -245,46 +246,53 @@ const EnquiryForm = ({ isOpen, onClose, product, user }) => {
     productName: product?.name || '',
     productDescription: product?.description || '',
     notes: '',
-    userType: user?.userType || '',
-    role: user?.role || 'Customer',
+    userType: user?.userTypeName || user?.userType || user?.userTypeId || '',
+    role: user?.userRole || user?.role || 'Customer',
   });
 
-  // Pre-fill form data when modal opens
+  // Pre-fill form data when modal opens or user data changes
   useEffect(() => {
     if (isOpen) {
       setFormData((prev) => ({
         ...prev,
         name: user?.name || '',
+        companyName: user?.companyName || user?.company || '',
         email: user?.email || '',
         phoneNo: user?.mobile || user?.phone || user?.phoneNo || '',
         state: user?.state || '',
         city: user?.city || '',
         pincode: user?.pincode || '',
-        userType: user?.userType || '',
-        role: user?.role || 'Customer',
+        userType: user?.userTypeName || user?.userType || user?.userTypeId || '',
+        role: user?.userRole || user?.role || 'ustomer',
         productDesignNumber: product?.designNumber || (product?.id ? String(product.id) : ''),
         productName: product?.name || '',
         productDescription: product?.description || '',
       }));
     }
-  }, [isOpen]); // Only run when isOpen changes to true
+  }, [isOpen, user, product]); // Added user and product dependencies
 
   // Sync userType once when userTypes are loaded if not already set or if it's the initial load
   useEffect(() => {
-    if (isOpen && userTypes.length > 0 && user?.userType && !formData.userType) {
+    if (isOpen && userTypes.length > 0 && (user?.userType || user?.userTypeName || user?.userTypeId)) {
+      const typeToMatch = user.userType || user.userTypeName || user.userTypeId;
       const match = userTypes.find(
         (type) =>
-          type.id?.toString().toLowerCase() === user.userType?.toString().toLowerCase() ||
-          type.name?.toString().toLowerCase() === user.userType?.toString().toLowerCase()
+          type.id?.toString().toLowerCase() === typeToMatch?.toString().toLowerCase() ||
+          type.name?.toString().toLowerCase() === typeToMatch?.toString().toLowerCase()
       );
+
       if (match) {
-        setFormData((prev) => ({
-          ...prev,
-          userType: match.id || match.name
-        }));
+        const matchedValue = match.id || match.name;
+        // Only update if the value is different (e.g. switching from Name to ID)
+        if (formData.userType !== matchedValue) {
+          setFormData((prev) => ({
+            ...prev,
+            userType: matchedValue
+          }));
+        }
       }
     }
-  }, [userTypes, user?.userType, isOpen]);
+  }, [userTypes, user, isOpen]); // Removed formData.userType from dependency to avoid loops, though strict check prevents it
 
   useEffect(() => {
     const fetchUserTypes = async () => {
@@ -295,12 +303,7 @@ const EnquiryForm = ({ isOpen, onClose, product, user }) => {
         const result = await getUserTypes();
         if (result.success && result.data) {
           setUserTypes(result.data);
-          if (!formData.userType && result.data.length > 0) {
-            setFormData(prev => ({
-              ...prev,
-              userType: result.data[0].id || result.data[0].name || 'General'
-            }));
-          }
+          // Removed auto-selection of first user type to allow 'Select User Type' default for guests
         }
       } catch (error) {
         console.error('Error fetching user types:', error);
@@ -311,12 +314,7 @@ const EnquiryForm = ({ isOpen, onClose, product, user }) => {
             { id: 'Architect', name: 'Architect' },
             { id: 'Contractor', name: 'Contractor' }
           ]);
-          if (!formData.userType) {
-            setFormData(prev => ({
-              ...prev,
-              userType: 'General'
-            }));
-          }
+          // Removed auto-select fallback to keep field empty for guests
         } else {
           toast.error('Failed to load user types');
           setUserTypes([
@@ -371,17 +369,17 @@ const EnquiryForm = ({ isOpen, onClose, product, user }) => {
   const resetForm = () => {
     setFormData({
       name: user?.name || '',
+      companyName: user?.companyName || user?.company || '',
       email: user?.email || '',
       phoneNo: user?.phone || user?.phoneNo || '',
       state: user?.state || '',
       city: user?.city || '',
       pincode: user?.pincode || '',
       productDesignNumber: product?.id ? String(product.id) : '',
-      productName: product?.name || '',
       productDescription: product?.description || '',
       notes: '',
-      userType: user?.userType || (userTypes.length > 0 ? userTypes[0].id || userTypes[0].name : ''),
-      role: user?.role || 'Customer',
+      userType: user?.userTypeName || user?.userType || user?.userTypeId || '',
+      role: user?.userRole || user?.role || 'Customer',
     });
     setValidationErrors({});
   };
@@ -420,6 +418,7 @@ const EnquiryForm = ({ isOpen, onClose, product, user }) => {
 
       const formattedEnquiry = {
         name: formData.name.trim(),
+        companyName: formData.companyName?.trim() || null,
         email: formData.email.trim().toLowerCase(),
         phoneNo: formatPhoneNumber(formData.phoneNo),
         state: formData.state.trim(),
@@ -484,6 +483,13 @@ const EnquiryForm = ({ isOpen, onClose, product, user }) => {
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   hasError={validationErrors.name}
+                />
+                <FormInput
+                  label="Company Name"
+                  name="companyName"
+                  value={formData.companyName}
+                  onChange={(e) => handleInputChange('companyName', e.target.value)}
+                  placeholder="Enter company name (optional)"
                 />
                 <FormInput
                   label="Email"

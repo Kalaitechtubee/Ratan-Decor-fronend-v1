@@ -180,7 +180,11 @@ export default function DesktopNavbar({
                       <FaUser className="text-sm" />
                     </div>
                     <span className="hidden lg:block text-sm font-semibold font-roboto truncate max-w-24">{user?.name || 'User'}</span>
-                    <FaChevronDown className={`text-[#ff4747] text-sm transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`} />
+                    <FaChevronDown
+                      className={`text-white text-sm transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''
+                        }`}
+                    />
+
                   </button>
                   <AnimatePresence>
                     {isProfileOpen && (

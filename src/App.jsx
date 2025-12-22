@@ -6,7 +6,7 @@ import { getSeoByPageName } from './features/seo/api/seoApi';
 import { useAuth } from './features/auth/hooks/useAuth';
 import { CartProvider } from './features/cart';
 import { useDispatch } from 'react-redux';
-import { setUser } from './features/auth/authSlice';
+import { setUser, logout } from './features/auth/authSlice';
 import api from './services/axios';
 
 function App() {
@@ -20,7 +20,7 @@ function App() {
   const location = useLocation();
   const lastPathnameRef = useRef(null);
   const timeoutRef = useRef(null);
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   // Normalize path to lowercase for consistency
   const normalizedPath = location.pathname.toLowerCase();
@@ -75,27 +75,25 @@ function App() {
   //  Restore session on app load
   useEffect(() => {
     const restoreSession = async () => {
-      const token = localStorage.getItem('token');
-      if (token && !user) {
+      // Check for isLoggedIn flag instead of token
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      if (isLoggedIn) {
         try {
           const response = await api.get('/auth/profile');
-          dispatch(
-            setUser({
-              ...response.data.user,
-              token,
-            })
-          );
+          if (response.data.success && response.data.user) {
+            dispatch(setUser(response.data.user));
+          }
         } catch (error) {
           console.error('Failed to restore session:', error);
-          localStorage.removeItem('token');
-          localStorage.removeItem('authState');
+          // If session is invalid, clear state
+          dispatch(logout());
         }
       }
       setIsInitialLoad(false);
     };
 
     restoreSession();
-  }, [dispatch, user]);
+  }, [dispatch]);
 
   const fetchSeoData = useCallback(
     async (path) => {
@@ -150,7 +148,7 @@ function App() {
             title:
               response.data.title ||
               `Ratan Decor - ${pageName.charAt(0).toUpperCase() +
-                pageName.slice(1).replace('-', ' ')}`,
+              pageName.slice(1).replace('-', ' ')}`,
             description:
               response.data.description ||
               `Explore Ratan Decor’s ${pageName.replace(

@@ -11,16 +11,15 @@ import {
   Check,
   X,
 } from "lucide-react";
-import { jwtDecode } from "jwt-decode";
 import appointmentApi from "../../features/VideoCall/appointmentApi";
 import { useAuth } from "../../features/auth/hooks/useAuth";
 
 const VideoCallPopup = ({ isOpen, onClose }) => {
   const { isAuthenticated, user } = useAuth();
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phoneNo: "",
+    name: user?.name || "",
+    email: user?.email || "",
+    phoneNo: user?.mobile || user?.phone || "",
     videoCallDate: "",
     videoCallTime: "",
     source: "Website",
@@ -30,85 +29,21 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [currentUser, setCurrentUser] = useState({
-    id: null,
-    email: "",
-    name: "",
-  });
   const [currentStep, setCurrentStep] = useState(1);
 
+  // Update form data when user data becomes available or popup opens
   useEffect(() => {
-    fetchCurrentUser();
-  }, []);
-
-  useEffect(() => {
-    if (currentUser.id) {
+    if (isOpen && user) {
       setFormData((prev) => ({
         ...prev,
-        name: currentUser.name || prev.name,
-        email: currentUser.email || prev.email,
+        name: user.name || prev.name,
+        email: user.email || prev.email,
+        phoneNo: user.mobile || user.phone || prev.phoneNo,
       }));
     }
-  }, [currentUser]);
+  }, [isOpen, user]);
 
-  const fetchCurrentUser = async () => {
-    if (!isAuthenticated || !user) {
-      setCurrentUser({ id: null, email: "", name: "" });
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setCurrentUser({ id: null, email: "", name: "" });
-        return;
-      }
-
-      const decoded = jwtDecode(token);
-      if (decoded.exp * 1000 < Date.now()) {
-        localStorage.removeItem("token");
-        setError("Session expired. Please log in again.");
-        setCurrentUser({ id: null, email: "", name: "" });
-        return;
-      }
-
-      const userData = await fetchUserProfile();
-      setCurrentUser({
-        id: decoded.id || decoded.sub,
-        email: decoded.email || userData.email || "",
-        name: userData.name || "",
-      });
-    } catch (err) {
-      console.error("Error decoding token:", err);
-      localStorage.removeItem("token");
-      setError("Invalid authentication token. Please log in again.");
-      setCurrentUser({ id: null, email: "", name: "" });
-    }
-  };
-
-  const fetchUserProfile = async () => {
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/auth/profile`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error(
-          "Server did not return JSON. Check API URL and backend status."
-        );
-      }
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.message || "Failed to fetch profile");
-      return data.user || { name: "", email: "" };
-    } catch (error) {
-      console.error("Error fetching user profile:", error);
-      return { name: "", email: "" };
-    }
-  };
+  /* Removed redundant fetching logic */
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -162,10 +97,10 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
     try {
       const response = await appointmentApi.createAppointment(
         formData,
-        currentUser
+        user
       );
       const newId = response.data?.id;
-      if (!currentUser.id) {
+      if (!user) {
         localStorage.setItem("lastAppointmentId", newId);
         localStorage.setItem("lastAppointmentEmail", formData.email);
       }
@@ -173,9 +108,9 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
         `Appointment created successfully! Your Appointment ID is ${newId}.`
       );
       setFormData({
-        name: currentUser.name || "",
-        email: currentUser.email || "",
-        phoneNo: "",
+        name: user?.name || "",
+        email: user?.email || "",
+        phoneNo: user?.mobile || user?.phone || "",
         videoCallDate: "",
         videoCallTime: "",
         source: "Website",
@@ -202,19 +137,17 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
       {[1, 2, 3].map((step) => (
         <React.Fragment key={step}>
           <div
-            className={`flex items-center justify-center w-6 h-6 rounded-full border-2 font-roboto text-xs ${
-              step <= currentStep
-                ? "bg-primary border-primary text-white"
-                : "border-gray-300 text-gray-500"
-            } font-medium`}
+            className={`flex items-center justify-center w-6 h-6 rounded-full border-2 font-roboto text-xs ${step <= currentStep
+              ? "bg-primary border-primary text-white"
+              : "border-gray-300 text-gray-500"
+              } font-medium`}
           >
             {step}
           </div>
           {step < 3 && (
             <div
-              className={`w-12 h-1 mx-2 ${
-                step < currentStep ? "bg-primary" : "bg-gray-300"
-              }`}
+              className={`w-12 h-1 mx-2 ${step < currentStep ? "bg-primary" : "bg-gray-300"
+                }`}
             />
           )}
         </React.Fragment>
@@ -307,7 +240,7 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
                 </p>
               </div>
 
-              {!currentUser.id && (
+              {!user && (
                 <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
                   <p className="text-xs text-gray-800 text-center font-roboto">
                     <span className="font-medium">Guest booking</span> •{" "}
@@ -560,11 +493,11 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
                     <p className="text-gray-900 font-semibold text-sm font-roboto">
                       {formData.videoCallTime
                         ? new Date(
-                            `2000-01-01T${formData.videoCallTime}`
-                          ).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
+                          `2000-01-01T${formData.videoCallTime}`
+                        ).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
                         : ""}
                     </p>
                   </div>
