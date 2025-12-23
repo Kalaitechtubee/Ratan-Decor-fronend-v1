@@ -105,10 +105,11 @@ const Contact = () => {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-              Contact Us
+           Request a Quote / 
+
             </h1>
             <h2 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-4">
-              Get in Touch with Us
+              Product Enquiry
             </h2>
             <div className="w-12 h-1 bg-red-600"></div>
           </div>
@@ -289,12 +290,10 @@ const Contact = () => {
             <div className="space-y-8">
               <div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
-                  Have Questions? Let's Connect
+               Let’s Discuss Your Requirement
                 </h2>
                 <p className="text-gray-600 text-base sm:text-lg leading-relaxed">
-                  If you have any questions about our products or would like to
-                  send us an inquiry, simply share your contact details here.
-                  We're happy to assist you!
+Tell us your requirements and our team will get back to you with product details, pricing, and expert guidance for your project.
                 </p>
               </div>
 

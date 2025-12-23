@@ -9,6 +9,13 @@ const LoadingSpinner = ({ size = 'default', className = '' }) => {
   return <Loader2 className={`animate-spin ${sizeClass} ${className}`} />;
 };
 
+const ROLE_OPTIONS = [
+  { value: 'Customer', label: 'End Consumer' },
+  { value: 'Architect', label: 'Architect / Interior Designer' },
+  { value: 'Dealer', label: 'Dealer / Distributor' },
+  { value: 'Customer', label: 'Others' }
+];
+
 // FormInput component
 const FormInput = ({ label, name, type = 'text', value, onChange, hasError, required = false, readOnly = false, ...props }) => (
   <div>
@@ -263,7 +270,7 @@ const EnquiryForm = ({ isOpen, onClose, product, user }) => {
         city: user?.city || '',
         pincode: user?.pincode || '',
         userType: user?.userTypeName || user?.userType || user?.userTypeId || '',
-        role: user?.userRole || user?.role || 'ustomer',
+        role: user?.userRole || user?.role || 'Customer',
         productDesignNumber: product?.designNumber || (product?.id ? String(product.id) : ''),
         productName: product?.name || '',
         productDescription: product?.description || '',
@@ -330,7 +337,18 @@ const EnquiryForm = ({ isOpen, onClose, product, user }) => {
     };
 
     fetchUserTypes();
+    fetchUserTypes();
   }, [isOpen, formData.userType]);
+
+  // Default userType for guests
+  useEffect(() => {
+    if (isOpen && !user && userTypes.length > 0 && !formData.userType) {
+      const defaultType = userTypes.find(t => t.name === 'General') || userTypes[0];
+      if (defaultType) {
+        setFormData(prev => ({ ...prev, userType: defaultType.name || defaultType.id }));
+      }
+    }
+  }, [isOpen, user, userTypes]); // formData.userType removed from dependency to specific check inside
 
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validatePhone = (phone) => /^[0-9]{10,15}$/.test(phone.replace(/[^\d]/g, ''));
@@ -484,13 +502,17 @@ const EnquiryForm = ({ isOpen, onClose, product, user }) => {
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   hasError={validationErrors.name}
                 />
+
                 <FormInput
-                  label="Company Name"
-                  name="companyName"
-                  value={formData.companyName}
-                  onChange={(e) => handleInputChange('companyName', e.target.value)}
-                  placeholder="Enter company name (optional)"
+                  label="Phone"
+                  name="phoneNo"
+                  type="tel"
+                  required
+                  value={formData.phoneNo}
+                  onChange={(e) => handleInputChange('phoneNo', e.target.value)}
+                  hasError={validationErrors.phoneNo}
                 />
+
                 <FormInput
                   label="Email"
                   name="email"
@@ -501,54 +523,49 @@ const EnquiryForm = ({ isOpen, onClose, product, user }) => {
                   hasError={validationErrors.email}
                 />
                 <FormInput
-                  label="Phone"
-                  name="phoneNo"
-                  type="tel"
-                  required
-                  value={formData.phoneNo}
-                  onChange={(e) => handleInputChange('phoneNo', e.target.value)}
-                  hasError={validationErrors.phoneNo}
+                  label="Company Name"
+                  name="companyName"
+                  value={formData.companyName}
+                  onChange={(e) => handleInputChange('companyName', e.target.value)}
+                  placeholder="Enter company name (optional)"
                 />
-                <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">
-                    User Type <span className="text-primary">*</span>
-                  </label>
-                  {loadingUserTypes ? (
-                    <div className="flex items-center justify-center h-12">
-                      <LoadingSpinner size="small" className="text-primary" />
+
+                {user ? (
+                  <FormInput
+                    label="Role"
+                    name="role"
+                    value={formData.role}
+                    onChange={(e) => handleInputChange('role', e.target.value)}
+                    placeholder="Enter your role"
+                  />
+                ) : (
+                  <div>
+                    <label className="block mb-2 text-sm font-medium text-gray-700">
+                      Role <span className="text-primary">*</span>
+                    </label>
+                    <div className="relative">
+                      <select
+                        name="role"
+                        value={formData.role}
+                        onChange={(e) => handleInputChange('role', e.target.value)}
+                        className="w-full px-3 py-2 bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow appearance-none"
+                      >
+                        <option value="">Select Role</option>
+                        {ROLE_OPTIONS.map((option) => (
+                          <option key={option.label} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
                     </div>
-                  ) : userTypes.length > 0 ? (
-                    <select
-                      value={formData.userType}
-                      onChange={(e) => handleInputChange('userType', e.target.value)}
-                      className={`w-full px-3 py-2 rounded-lg border transition-shadow ${validationErrors.userType
-                        ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-transparent'
-                        : 'border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent'
-                        }`}
-                    >
-                      <option value="">Select User Type</option>
-                      {userTypes.map((type) => (
-                        <option key={type.id || type.name} value={type.id || type.name}>
-                          {type.name}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      type="text"
-                      value={formData.userType}
-                      onChange={(e) => handleInputChange('userType', e.target.value)}
-                      placeholder="Enter user type"
-                      className={`w-full px-3 py-2 rounded-lg border transition-shadow ${validationErrors.userType
-                        ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-transparent'
-                        : 'border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent'
-                        }`}
-                    />
-                  )}
-                  {validationErrors.userType && (
-                    <p className="mt-1 text-sm text-red-600">{validationErrors.userType}</p>
-                  )}
-                </div>
+                  </div>
+                )}
+
               </div>
             </div>
 

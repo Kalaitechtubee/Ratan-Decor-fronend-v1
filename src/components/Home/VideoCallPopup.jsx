@@ -231,34 +231,18 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
           {/* Step 1: Personal Information */}
           {currentStep === 1 && (
             <div className="space-y-4 animate-fade-in">
-              <div className="text-center mb-2">
+              <div className="text-center mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 font-roboto">
                   Personal Information
                 </h3>
-                <p className="text-gray-600 mt-1 text-xs font-roboto">
+                {/* <p className="text-gray-600 mt-1 text-xs font-roboto">
                   Let's start with your basic details
-                </p>
+                </p> */}
               </div>
 
-              {!user && (
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
-                  <p className="text-xs text-gray-800 text-center font-roboto">
-                    <span className="font-medium">Guest booking</span> •{" "}
-                    <a href="/login" className="underline hover:text-primary">
-                      Log in
-                    </a>{" "}
-                    or{" "}
-                    <a
-                      href="/register"
-                      className="underline hover:text-primary"
-                    >
-                      register
-                    </a>{" "}
-                    to manage your appointments
-                  </p>
-                </div>
-              )}
+        
 
+              {/* Name and Phone: Same row, two columns */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="block text-sm font-medium text-gray-700 font-roboto">
@@ -278,22 +262,6 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
 
                 <div className="space-y-1">
                   <label className="block text-sm font-medium text-gray-700 font-roboto">
-                    <Mail className="w-4 h-4 inline mr-1 text-gray-500" />
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm font-roboto"
-                    placeholder="your.email@example.com"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="block text-sm font-medium text-gray-700 font-roboto">
                     <Phone className="w-4 h-4 inline mr-1 text-gray-500" />
                     Phone Number
                   </label>
@@ -306,18 +274,32 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
                     placeholder="+1 (555) 123-4567"
                   />
                 </div>
-
-                {/* Source Field - Display only (no dropdown) */}
-                <div className="space-y-1">
-                  <label className="block text-sm font-medium text-gray-700 font-roboto">
-                    Booking Source
-                  </label>
-                  <div className="w-full px-3 py-2 border border-gray-300 rounded-xl bg-gray-50 text-gray-600 text-sm font-roboto">
-                    Website
-                  </div>
-                </div>
               </div>
 
+              {/* Email: Second row, single column */}
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-gray-700 font-roboto">
+                  <Mail className="w-4 h-4 inline mr-1 text-gray-500" />
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm font-roboto"
+                  placeholder="your.email@example.com"
+                  required
+                />
+              </div>
+   <div className="flex justify-end pt-2">
+                <button
+                  onClick={nextStep}
+                  className="px-4 py-2 bg-primary text-white rounded-xl hover:bg-accent focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 font-medium text-sm font-roboto"
+                >
+                  Continue to Schedule
+                </button>
+              </div>
               {/* Improved Professional Consultation Section */}
               <div className="bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20 rounded-xl p-4 mt-4">
                 <h3 className="text-base font-semibold text-primary text-center font-roboto mb-2">
@@ -339,27 +321,20 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
                 </div>
               </div>
 
-              <div className="flex justify-end pt-2">
-                <button
-                  onClick={nextStep}
-                  className="px-4 py-2 bg-primary text-white rounded-xl hover:bg-accent focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 font-medium text-sm font-roboto"
-                >
-                  Continue to Schedule
-                </button>
-              </div>
+           
             </div>
           )}
 
           {/* Step 2: Scheduling */}
           {currentStep === 2 && (
             <div className="space-y-4 animate-fade-in">
-              <div className="text-center mb-2">
+              <div className="text-center mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 font-roboto">
                   Schedule Your Session
                 </h3>
-                <p className="text-gray-600 mt-1 text-xs font-roboto">
+                {/* <p className="text-gray-600 mt-1 text-xs font-roboto">
                   Choose the date and time for your consultation
-                </p>
+                </p> */}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -437,9 +412,9 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
                 <h3 className="text-lg font-semibold text-gray-900 font-roboto">
                   Review Your Appointment
                 </h3>
-                <p className="text-gray-600 mt-1 text-xs font-roboto">
+                {/* <p className="text-gray-600 mt-1 text-xs font-roboto">
                   Please confirm your details before booking
-                </p>
+                </p> */}
               </div>
 
               <div className="bg-gray-50 rounded-xl p-4 space-y-3">
@@ -567,6 +542,25 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
             </div>
           )}
         </div>
+
+              {!user && (
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
+                  <p className="text-xs text-gray-800 text-center font-roboto">
+                    <span className="font-medium">Guest booking</span> •{" "}
+                    <a href="/login" className="underline hover:text-primary">
+                      Log in
+                    </a>{" "}
+                    or{" "}
+                    <a
+                      href="/register"
+                      className="underline hover:text-primary"
+                    >
+                      register
+                    </a>{" "}
+                    to manage your appointments
+                  </p>
+                </div>
+              )}
 
         <style jsx>{`
           @keyframes fade-in {

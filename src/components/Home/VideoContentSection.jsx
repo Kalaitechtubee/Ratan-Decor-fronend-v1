@@ -18,7 +18,8 @@ const VideoContentSection = () => {
           <h2 className="text-3xl sm:text-4xl lg:text-6xl mt-5 font-bold text-gray-900 mb-6 sm:mb-8 font-title leading-tight relative">
             Discover Our
             <span className="block text-primary relative">
-              Craftsmanship
+            Experience Centre
+
               {/* Mobile-specific underline adjustment */}
               <div className="absolute -bottom-1 sm:-bottom-2 left-0 w-16 sm:w-24 h-1 bg-primary rounded-full"></div>
             </span>
@@ -27,7 +28,9 @@ const VideoContentSection = () => {
         
         {/* Mobile text size and spacing adjustments */}
         <p className="text-base sm:text-lg lg:text-xl text-gray-700 mb-6 sm:mb-10 font-poppins leading-relaxed max-w-md">
-          Immerse yourself in a world of exceptional quality and meticulous attention to detail. Our craftspeople pour their passion into every creation, ensuring unparalleled excellence that stands the test of time.
+Step inside our store and explore a wide range of plywood, mica, veneers, doors, louvers, and decorative panels — all under one roof.
+ Designed to help homeowners, architects, interior designers, and dealers choose the right materials with confidence.
+
         </p>
         
         {/* Mobile button layout adjustments */}

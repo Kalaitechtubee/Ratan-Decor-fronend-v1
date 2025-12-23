@@ -164,7 +164,6 @@ function RegisterForm() {
                 <option value="Architect">Architect / Interior Designer</option>
                 <option value="Dealer">Dealer / Distributor</option>
                 <option value="customer">Others</option>
-
                 
               </select> 
             </div>

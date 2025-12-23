@@ -5,29 +5,29 @@ import PropTypes from 'prop-types';
 const defaultStats = [
   {
     id: 'projects',
-    value: 500,
-    label: 'Projects Completed',
+    value: 18,
+    label: 'Years Experience',
     icon: Trophy,
     suffix: '+',
   },
   {
     id: 'customers',
-    value: 1000,
-    label: 'Happy Customers',
+    value: 50,
+    label: 'Expert Team Members',
     icon: Users,
     suffix: '+',
   },
   {
     id: 'issues',
-    value: 0,
-    label: 'Issues Resolved',
+    value: 1000,
+    label: 'Architects, Designers & Dealers Served',
     icon: CheckCircle,
     suffix: '',
   },
   {
     id: 'awards',
-    value: 25,
-    label: 'Awards Won',
+    value: 1000,
+    label: 'Decorative Products Available',
     icon: Target,
     suffix: '+',
   },
@@ -119,14 +119,14 @@ const CounterComponent = ({ apiStats }) => {
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}
             >
-              Our <span className="text-[#ff4747]">Achievements</span>
+              Our <span className="text-[#ff4747]">Journey in Numbers</span>
             </h2>
             <p
               className={`text-xl text-gray-600 max-w-2xl mx-auto transition-all duration-1000 delay-300 ${
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}
             >
-              Numbers that speak for our excellence and commitment to delivering outstanding results
+              Numbers that reflect our experience, scale, and trust built with customers across India
             </p>
           </div>
 
