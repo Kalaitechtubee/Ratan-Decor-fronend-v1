@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FaTimes, FaSync, FaShoppingCart } from 'react-icons/fa';
+import { FaTimes, FaSync, FaShoppingCart, FaSearch } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchBar from '../SearchBar';
 import logo from '../../assets/images/ratan-decor.png';
@@ -21,7 +21,10 @@ export default function MobileNavbar({
   currentUserType,
   setIsUserTypePopupOpen,
   isMobileSearchOpen,
-  setIsMobileSearchOpen
+  setIsMobileSearchOpen,
+  onOpenCart,
+  isCartOpen,
+  cartCount = 0
 }) {
   const closeMobileSearch = () => {
     setIsMobileSearchOpen(false);
@@ -86,15 +89,33 @@ export default function MobileNavbar({
               )}
             </AnimatePresence>
 
+            {/* Search Icon - Mobile Toggle */}
+            {!isMobileSearchOpen && (
+              <button
+                onClick={() => setIsMobileSearchOpen(true)}
+                className="flex items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-all duration-200 touch-target flex-shrink-0 font-roboto"
+                aria-label="Open search"
+              >
+                <FaSearch className="text-[#ff4747] text-lg" />
+              </button>
+            )}
+
             {/* Cart Icon - Mobile */}
             {!isMobileSearchOpen && (
-              <Link
-                to="/cart"
-                className="flex items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-all duration-200 touch-target flex-shrink-0 font-roboto"
-                aria-label="Go to cart"
+              <button
+                onClick={onOpenCart}
+                className="flex items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-all duration-200 touch-target flex-shrink-0 font-roboto relative"
+                aria-label="Open cart"
               >
-                <FaShoppingCart className="text-[#ff4747] text-lg" />
-              </Link>
+                <div className="relative">
+                  <FaShoppingCart className={`text-2xl transition-colors duration-200 ${isCartOpen ? 'text-[#ff4747]' : 'text-gray-700'}`} />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-[#ff4747] text-white text-[10px] font-bold h-5 min-w-[20px] px-1.5 rounded-full border-2 border-white flex items-center justify-center shadow-md transform scale-105">
+                      {cartCount > 99 ? '99+' : cartCount}
+                    </span>
+                  )}
+                </div>
+              </button>
             )}
 
             {/* Mobile User Type Button */}

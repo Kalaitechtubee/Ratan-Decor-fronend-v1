@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaHome, FaBars, FaSearch, FaUser, FaSignOutAlt, FaSignInAlt } from 'react-icons/fa';
+import { FaHome, FaBars, FaSearch, FaUser, FaSignOutAlt, FaSignInAlt, FaShoppingCart } from 'react-icons/fa';
 import { MdGridView } from 'react-icons/md';
 import { useState, useEffect } from 'react';
 
@@ -16,7 +16,9 @@ export default function MobileBottomNav({
   setIsMoreMenuOpen,
   currentUserType,
   isMobileSearchOpen,
-  setIsMobileSearchOpen
+  onOpenCart,
+  isCartOpen,
+  cartCount = 0
 }) {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -31,17 +33,17 @@ export default function MobileBottomNav({
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setIsVisible(false);
       } else {
         setIsVisible(true);
       }
-      
+
       setLastScrollY(currentScrollY);
 
       clearTimeout(scrollTimeout);
-      
+
       scrollTimeout = setTimeout(() => {
         setIsVisible(true);
       }, 150);
@@ -68,10 +70,10 @@ export default function MobileBottomNav({
       isProductMenu: true
     },
     {
-      path: '#search',
-      icon: FaSearch,
-      label: 'Search',
-      isSearch: true
+      path: '#cart',
+      icon: FaShoppingCart,
+      label: 'Cart',
+      isCart: true
     },
     {
       path: isAuthenticated ? '/profile' : '/register',
@@ -91,11 +93,11 @@ export default function MobileBottomNav({
     <motion.nav
       className="bottom-nav fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg md:hidden font-roboto"
       initial={{ y: 0, opacity: 1 }}
-      animate={{ 
+      animate={{
         y: isVisible ? 0 : '100%',
         opacity: isVisible ? 1 : 0
       }}
-      transition={{ 
+      transition={{
         type: "spring",
         stiffness: 300,
         damping: 30,
@@ -107,14 +109,13 @@ export default function MobileBottomNav({
           const Icon = item.icon;
           const isActive = isActiveRoute(item.path);
 
-          const buttonClasses = `flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 relative touch-target w-20 h-16 font-roboto ${
-            isActive || 
-            (item.isProductMenu && location.pathname.startsWith('/products')) || 
+          const buttonClasses = `flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 relative touch-target w-20 h-16 font-roboto ${isActive ||
+            (item.isProductMenu && location.pathname.startsWith('/products')) ||
             (item.isMoreMenu && isMoreMenuOpen) ||
             (item.isSearch && isMobileSearchOpen)
-              ? 'text-[#ff4747] scale-110 shadow-sm'
-              : 'text-gray-600 hover:text-[#ff4747] active:scale-95'
-          }`;
+            ? 'text-[#ff4747] scale-110 shadow-sm'
+            : 'text-gray-600 hover:text-[#ff4747] active:scale-95'
+            }`;
 
           if (item.isProductMenu) {
             return (
@@ -137,13 +138,13 @@ export default function MobileBottomNav({
             );
           }
 
-          if (item.isSearch) {
+          if (item.isCart) {
             return (
               <motion.button
-                key="search"
-                onClick={toggleMobileSearch}
+                key="cart"
+                onClick={onOpenCart}
                 className={buttonClasses}
-                aria-label={isMobileSearchOpen ? "Close search" : "Open search"}
+                aria-label="Open cart"
                 role="button"
                 whileTap={{ scale: 0.9 }}
                 initial={{ opacity: 0, y: 20 }}
@@ -151,15 +152,14 @@ export default function MobileBottomNav({
                 transition={{ delay: index * 0.1 }}
               >
                 <div className="flex flex-col items-center justify-center h-full">
-                  <motion.div
-                    animate={{ 
-                      rotate: isMobileSearchOpen ? 45 : 0,
-                      scale: isMobileSearchOpen ? 1.1 : 1
-                    }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Icon className="text-xl mb-1" />
-                  </motion.div>
+                  <div className="relative">
+                    <Icon className={`text-xl mb-1 transition-colors duration-200 ${isActiveRoute('/cart') || isCartOpen ? 'text-[#ff4747]' : 'text-gray-600'}`} />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 bg-[#ff4747] text-white text-[8px] font-bold h-3.5 min-w-[14px] px-1 rounded-full border border-white flex items-center justify-center shadow-sm">
+                        {cartCount > 99 ? '99+' : cartCount}
+                      </span>
+                    )}
+                  </div>
                   <span className="text-xs font-medium font-roboto text-center leading-tight">{item.label}</span>
                 </div>
               </motion.button>
