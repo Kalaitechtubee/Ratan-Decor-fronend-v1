@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Filter, Grid, List, X, Loader2, AlertCircle } from 'lucide-react';
+import { Filter, Grid, List, X, Loader2, AlertCircle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
 import ProductGrid, { ProductGridSkeleton } from '../components/ProductGrid';
@@ -80,6 +80,9 @@ function ProductPage() {
         if (urlParams.minDesignNumber) newFilters.minDesignNumber = urlParams.minDesignNumber;
         if (urlParams.maxDesignNumber) newFilters.maxDesignNumber = urlParams.maxDesignNumber;
         dispatch(setFilters(newFilters));
+        if (urlParams.page) {
+          dispatch(setPage(parseInt(urlParams.page)));
+        }
       }
       isFirstMountRef.current = false;
     }
@@ -94,7 +97,7 @@ function ProductPage() {
       page: currentPage,
       userType: activeUserType,
       userRole: storedUserRole,
-      limit: 12,
+      limit: 12, // Standardized limit
       categoryIds: filters.categoryIds || []
     };
   }, [filters, currentPage, userRole, getCurrentUserType]);
@@ -284,19 +287,10 @@ function ProductPage() {
       <div className="w-full px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Our Products</h1>
-          <div className="mt-2 flex items-center gap-4 text-sm text-gray-600">
-            <span>{status === 'loading' ? 'Loading...' : `${count.toLocaleString()} products found`}</span>
-            {appliedFiltersCount > 0 && (
-              <span className="px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
-                {appliedFiltersCount} filter{appliedFiltersCount > 1 ? 's' : ''} applied
-              </span>
-            )}
-            <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-md text-xs">
-              User Type: {getCurrentUserType()}
-            </span>
-          </div>
         </div>
+      </div>
 
+      <div className="w-full px-4 sm:px-6 lg:px-8 pb-12">
         <div className="flex gap-8 relative">
           <div className="hidden lg:block w-full lg:w-1/4">
             <AdvancedProductFilters
@@ -331,9 +325,10 @@ function ProductPage() {
                     <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
                     <button
                       onClick={() => setShowMobileFilters(false)}
-                      className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-full transition-all duration-200 active:scale-95"
                     >
-                      <X className="w-5 h-5 text-gray-600" />
+                      <span className="text-sm font-medium">Close</span>
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
                   <div className="p-4">
@@ -361,14 +356,16 @@ function ProductPage() {
                 {status === 'loading' ? (
                   <span className="flex items-center">
                     <Loader2 className="w-4 h-4 animate-spin mr-2 text-primary" />
-                    Loading...
+                    Loading products...
                   </span>
                 ) : status === 'failed' ? (
                   <span className="flex items-center text-red-500">
-                    <AlertCircle className="w-4 h-4 mr-2" /> Failed to load
+                    <AlertCircle className="w-4 h-4 mr-2" /> Failed to load products
                   </span>
                 ) : (
-                  `${count.toLocaleString()} products found`
+                  <span className="text-gray-600 font-medium">
+                    {count === 0 && 'No products found'}
+                  </span>
                 )}
               </span>
               <div className="flex items-center space-x-4">
@@ -423,75 +420,118 @@ function ProductPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="mt-8 flex justify-center"
+                className="mt-16 flex flex-col items-center gap-6 pb-12"
               >
-                <div className="flex items-center space-x-2 bg-white rounded-lg border border-gray-200 p-2">
+                <div className="flex items-center gap-2">
+                  {/* First Page */}
+                  <button
+                    onClick={() => handlePageChange(1)}
+                    disabled={currentPage === 1}
+                    className="hidden sm:flex p-2.5 rounded-xl border border-gray-200 bg-white text-gray-400 hover:text-primary hover:border-primary/30 hover:bg-primary/5 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
+                    title="First Page"
+                  >
+                    <ChevronsLeft className="w-5 h-5" />
+                  </button>
+
+                  {/* Previous Page */}
                   <button
                     onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    className="px-3 py-2 text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
-                    aria-label="Previous page"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:text-primary hover:border-primary/30 hover:bg-primary/5 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 shadow-sm group"
                   >
-                    Previous
+                    <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-0.5" />
+                    <span className="hidden md:inline text-sm font-semibold">Previous</span>
                   </button>
-                  {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
-                    let pageNum = currentPage <= 4 ? i + 1 : currentPage >= totalPages - 3 ? totalPages - 6 + i : currentPage - 3 + i;
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => handlePageChange(pageNum)}
-                        className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${currentPage === pageNum ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'
-                          }`}
-                        aria-label={`Page ${pageNum}`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
+
+                  {/* Page Numbers */}
+                  <div className="flex items-center gap-1.5 mx-2">
+                    {(() => {
+                      const pages = [];
+                      const maxVisible = window.innerWidth < 640 ? 3 : 5;
+
+                      if (totalPages <= maxVisible) {
+                        for (let i = 1; i <= totalPages; i++) pages.push(i);
+                      } else {
+                        if (currentPage <= 3) {
+                          for (let i = 1; i <= 4; i++) pages.push(i);
+                          pages.push('...');
+                          pages.push(totalPages);
+                        } else if (currentPage >= totalPages - 2) {
+                          pages.push(1);
+                          pages.push('...');
+                          for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
+                        } else {
+                          pages.push(1);
+                          pages.push('...');
+                          pages.push(currentPage - 1);
+                          pages.push(currentPage);
+                          pages.push(currentPage + 1);
+                          pages.push('...');
+                          pages.push(totalPages);
+                        }
+                      }
+
+                      return pages.map((page, index) => {
+                        if (page === '...') {
+                          return (
+                            <span key={`dots-${index}`} className="w-10 text-center text-gray-400 font-medium">
+                              ...
+                            </span>
+                          );
+                        }
+
+                        const isActive = currentPage === page;
+                        return (
+                          <button
+                            key={page}
+                            onClick={() => handlePageChange(page)}
+                            className={`min-w-[42px] h-[42px] flex items-center justify-center text-sm font-bold rounded-xl transition-all duration-300 ${isActive
+                              ? 'bg-primary text-white shadow-xl shadow-primary/20 scale-110 ring-2 ring-primary ring-offset-2'
+                              : 'bg-white text-gray-600 border border-gray-200 hover:border-primary/30 hover:text-primary hover:bg-primary/5 shadow-sm'
+                              }`}
+                            aria-label={`Page ${page}`}
+                            aria-current={isActive ? 'page' : undefined}
+                          >
+                            {page}
+                          </button>
+                        );
+                      });
+                    })()}
+                  </div>
+
+                  {/* Next Page */}
                   <button
                     onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-2 text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
-                    aria-label="Next page"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:text-primary hover:border-primary/30 hover:bg-primary/5 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 shadow-sm group"
                   >
-                    Next
+                    <span className="hidden md:inline text-sm font-semibold">Next</span>
+                    <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-0.5" />
+                  </button>
+
+                  {/* Last Page */}
+                  <button
+                    onClick={() => handlePageChange(totalPages)}
+                    disabled={currentPage === totalPages}
+                    className="hidden sm:flex p-2.5 rounded-xl border border-gray-200 bg-white text-gray-400 hover:text-primary hover:border-primary/30 hover:bg-primary/5 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
+                    title="Last Page"
+                  >
+                    <ChevronsRight className="w-5 h-5" />
                   </button>
                 </div>
+
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-widest leading-none">
+                  Page {currentPage} of {totalPages}
+                </p>
               </motion.div>
             )}
 
-            {status === 'succeeded' && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="mt-6 bg-white rounded-lg border border-gray-200 p-4"
-              >
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                  <div>
-                    <div className="text-2xl font-bold text-primary">{count}</div>
-                    <div className="text-xs text-gray-500">Current Results</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-green-600">{activeCount}</div>
-                    <div className="text-xs text-gray-500">Active Products</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-gray-400">{inactiveCount}</div>
-                    <div className="text-xs text-gray-500">Inactive Products</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-blue-600">{totalCount}</div>
-                    <div className="text-xs text-gray-500">Total Products</div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
+
           </div>
         </div>
       </div>
       <Footer />
-    </div>
+    </div >
   );
 }
 

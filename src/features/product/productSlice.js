@@ -33,7 +33,7 @@ export const fetchProducts = createDedupedThunk(
   'products/fetchProducts',
   async ({
     page = 1,
-    limit = 8,
+    limit = 12,
     userType,
     userRole,
     categoryIds, // Changed from categoryId to categoryIds (array)

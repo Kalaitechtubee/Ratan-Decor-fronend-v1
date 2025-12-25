@@ -8,7 +8,7 @@ import { slugify } from '../../../utils/utils';
 import toast from 'react-hot-toast';
 import VideoCallPopup from '../../../components/Home/VideoCallPopup';
 
-function EnhancedProductCard({ product, viewMode = 'grid' }) {
+export default function EnhancedProductCard({ product, viewMode = 'grid' }) {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { cart, addToCart: addToCartContext, cartLoading } = useCart();
@@ -24,10 +24,25 @@ function EnhancedProductCard({ product, viewMode = 'grid' }) {
       JSON.stringify(product.specifications || {})
   );
 
-  const price = product.price;
+  const { user } = useAuth();
+  const userType = user?.userType || localStorage.getItem('userType') || 'General';
+
+  const getPrice = () => {
+    switch (userType?.toLowerCase()) {
+      case 'architect':
+        return product.architectPrice || product.price;
+      case 'dealer':
+        return product.dealerPrice || product.price;
+      case 'commercial':
+        return product.generalPrice || product.price;
+      default:
+        return product.price;
+    }
+  };
+
+  const currentPrice = getPrice();
   const imageUrls = product.imageUrls || [];
 
-  // ⭐ Updated logic — Redirect to Register page
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
       toast.error("Please create an account before adding items to cart", {
@@ -74,73 +89,79 @@ function EnhancedProductCard({ product, viewMode = 'grid' }) {
               loading="lazy"
             />
           </div>
-          {/* OVERLAY */}
-          <div className="absolute inset-0 bg-black/0 transition-all duration-300 group-hover:bg-black/20 flex flex-col">
-            {/* SHOP ON CALL (VIDEO) */}
-            <button
-              onClick={handleOpenPopup}
-              aria-label="Start Video Call"
-              className="absolute top-2 right-2 transform translate-y-4 opacity-0
+
+          {/* OVERLAY - Completely hidden in list view as requested */}
+          {viewMode !== 'list' && (
+            <div className="absolute inset-0 bg-black/0 transition-all duration-300 group-hover:bg-black/20 flex flex-col">
+              {/* SHOP ON CALL (VIDEO) */}
+              <button
+                onClick={handleOpenPopup}
+                aria-label="Start Video Call"
+                className="absolute top-2 right-2 transform translate-y-4 opacity-0
                          group-hover:translate-y-0 group-hover:opacity-100 transition-all
                          duration-300 flex items-center space-x-2 px-3 py-1.5 rounded-full
                          font-medium bg-white/90 hover:bg-white text-gray-900 shadow-lg text-sm"
-            >
-              <Video className="w-4 h-4" />
-              <span>Shop on Call</span>
-            </button>
-            {/* CALL & WHATSAPP */}
-            <div
-              className="absolute bottom-3 left-3 flex flex-col items-start space-y-2
+              >
+                <Video className="w-4 h-4" />
+                <span>Shop on Call</span>
+              </button>
+
+              {/* CALL & WHATSAPP */}
+              <div
+                className="absolute bottom-3 left-3 flex flex-col items-start space-y-2
                          transform translate-x-[-20px] opacity-0
                          group-hover:opacity-100 group-hover:translate-x-0
                          transition-all duration-300"
-            >
-              {/* CALL */}
-              <a
-                href="tel:+919876543210"
-                aria-label="Call Now"
-                className="flex items-center space-x-2 px-3 py-1.5 rounded-full
+              >
+                {/* CALL */}
+                <a
+                  href="tel:+919876543210"
+                  aria-label="Call Now"
+                  className="flex items-center space-x-2 px-3 py-1.5 rounded-full
                            bg-white/90 hover:bg-white shadow-lg text-gray-900
                            text-sm font-medium"
-              >
-                <Phone className="w-4 h-4" />
-                <span>Call Now</span>
-              </a>
-              {/* WHATSAPP */}
-              <a
-                href={`https://wa.me/919884000000?text=Hi,%20I%20want%20to%20know%20more%20about%20${encodeURIComponent(
-                  product.name
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="WhatsApp Chat"
-                className="flex items-center space-x-2 px-3 py-1.5 rounded-full
+                >
+                  <Phone className="w-4 h-4" />
+                  <span>Call Now</span>
+                </a>
+                {/* WHATSAPP */}
+                <a
+                  href={`https://wa.me/919884000000?text=Hi,%20I%20want%20to%20know%20more%20about%20${encodeURIComponent(
+                    product.name
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="WhatsApp Chat"
+                  className="flex items-center space-x-2 px-3 py-1.5 rounded-full
                            bg-[#25D366]/90 hover:bg-[#25D366] shadow-lg text-white
                            text-sm font-medium"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>WhatsApp</span>
-              </a>
-            </div>
-            {/* ADD TO CART (CENTER BUTTON) */}
-            <div className="flex-grow flex items-center justify-center">
-              <button
-                aria-label="Add to Cart"
-                className={`transform translate-y-4 opacity-0 group-hover:translate-y-0
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>WhatsApp</span>
+                </a>
+              </div>
+
+              {/* ADD TO CART (CENTER BUTTON) */}
+              <div className="flex-grow flex items-center justify-center">
+                <button
+                  aria-label="Add to Cart"
+                  className={`transform translate-y-4 opacity-0 group-hover:translate-y-0
                             group-hover:opacity-100 transition-all duration-300
                             flex items-center space-x-2 px-4 py-2 rounded-full font-medium ${isInCart || cartLoading
-                    ? 'bg-gray-500/90 cursor-not-allowed text-white'
-                    : 'bg-[#ff4747]/90 hover:bg-[#ff4747] text-white shadow-lg'
-                  }`}
-                onClick={isInCart || cartLoading ? null : handleAddToCart}
-                disabled={isInCart || cartLoading}
-              >
-                <ShoppingBag className="w-4 h-4" />
-                <span>{cartLoading ? 'Adding...' : isInCart ? 'Added' : 'Add to Cart'}</span>
-              </button>
+                      ? 'bg-gray-500/90 cursor-not-allowed text-white'
+                      : 'bg-[#ff4747]/90 hover:bg-[#ff4747] text-white shadow-lg'
+                    }`}
+                  onClick={isInCart || cartLoading ? null : handleAddToCart}
+                  disabled={isInCart || cartLoading}
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  <span>{cartLoading ? 'Adding...' : isInCart ? 'Added' : 'Add to Cart'}</span>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
+
         {/* PRODUCT INFO */}
         <div
           className={`flex flex-col flex-grow py-4 px-5 ${viewMode === 'list' ? 'text-left justify-center' : 'pt-3 pb-2 text-center'
@@ -162,14 +183,17 @@ function EnhancedProductCard({ product, viewMode = 'grid' }) {
               </div>
             )}
           </div>
+
           <div className={`flex flex-col mt-auto ${viewMode === 'list' ? 'items-start' : 'items-center'}`}>
             <div className={`flex items-baseline space-x-1 ${viewMode === 'list' ? 'mb-4' : 'justify-center'}`}>
-              <span className="text-xl font-bold text-gray-900">₹{price.toLocaleString()}</span>
+              <span className="text-xl font-bold text-gray-900">₹{Number(currentPrice).toLocaleString()}</span>
               <span className="text-sm text-gray-500 font-medium">/ {product.unitType || 'Per Sheet'}</span>
             </div>
+
             {/* ACTION BUTTONS FOR LIST VIEW */}
             {viewMode === 'list' && (
               <div className="hidden md:flex items-center space-x-3">
+                {/* ADD TO CART */}
                 <button
                   aria-label="Add to Cart"
                   className={`flex items-center space-x-2 px-6 py-2.5 rounded-lg font-medium transition-all shadow-sm ${isInCart || cartLoading
@@ -182,6 +206,17 @@ function EnhancedProductCard({ product, viewMode = 'grid' }) {
                   <ShoppingBag className="w-4.5 h-4.5" />
                   <span>{cartLoading ? 'Adding...' : isInCart ? 'Added to Cart' : 'Add to Cart'}</span>
                 </button>
+
+                {/* SHOP ON CALL (VIDEO) - MOVED INSIDE FOR LIST VIEW */}
+                <button
+                  onClick={handleOpenPopup}
+                  className="flex items-center space-x-2 px-4 py-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 transition-colors font-medium text-sm"
+                >
+                  <Video className="w-4 h-4 text-primary" />
+                  <span>Shop on Call</span>
+                </button>
+
+                {/* CALL */}
                 <a
                   href="tel:+919876543210"
                   className="flex items-center space-x-2 px-4 py-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 transition-colors font-medium text-sm"
@@ -189,6 +224,8 @@ function EnhancedProductCard({ product, viewMode = 'grid' }) {
                   <Phone className="w-4 h-4 text-primary" />
                   <span>Call</span>
                 </a>
+
+                {/* WHATSAPP */}
                 <a
                   href={`https://wa.me/919884000000?text=Hi,%20I%20want%20to%20know%20more%20about%20${encodeURIComponent(
                     product.name
@@ -202,20 +239,48 @@ function EnhancedProductCard({ product, viewMode = 'grid' }) {
                 </a>
               </div>
             )}
-            {/* MOBILE ADD BUTTON */}
-            <button
-              aria-label="Add to Cart (Mobile)"
-              className={`md:hidden flex items-center space-x-1 px-3 py-1.5 rounded-lg
-                          text-sm font-medium transition-colors mt-2 ${isInCart || cartLoading
-                  ? 'bg-gray-400 cursor-not-allowed text-white'
-                  : 'bg-[#ff4747] hover:bg-[#e63e3e] text-white'
-                }`}
-              onClick={isInCart || cartLoading ? null : handleAddToCart}
-              disabled={isInCart || cartLoading}
-            >
-              <ShoppingBag className="w-4 h-4" />
-              <span>{cartLoading ? 'Adding...' : isInCart ? 'Added' : 'Add'}</span>
-            </button>
+
+            {/* MOBILE ACTION BUTTONS FOR LIST VIEW */}
+            {viewMode === 'list' && (
+              <div className="md:hidden flex flex-wrap gap-2 mt-3">
+                <button
+                  aria-label="Add to Cart (Mobile)"
+                  className={`flex items-center space-x-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${isInCart || cartLoading
+                    ? 'bg-gray-400 cursor-not-allowed text-white'
+                    : 'bg-[#ff4747] hover:bg-[#e63e3e] text-white'
+                    }`}
+                  onClick={isInCart || cartLoading ? null : handleAddToCart}
+                  disabled={isInCart || cartLoading}
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  <span>{cartLoading ? 'Adding...' : isInCart ? 'Added' : 'Add'}</span>
+                </button>
+                <button
+                  onClick={handleOpenPopup}
+                  className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium"
+                >
+                  <Video className="w-4 h-4" />
+                  <span>Video Call</span>
+                </button>
+              </div>
+            )}
+
+            {/* MOBILE ADD BUTTON FOR NON-LIST VIEW */}
+            {viewMode !== 'list' && (
+              <button
+                aria-label="Add to Cart (Mobile)"
+                className={`md:hidden flex items-center space-x-1 px-3 py-1.5 rounded-lg
+                            text-sm font-medium transition-colors mt-2 ${isInCart || cartLoading
+                    ? 'bg-gray-400 cursor-not-allowed text-white'
+                    : 'bg-[#ff4747] hover:bg-[#e63e3e] text-white'
+                  }`}
+                onClick={isInCart || cartLoading ? null : handleAddToCart}
+                disabled={isInCart || cartLoading}
+              >
+                <ShoppingBag className="w-4 h-4" />
+                <span>{cartLoading ? 'Adding...' : isInCart ? 'Added' : 'Add'}</span>
+              </button>
+            )}
           </div>
         </div>
       </motion.div>
@@ -224,5 +289,3 @@ function EnhancedProductCard({ product, viewMode = 'grid' }) {
     </>
   );
 }
-
-export default EnhancedProductCard;

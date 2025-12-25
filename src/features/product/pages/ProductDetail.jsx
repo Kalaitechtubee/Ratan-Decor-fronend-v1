@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Box, Mail, Star, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Box, Mail, Star, ArrowRight, Home } from 'lucide-react';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { useCart } from '../../cart/context/CartContext';
 import { fetchProduct } from '../productSlice';
@@ -11,6 +11,7 @@ import { currencyINR } from '../../../utils/utils';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
 import EnquiryForm from './EnquiryForm';
+import CategorySpotlight from '../components/CategorySpotlight';
 import { normalizeImageUrl } from '../../../utils/imageUtils';
 
 // ErrorBoundary and ImageGallery components remain unchanged
@@ -64,11 +65,8 @@ const ImageGallery = ({ images, productName, onQuickOrder }) => {
           loading="eager"
         />
         <div className="absolute top-4 left-4 flex flex-col space-y-2">
-          <span className="px-3 py-1 text-xs font-semibold text-white bg-primary rounded-full font-poppins shadow-sm">
-            NEW
-          </span>
           {images.length > 1 && (
-            <span className="px-3 py-1 text-xs font-semibold text-white bg-gray-800 rounded-full font-poppins shadow-sm">
+            <span className="px-3 py-1 text-xs font-semibold text-white bg-gray-800/80 backdrop-blur-sm rounded-full font-poppins shadow-sm">
               {images.length} IMAGES
             </span>
           )}
@@ -76,20 +74,20 @@ const ImageGallery = ({ images, productName, onQuickOrder }) => {
         <AnimatePresence>
           {isHovered && (
             <motion.div
-              initial={{ opacity: 0, y: 30, scale: 0.8 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 30, scale: 0.8 }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10"
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 10 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 flex items-center justify-center p-4 bg-black/5"
             >
               <motion.button
                 onClick={onQuickOrder}
-                className="flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-red-600 text-white px-6 py-3 rounded-full font-poppins font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-300"
-                whileHover={{ scale: 1.1, boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)" }}
+                className="flex items-center gap-2 bg-white/95 backdrop-blur-sm text-gray-900 px-6 py-3 rounded-xl font-poppins font-bold text-sm shadow-xl border border-gray-100"
+                whileHover={{ scale: 1.05, backgroundColor: '#ffffff' }}
                 whileTap={{ scale: 0.95 }}
                 aria-label="Quick order"
               >
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-5 h-5 text-primary" />
                 <span>Quick Order</span>
               </motion.button>
             </motion.div>
@@ -104,11 +102,10 @@ const ImageGallery = ({ images, productName, onQuickOrder }) => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setSelectedImage(index)}
-              className={`flex-shrink-0 w-20 h-20 rounded-lg border-2 transition-all duration-200 overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary ${
-                selectedImage === index
-                  ? 'border-primary shadow-md'
-                  : 'border-gray-200 hover:border-primary'
-              }`}
+              className={`flex-shrink-0 w-20 h-20 rounded-lg border-2 transition-all duration-200 overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary ${selectedImage === index
+                ? 'border-primary shadow-md'
+                : 'border-gray-200 hover:border-primary'
+                }`}
               aria-label={`Select image ${index + 1}`}
             >
               <img
@@ -124,16 +121,47 @@ const ImageGallery = ({ images, productName, onQuickOrder }) => {
   );
 };
 
-const Breadcrumb = ({ productName }) => (
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 font-poppins">
-    <nav className="flex items-center space-x-2 text-sm text-gray-600" aria-label="Breadcrumb">
-      <Link to="/" className="hover:text-primary transition-colors duration-200">Home</Link>
-      <span className="text-gray-400">/</span>
-      <Link to="/products" className="hover:text-primary transition-colors duration-200">Products</Link>
-      <span className="text-gray-400">/</span>
-      <span className="text-gray-900 truncate max-w-[250px] font-medium">{productName}</span>
-    </nav>
-  </div>
+const Breadcrumb = ({ productName, category, designNumber }) => (
+  <nav className="flex flex-wrap items-center gap-2 text-base text-gray-600 font-poppins" aria-label="Breadcrumb">
+    <Link to="/" className="hover:text-primary transition-colors duration-200 flex items-center gap-1.5 flex-shrink-0">
+      <Home className="w-4 h-4" />
+      <span>Home</span>
+    </Link>
+
+    {/* Main Category */}
+    {category && category.parent && (
+      <>
+        <span className="text-gray-400 font-light">»</span>
+        <Link
+          to={`/products?categoryId=${category.parent.id}&categoryName=${encodeURIComponent(category.parent.name)}`}
+          className="hover:text-primary transition-colors duration-200 flex-shrink-0"
+        >
+          {category.parent.name}
+        </Link>
+      </>
+    )}
+
+    {/* Current Category (either Subcategory or Main Category) */}
+    {category && (
+      <>
+        <span className="text-gray-400 font-light">»</span>
+        <Link
+          to={`/products?${category.parent ? 'subcategoryId' : 'categoryId'}=${category.id}&categoryName=${encodeURIComponent(category.name)}`}
+          className="hover:text-primary transition-colors duration-200 flex-shrink-0"
+        >
+          {category.name}
+        </Link>
+      </>
+    )}
+
+    {/* Design Number */}
+    {designNumber && designNumber !== 'N/A' && (
+      <>
+        <span className="text-gray-400 font-light">»</span>
+        <span className="text-primary font-bold flex-shrink-0">{designNumber}</span>
+      </>
+    )}
+  </nav>
 );
 
 function ProductDetail() {
@@ -328,22 +356,29 @@ function ProductDetail() {
   return (
     <div className="min-h-screen bg-gray-50 font-roboto">
       <Navbar />
-      <Breadcrumb productName={product.name} />
       <motion.main
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="pt-4 pb-16"
+        className="pb-16"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between mb-6">
-            <span className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary bg-primary/10 rounded-full font-poppins">
-              Product Details
-            </span>
-            <div className="hidden sm:block">
-              <Breadcrumb productName={product.name} />
+        {/* Premium Header Section */}
+        <div className="mb-2 pt-24 lg:pt-28 pb-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="mb-6">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 font-title uppercase tracking-tight leading-tight inline-block border-b-2 border-gray-900 pb-2">
+                {product.name}
+              </h1>
             </div>
+            <Breadcrumb
+              productName={product.name}
+              category={product.category}
+              designNumber={product.designNumber}
+            />
           </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             <motion.div
               initial={{ opacity: 0, x: -50 }}
@@ -351,9 +386,9 @@ function ProductDetail() {
               transition={{ duration: 0.6 }}
               className="lg:sticky lg:top-20"
             >
-              <ImageGallery 
-                images={uniqueImageUrls} 
-                productName={product.name} 
+              <ImageGallery
+                images={uniqueImageUrls}
+                productName={product.name}
                 onQuickOrder={handleQuickOrder}
               />
             </motion.div>
@@ -396,30 +431,27 @@ function ProductDetail() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 mb-6">
-                  <span className="text-2xl font-title font-bold text-gray-900">{currencyINR(getPrice())} /{product.unitType || 'Per Sheet'}</span>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
                   {product.mrpPrice && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl text-gray-500 line-through font-poppins">{currencyINR(product.mrpPrice)}</span>
-                      <span className="text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-lg font-poppins">
-                        Save {currencyINR(product.mrpPrice - getPrice())} ({discountPercentage}% OFF)
-                      </span>
-                    </div>
+                    <span className="text-lg text-gray-400 line-through font-poppins shrink-0">
+                      {currencyINR(product.mrpPrice)}
+                    </span>
+                  )}
+                  <div className="flex items-baseline whitespace-nowrap">
+                    <span className="text-xl sm:text-2xl font-title font-bold text-gray-900">
+                      {currencyINR(getPrice())}
+                    </span>
+                    <span className="text-sm sm:text-base font-medium text-gray-500 ml-1">
+                      /{product.unitType || 'Per Sheet'}
+                    </span>
+                  </div>
+                  {product.mrpPrice && (
+                    <span className="inline-flex items-center text-xs sm:text-sm font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-lg font-poppins shrink-0">
+                      {discountPercentage}% OFF
+                    </span>
                   )}
                 </div>
-                <div className="flex flex-wrap gap-2 mb-6">
-                  <span className="text-sm bg-gray-100 text-gray-700 px-3 py-1 rounded-full font-poppins">
-                    {product.category?.name || 'Uncategorized'}
-                  </span>
-                  {product.colors && product.colors.length > 0 && product.colors.map((color, index) => (
-                    <span
-                      key={index}
-                      className="text-sm bg-gray-100 text-gray-700 px-3 py-1 rounded-full font-poppins"
-                    >
-                      {color}
-                    </span>
-                  ))}
-                </div>
+                {/* Category and Color tags removed */}
               </div>
               <div className="flex items-center gap-4 pt-4 border-t border-gray-200">
                 <span className="text-sm font-medium text-gray-700 font-title">Quantity:</span>
@@ -446,12 +478,12 @@ function ProductDetail() {
                   </button>
                 </div>
               </div>
-              <div className="space-y-3 pt-4 border-t border-gray-200">
+              <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
                 <motion.button
-                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-red-600 text-white px-5 py-2.5 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-poppins font-medium text-sm shadow-md hover:shadow-lg"
+                  className="flex-1 flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl hover:bg-red-600 transition-all duration-200 font-poppins font-semibold text-sm shadow-sm hover:shadow-md"
                   onClick={handleAddToCart}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   aria-label="Add to cart"
                 >
                   <ShoppingBag className="w-4 h-4" />
@@ -459,9 +491,9 @@ function ProductDetail() {
                 </motion.button>
                 <motion.button
                   onClick={() => setShowEnquiryModal(true)}
-                  className="w-full flex items-center justify-center gap-2 text-primary font-semibold px-5 py-2.5 rounded-lg transition-all duration-200 font-poppins font-medium text-sm border-2 border-primary hover:bg-gradient-to-r hover:from-primary hover:to-red-600 hover:text-white shadow-md hover:shadow-lg"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  className="flex-1 flex items-center justify-center gap-2 text-gray-700 bg-white border border-gray-200 px-6 py-3 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 font-poppins font-semibold text-sm shadow-sm hover:shadow-md"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   aria-label="Send enquiry"
                 >
                   <Mail className="w-4 h-4" />
@@ -496,6 +528,7 @@ function ProductDetail() {
           </ErrorBoundary>
         )}
       </AnimatePresence>
+      <CategorySpotlight />
       <Footer />
     </div>
   );

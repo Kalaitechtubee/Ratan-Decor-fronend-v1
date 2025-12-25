@@ -10,7 +10,6 @@ import {
   Phone,
   Calendar,
   FileText,
-  Copy,
   Eye,
   ShoppingBag,
   AlertCircle,
@@ -33,9 +32,6 @@ const OrderDetails = () => {
   const [selectedProductImage, setSelectedProductImage] = useState({});
   const [showImageModal, setShowImageModal] = useState(false);
   const [modalImage, setModalImage] = useState('');
-  const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [cancelLoading, setCancelLoading] = useState(false);
-  const [cancelReason, setCancelReason] = useState('');
 
   const hasFetched = useRef(false);
 
@@ -130,22 +126,27 @@ const OrderDetails = () => {
 
   const getTrackingSteps = (status) => {
     const steps = [
-      { id: 1, name: 'Order Placed', status: 'completed', icon: ShoppingBag },
-      { id: 2, name: 'Processing', status: 'pending', icon: Package },
-      { id: 3, name: 'Shipped', status: 'pending', icon: Truck },
-      { id: 4, name: 'Completed', status: 'pending', icon: CheckCircle },
+      { id: 1, name: 'Order Placed', icon: ShoppingBag },
+      { id: 2, name: 'Pending', icon: Clock },
+      { id: 3, name: 'Processing', icon: Package },
+      { id: 4, name: 'Shipped', icon: Truck },
+      { id: 5, name: 'Completed', icon: CheckCircle },
     ];
-    const statusMap = { pending: 1, processing: 2, shipped: 3, completed: 4 };
-    const currentStep = statusMap[status?.toLowerCase()] || 1;
-    return steps.map((step) => ({
-      ...step,
-      status:
-        step.id <= currentStep
-          ? 'completed'
-          : step.id === currentStep + 1
-          ? 'current'
-          : 'pending',
-    }));
+    const s = status?.toLowerCase();
+    const statusMap = { pending: 2, processing: 3, shipped: 4, completed: 5 };
+    const currentStep = statusMap[s] || 1;
+
+    return steps.map((step) => {
+      let stepStatus = 'pending';
+      if (s === 'completed') {
+        stepStatus = 'completed';
+      } else if (step.id < currentStep) {
+        stepStatus = 'completed';
+      } else if (step.id === currentStep) {
+        stepStatus = 'current';
+      }
+      return { ...step, status: stepStatus };
+    });
   };
 
   const handleImageClick = (imageUrl) => {
@@ -153,47 +154,14 @@ const OrderDetails = () => {
     setShowImageModal(true);
   };
 
-  const handleCopyOrderId = () => {
-    navigator.clipboard.writeText(order?.id || '');
-    console.log('OrderDetails: Order ID copied to clipboard', { orderId: order?.id });
-  };
+
 
   const handleViewProduct = (productId) => {
     console.log('OrderDetails: Navigating to product ID:', productId);
     navigate(`/products/${productId}`);
   };
 
-  const canCancelOrder = (status) => {
-    const cancellableStatuses = ['pending', 'processing'];
-    return cancellableStatuses.includes(status?.toLowerCase());
-  };
 
-  const handleCancelOrder = async () => {
-    if (!order) return;
-    if (!cancelReason.trim()) {
-      console.error('OrderDetails: Cancellation failed - no reason provided');
-      return;
-    }
-    setCancelLoading(true);
-    try {
-      const response = await OrderAPI.cancelOrder(order.id, cancelReason);
-      if (response.success) {
-        console.log('OrderDetails: Order cancelled successfully', { orderId: order.id, reason: cancelReason });
-        setOrder((prev) => ({ ...prev, status: 'cancelled' }));
-        setShowCancelDialog(false);
-        setCancelReason('');
-      } else {
-        throw new Error(response.message || 'Failed to cancel order');
-      }
-    } catch (err) {
-      console.error('OrderDetails: Failed to cancel order', {
-        orderId: order.id,
-        error: err.message || 'Unknown error',
-      });
-    } finally {
-      setCancelLoading(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -217,8 +185,8 @@ const OrderDetails = () => {
               {error?.includes('permission')
                 ? 'Access Denied'
                 : error?.includes('not found')
-                ? 'Order Not Found'
-                : 'Error'}
+                  ? 'Order Not Found'
+                  : 'Error'}
             </h2>
             <p className='text-gray-600 mb-6'>
               {error ||
@@ -276,22 +244,6 @@ const OrderDetails = () => {
             </div>
           </div>
           <div className='flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-3'>
-            <button
-              onClick={handleCopyOrderId}
-              className='flex items-center px-4 py-2 text-gray-600 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition-colors text-sm sm:text-base w-full sm:w-auto'
-            >
-              <Copy className='mr-2 w-4 h-4' />
-              Copy ID
-            </button>
-            {canCancelOrder(order.status) && (
-              <button
-                onClick={() => setShowCancelDialog(true)}
-                className='flex items-center px-4 py-2 text-white bg-red-500 rounded-lg shadow-sm hover:bg-red-600 transition-colors text-sm sm:text-base w-full sm:w-auto'
-              >
-                <AlertCircle className='mr-2 w-4 h-4' />
-                Cancel Order
-              </button>
-            )}
             <span
               className={`inline-flex items-center px-4 py-2 rounded-lg border font-medium ${getStatusColor(
                 order.status
@@ -319,25 +271,23 @@ const OrderDetails = () => {
                     return (
                       <div key={step.id} className='relative flex items-center'>
                         <div
-                          className={`relative z-10 flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 ${
-                            step.status === 'completed'
-                              ? 'bg-green-500 border-green-500 text-white'
-                              : step.status === 'current'
+                          className={`relative z-10 flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 ${step.status === 'completed'
+                            ? 'bg-green-500 border-green-500 text-white'
+                            : step.status === 'current'
                               ? 'bg-primary border-primary text-white animate-pulse'
                               : 'bg-white border-gray-300 text-gray-400'
-                          }`}
+                            }`}
                         >
                           <Icon className='w-3 h-3 sm:w-4 sm:h-4' />
                         </div>
                         <div className='ml-4'>
                           <p
-                            className={`font-medium ${
-                              step.status === 'completed'
-                                ? 'text-green-600'
-                                : step.status === 'current'
+                            className={`font-medium ${step.status === 'completed'
+                              ? 'text-green-600'
+                              : step.status === 'current'
                                 ? 'text-primary'
                                 : 'text-gray-400'
-                            } text-sm sm:text-base`}
+                              } text-sm sm:text-base`}
                           >
                             {step.name}
                           </p>
@@ -509,10 +459,6 @@ const OrderDetails = () => {
                     </span>
                   </div>
                 )}
-                <div className='flex justify-between text-sm'>
-                  <span className='text-gray-600'>Shipping</span>
-                  <span className='text-green-600'>Free</span>
-                </div>
                 <div className='border-t border-gray-200 pt-2 sm:pt-3'>
                   <div className='flex justify-between font-semibold text-base sm:text-lg'>
                     <span className='text-gray-900'>Total</span>
@@ -559,13 +505,12 @@ const OrderDetails = () => {
                       Payment Status
                     </p>
                     <p
-                      className={`text-xs sm:text-sm ${
-                        order.paymentStatus === 'Approved'
-                          ? 'text-green-600'
-                          : order.paymentStatus === 'Rejected'
+                      className={`text-xs sm:text-sm ${order.paymentStatus === 'Received'
+                        ? 'text-green-600'
+                        : order.paymentStatus === 'Not Received'
                           ? 'text-red-600'
                           : 'text-yellow-600'
-                      }`}
+                        }`}
                     >
                       {order.paymentStatus || 'N/A'}
                     </p>
@@ -705,74 +650,7 @@ const OrderDetails = () => {
           )}
         </AnimatePresence>
 
-        {/* Cancel Order Confirmation Modal */}
-        <AnimatePresence>
-          {showCancelDialog && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-2 sm:p-4'
-              onClick={() => setShowCancelDialog(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                className='bg-white rounded-xl shadow-xl max-w-[90%] sm:max-w-md w-full mx-2 sm:mx-4'
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className='p-4 sm:p-6'>
-                  <div className='flex items-center mb-3 sm:mb-4'>
-                    <AlertCircle className='w-5 h-5 sm:w-6 sm:h-6 text-red-500 mr-2 sm:mr-3' />
-                    <h3 className='text-lg font-semibold text-gray-900'>
-                      Cancel Order
-                    </h3>
-                  </div>
-                  <p className='text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base'>
-                    Are you sure you want to cancel this order? This action cannot be undone.
-                  </p>
-                  <div className='mb-3 sm:mb-4'>
-                    <label className='block text-sm font-medium text-gray-700 mb-1 sm:mb-2'>
-                      Reason for cancellation *
-                    </label>
-                    <textarea
-                      value={cancelReason}
-                      onChange={(e) => setCancelReason(e.target.value)}
-                      placeholder='Please provide a reason for cancelling this order...'
-                      className='w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none text-sm sm:text-base'
-                      rows={3}
-                      required
-                    />
-                  </div>
-                  <div className='flex space-x-2 sm:space-x-3'>
-                    <button
-                      onClick={() => setShowCancelDialog(false)}
-                      className='flex-1 px-2 sm:px-4 py-1 sm:py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-sm sm:text-base'
-                      disabled={cancelLoading}
-                    >
-                      Keep Order
-                    </button>
-                    <button
-                      onClick={handleCancelOrder}
-                      disabled={cancelLoading || !cancelReason.trim()}
-                      className='flex-1 px-2 sm:px-4 py-1 sm:py-2 text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:bg-red-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center text-sm sm:text-base'
-                    >
-                      {cancelLoading ? (
-                        <>
-                          <div className='animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-t-2 border-b-2 border-white mr-1 sm:mr-2'></div>
-                          Cancelling...
-                        </>
-                      ) : (
-                        'Cancel Order'
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+
       </motion.div>
       <Footer />
     </div>

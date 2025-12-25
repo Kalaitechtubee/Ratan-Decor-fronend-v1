@@ -445,12 +445,6 @@ export default function AdvancedProductFilters({
                 }`}>
                 {category.name}
               </span>
-              {/* Show product count if available */}
-              {category.productCount !== undefined && category.productCount > 0 && (
-                <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">
-                  {category.productCount}
-                </span>
-              )}
             </div>
             {category.subCategories?.length > 0 && (
               <button
@@ -460,7 +454,6 @@ export default function AdvancedProductFilters({
                 }}
                 className="p-1 hover:bg-gray-200 rounded transition-colors flex items-center gap-1"
               >
-                <span className="text-xs text-gray-400">{category.subCategories.length}</span>
                 {expandedCategories.has(category.id) ? (
                   <ChevronDown className="w-4 h-4 text-gray-500" />
                 ) : (
@@ -482,7 +475,7 @@ export default function AdvancedProductFilters({
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </div >
       );
     });
   };
@@ -502,11 +495,6 @@ export default function AdvancedProductFilters({
           All Categories
         </span>
       </div>
-      {selectedCategories.length > 0 && (
-        <span className="text-xs text-accent bg-accent/10 px-2 py-0.5 rounded-full">
-          {selectedCategories.length} selected - Clear
-        </span>
-      )}
     </div>
   );
   const renderSection = (title, Icon, content, sectionName) => (
@@ -688,7 +676,7 @@ export default function AdvancedProductFilters({
       {/* Design Number Filter Section */}
       {renderSection(
         'Design Number',
-        Search,
+        null,
         <div className="space-y-4">
           {/* Exact/Partial Search Input */}
           <div>
@@ -696,13 +684,12 @@ export default function AdvancedProductFilters({
               Search Design Number
             </label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               <input
                 type="text"
                 value={designSearch}
                 onChange={handleDesignSearchInput}
                 placeholder="e.g., 12345 or partial"
-                className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:border-transparent"
               />
             </div>
           </div>
@@ -804,26 +791,7 @@ export default function AdvancedProductFilters({
             <RefreshCw className="w-4 h-4 animate-spin mr-2" />
             Loading...
           </div>
-        ) : (
-          <>
-            {productCount} products found
-            {selectedCategories.length > 0 && (
-              <div className="mt-2 px-2 py-1 bg-accent/10 text-accent rounded-md text-xs">
-                {selectedCategories.length} {selectedCategories.length === 1 ? 'category' : 'categories'} selected
-              </div>
-            )}
-            {(designSearch || minDesignNumber || maxDesignNumber) && (
-              <div className="mt-2 px-2 py-1 bg-accent/10 text-accent rounded-md text-xs">
-                Design filter active
-              </div>
-            )}
-            {(minPrice > MIN_PRICE || maxPrice < MAX_PRICE) && (
-              <div className="mt-2 px-2 py-1 bg-accent/10 text-accent rounded-md text-xs">
-                Price filter: ₹{minPrice.toLocaleString('en-IN')} - ₹{maxPrice.toLocaleString('en-IN')}
-              </div>
-            )}
-          </>
-        )}
+        ) : null}
       </div>
       {/* Custom scrollbar styles */}
       <style>{`

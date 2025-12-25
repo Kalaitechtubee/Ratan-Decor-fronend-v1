@@ -40,7 +40,7 @@ const Checkout = () => {
   const [addressType, setAddressType] = useState('shipping'); // 'billing' or 'shipping'
 
   // Order States
-  const [paymentMethod, setPaymentMethod] = useState('Gateway');
+  const [paymentMethod, setPaymentMethod] = useState('UPI');
   const [notes, setNotes] = useState('');
   const [expectedDeliveryDate, setExpectedDeliveryDate] = useState('');
   const [loading, setLoading] = useState(false);
@@ -655,8 +655,8 @@ const Checkout = () => {
                             <div key={address.id} className='mb-4'>
                               <label
                                 className={`flex items-center p-4 rounded-lg border cursor-pointer hover:bg-gray-50 ${selectedShippingAddress?.id === address.id
-                                    ? 'border-[#ff4747] bg-red-50'
-                                    : 'border-gray-200'
+                                  ? 'border-[#ff4747] bg-red-50'
+                                  : 'border-gray-200'
                                   }`}
                               >
                                 <input
@@ -751,21 +751,6 @@ const Checkout = () => {
                   <input
                     type='radio'
                     name='payment'
-                    value='Gateway'
-                    className='mr-3 text-[#ff4747]'
-                    checked={paymentMethod === 'Gateway'}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                  />
-                  <div className='flex items-center'>
-                    <CreditCard className='mr-2 w-5 h-5 text-gray-600' />
-                    <span className='font-medium'>Online Payment Gateway</span>
-                  </div>
-                </label>
-
-                <label className='flex items-center p-4 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50'>
-                  <input
-                    type='radio'
-                    name='payment'
                     value='UPI'
                     className='mr-3 text-[#ff4747]'
                     checked={paymentMethod === 'UPI'}
@@ -804,6 +789,20 @@ const Checkout = () => {
                     <span className='font-medium'>Bank Transfer</span>
                   </div>
                 </label>
+
+                {paymentMethod === 'BankTransfer' && (
+                  <div className='mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200'>
+                    <h4 className='text-sm font-semibold text-blue-900 mb-2'>Bank Details for Transfer:</h4>
+                    <div className='space-y-1 text-sm text-blue-800'>
+                      <p><span className='font-medium'>Account Name:</span> Ratan Decor</p>
+                      <p><span className='font-medium'>Bank Name:</span> HDFC Bank</p>
+                      <p><span className='font-medium'>Account Number:</span> 50200012345678</p>
+                      <p><span className='font-medium'>IFSC Code:</span> HDFC0001234</p>
+                      <p><span className='font-medium'>Branch:</span> Main Branch, New Delhi</p>
+                    </div>
+                    <p className='mt-3 text-xs text-blue-600 italic'>* Please share the payment screenshot or UTR number with our team after the transfer.</p>
+                  </div>
+                )}
 
                 <label className='flex items-center p-4 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50'>
                   <input
@@ -869,23 +868,11 @@ const Checkout = () => {
                     <span className='text-gray-600'>GST</span>
                     <span className='text-gray-900'>{formatPrice(cartSummary.gstAmount)}</span>
                   </div>
-                  <div className='flex justify-between text-sm'>
-                    <span className='text-gray-600'>Shipping</span>
-                    <span className='text-green-600'>Free</span>
-                  </div>
                   <div className='pt-2 border-t border-gray-200'>
                     <div className='flex justify-between font-semibold'>
                       <span className='text-gray-900'>Total</span>
                       <span className='text-lg text-[#ff4747]'>{formatPrice(cartSummary.totalAmount)}</span>
                     </div>
-                  </div>
-                </div>
-
-                {/* User Type Info */}
-                <div className='p-3 mt-4 bg-blue-50 rounded-lg'>
-                  <div className='flex items-center text-sm text-blue-800'>
-                    <Shield className='mr-2 w-4 h-4' />
-                    <span>User Type: {user?.role || 'General'}</span>
                   </div>
                 </div>
 
