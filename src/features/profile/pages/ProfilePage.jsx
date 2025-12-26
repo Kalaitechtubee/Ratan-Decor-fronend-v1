@@ -55,6 +55,7 @@ const TabNavigation = ({ tabs, activeTab, handleTabChange }) => (
 );
 
 // Enhanced Profile Header Component
+// Enhanced Profile Header Component - Logout text visible on MOBILE too
 const ProfileHeader = ({ profile, getRoleColor, getStatusIcon, getStatusColor, onLogoutClick }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -79,30 +80,37 @@ const ProfileHeader = ({ profile, getRoleColor, getStatusIcon, getStatusColor, o
             <p className="text-xs sm:text-sm text-neutral-600 truncate">{profile?.email || 'N/A'}</p>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2 items-center w-full sm:w-auto">
+
+        {/* Right side: Role, Status, Logout */}
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
+          {/* Role Badge */}
           <motion.span
             whileHover={{ scale: 1.05 }}
-            className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getRoleColor(profile?.role)}`}
+            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getRoleColor(profile?.role)}`}
           >
-            <FaIdCard className="mr-1 flex-shrink-0" size={12} />
-            <span className="truncate">{profile?.role || 'N/A'}</span>
+            <FaIdCard className="mr-1.5 flex-shrink-0" size={11} />
+            <span className="truncate max-w-20">{profile?.role || 'N/A'}</span>
           </motion.span>
+
+          {/* Status Badge */}
           <motion.span
             whileHover={{ scale: 1.05 }}
-            className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getStatusColor(profile?.status)}`}
+            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(profile?.status)}`}
           >
             {getStatusIcon(profile?.status)}
-            <span className="ml-1 capitalize">{profile?.status || 'N/A'}</span>
+            <span className="ml-1 capitalize truncate max-w-24">{profile?.status || 'N/A'}</span>
           </motion.span>
+
+          {/* Logout Button - Text visible on mobile too */}
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={onLogoutClick}
-            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-1.5 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors duration-200 shadow-sm font-medium text-xs sm:text-sm flex-shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-full hover:bg-primary/90 transition-all duration-200 shadow-sm font-medium text-xs min-w-fit"
             aria-label="Logout"
           >
             <FaSignOutAlt className="text-sm flex-shrink-0" />
-            <span className="hidden sm:inline">Logout</span>
+            <span className="whitespace-nowrap">Logout</span>
           </motion.button>
         </div>
       </div>
@@ -140,9 +148,10 @@ const LogoutModal = ({ isOpen, onClose, onConfirm }) => {
             initial="hidden"
             animate="visible"
             exit="hidden"
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-4 sm:p-6 shadow-card z-50 max-w-sm w-full mx-4"
+            className="fixed inset-0 flex items-center justify-center z-50 p-4"
           >
-            <div className="text-center mb-4 sm:mb-6">
+            <div className="bg-white rounded-lg p-4 sm:p-6 shadow-card max-w-sm w-full">
+                        <div className="text-center mb-4 sm:mb-6">
               <div className="w-12 sm:w-14 h-12 sm:h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                 <FaTimes className="text-lg sm:text-xl text-red-600" />
               </div>
@@ -166,6 +175,7 @@ const LogoutModal = ({ isOpen, onClose, onConfirm }) => {
               >
                 Logout
               </motion.button>
+            </div>
             </div>
           </motion.div>
         </>

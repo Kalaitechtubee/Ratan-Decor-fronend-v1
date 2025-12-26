@@ -71,11 +71,11 @@ const PersonalInfo = ({
       animate="visible"
       exit="hidden"
       variants={{ hidden: { opacity: 0, x: 20 }, visible: { opacity: 1, x: 0, transition: { duration: 0.3 } } }}
-      className="space-y-4 sm:space-y-6"
+      className="space-y-6"
     >
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+      <div className="flex justify-between items-center mb-6">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-          <h3 className="text-base sm:text-lg font-semibold text-neutral-900">Personal Information</h3>
+          <h3 className="text-lg font-semibold text-neutral-900">Personal Information</h3>
           <p className="text-xs text-neutral-500 mt-1">Update your profile details</p>
         </motion.div>
         {!isEditing ? (
@@ -83,27 +83,26 @@ const PersonalInfo = ({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-medium text-xs sm:text-sm w-full sm:w-auto justify-center sm:justify-start"
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-medium"
           >
-            <FaEdit size={16} />
-            <span>Edit Profile</span>
+            <FaEdit size={18} />
+            <span className="hidden sm:inline">Edit Profile</span>
           </motion.button>
         ) : null}
       </div>
 
-      <div className="space-y-4 sm:space-y-6">
-        {/* ========== BASIC FIELDS ========== */}
+      <div className="space-y-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
           {inputFields.map((field) => (
             <motion.div key={field.name} whileHover={{ y: isEditing ? -2 : 0 }}>
-              <label className="block text-xs sm:text-sm font-medium text-neutral-700 mb-1 sm:mb-2 flex items-center gap-2">
-                <field.icon className="text-neutral-600 flex-shrink-0" size={14} />
-                <span className="truncate">{field.label} {field.required && <span className="text-red-500">*</span>}</span>
+              <label className="block text-sm font-medium text-neutral-700 mb-2 flex items-center gap-2">
+                <field.icon className="text-neutral-600" size={16} />
+                {field.label} {field.required && <span className="text-red-500">*</span>}
               </label>
               <div className="relative">
                 <input
@@ -113,7 +112,7 @@ const PersonalInfo = ({
                   onChange={handleInputChange}
                   disabled={!isEditing || field.disabled}
                   placeholder={`Enter ${field.label.toLowerCase()}`}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 font-medium text-neutral-900 text-xs sm:text-sm ${
+                  className={`w-full px-4 py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 font-medium text-neutral-900 ${
                     isEditing && !field.disabled
                       ? 'bg-white cursor-text'
                       : 'bg-neutral-50 cursor-not-allowed text-neutral-600'
@@ -123,11 +122,10 @@ const PersonalInfo = ({
             </motion.div>
           ))}
 
-          {/* ========== PROJECT TYPE ========== */}
           <motion.div whileHover={{ y: isEditing ? -2 : 0 }}>
-            <label className="block text-xs sm:text-sm font-medium text-neutral-700 mb-1 sm:mb-2 flex items-center gap-2">
-              <FiGrid className="text-neutral-600 flex-shrink-0" size={14} />
-              <span className="truncate">Project Type <span className="text-red-500">*</span></span>
+            <label className="block text-sm font-medium text-neutral-700 mb-2 flex items-center gap-2">
+              <FiGrid className="text-neutral-600" size={16} />
+              Project Type <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <select
@@ -135,7 +133,7 @@ const PersonalInfo = ({
                 value={formData.userTypeId || ''}
                 onChange={handleUserTypeSelectChange}
                 disabled={!isEditing}
-                className={`w-full px-3 sm:px-4 py-2 sm:py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 font-medium appearance-none text-neutral-900 text-xs sm:text-sm ${
+                className={`w-full px-4 py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 font-medium appearance-none text-neutral-900 ${
                   isEditing
                     ? 'bg-white cursor-pointer'
                     : 'bg-neutral-50 cursor-not-allowed text-neutral-600'
@@ -153,7 +151,7 @@ const PersonalInfo = ({
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-xs text-neutral-500 mt-1 sm:mt-2 font-medium"
+                className="text-xs text-neutral-500 mt-2 font-medium"
               >
                 Selected: <span className="text-primary font-semibold">{selectedUserTypeName}</span>
               </motion.p>
@@ -161,10 +159,9 @@ const PersonalInfo = ({
           </motion.div>
         </motion.div>
 
-        {/* ========== ADDRESS ========== */}
         <motion.div whileHover={{ y: isEditing ? -2 : 0 }}>
-          <label className="block text-xs sm:text-sm font-medium text-neutral-700 mb-1 sm:mb-2 flex items-center gap-2">
-            <FaMapMarkerAlt className="text-neutral-600 flex-shrink-0" size={14} />
+          <label className="block text-sm font-medium text-neutral-700 mb-2 flex items-center gap-2">
+            <FaMapMarkerAlt className="text-neutral-600" size={16} />
             Address
           </label>
           <div className="relative">
@@ -175,7 +172,7 @@ const PersonalInfo = ({
               disabled={!isEditing}
               rows={3}
               placeholder="Enter your full address"
-              className={`w-full px-3 sm:px-4 py-2 sm:py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 font-medium text-neutral-900 resize-none text-xs sm:text-sm ${
+              className={`w-full px-4 py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 font-medium text-neutral-900 resize-none ${
                 isEditing
                   ? 'bg-white cursor-text'
                   : 'bg-neutral-50 cursor-not-allowed text-neutral-600'
@@ -184,11 +181,10 @@ const PersonalInfo = ({
           </div>
         </motion.div>
 
-        {/* ========== LOCATION FIELDS ========== */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 pt-0 sm:pt-2">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
           {locationFields.map((field) => (
             <motion.div key={field.name} whileHover={{ y: isEditing ? -2 : 0 }}>
-              <label className="block text-xs sm:text-sm font-medium text-neutral-700 mb-1 sm:mb-2 truncate">{field.label}</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">{field.label}</label>
               <input
                 type="text"
                 name={field.name}
@@ -196,7 +192,7 @@ const PersonalInfo = ({
                 onChange={handleInputChange}
                 disabled={!isEditing}
                 placeholder={field.label}
-                className={`w-full px-3 sm:px-4 py-2 sm:py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 font-medium text-neutral-900 text-xs sm:text-sm ${
+                className={`w-full px-4 py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 font-medium text-neutral-900 ${
                   isEditing
                     ? 'bg-white cursor-text'
                     : 'bg-neutral-50 cursor-not-allowed text-neutral-600'
@@ -206,18 +202,17 @@ const PersonalInfo = ({
           ))}
         </div>
 
-        {/* ========== ACTION BUTTONS ========== */}
         {isEditing && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4 sm:pt-6 border-t border-neutral-200"
+            className="flex gap-3 pt-6 border-t border-neutral-200"
           >
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleCancel}
-              className="flex-1 px-4 py-2 sm:py-3 bg-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-300 transition-colors duration-200 font-semibold text-xs sm:text-sm"
+              className="flex-1 px-4 py-3 bg-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-300 transition-colors duration-200 font-semibold"
             >
               Cancel
             </motion.button>
@@ -226,20 +221,20 @@ const PersonalInfo = ({
               whileTap={{ scale: 0.98 }}
               onClick={handleUpdateProfile}
               disabled={isLoading}
-              className="flex-1 px-4 py-2 sm:py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
+              className="flex-1 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity }}
-                    className="w-3 sm:w-4 h-3 sm:h-4 border-2 border-white border-t-transparent rounded-full flex-shrink-0"
+                    className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
                   />
                   <span>Saving...</span>
                 </>
               ) : (
                 <>
-                  <FaSave size={16} />
+                  <FaSave size={18} />
                   <span>Save Changes</span>
                 </>
               )}

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FaTimes, FaSync, FaShoppingCart, FaSearch } from 'react-icons/fa';
+import { FaTimes, FaSync, FaShoppingCart } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchBar from '../SearchBar';
 import logo from '../../assets/images/ratan-decor.png';
@@ -34,7 +34,7 @@ export default function MobileNavbar({
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm transition-all duration-300 py-2 md:hidden font-roboto">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo Section - Conditional Rendering */}
+          {/* Logo Section */}
           <AnimatePresence mode="wait">
             {!isMobileSearchOpen ? (
               <motion.div
@@ -72,7 +72,7 @@ export default function MobileNavbar({
 
           {/* Mobile Controls */}
           <div className={`flex items-center ${isMobileSearchOpen ? 'space-x-1' : 'space-x-2'}`}>
-            {/* Close Search Button - Only show when search is open */}
+            {/* Close Search */}
             <AnimatePresence>
               {isMobileSearchOpen && (
                 <motion.button
@@ -89,18 +89,7 @@ export default function MobileNavbar({
               )}
             </AnimatePresence>
 
-            {/* Search Icon - Mobile Toggle */}
-            {!isMobileSearchOpen && (
-              <button
-                onClick={() => setIsMobileSearchOpen(true)}
-                className="flex items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-all duration-200 touch-target flex-shrink-0 font-roboto"
-                aria-label="Open search"
-              >
-                <FaSearch className="text-[#ff4747] text-lg" />
-              </button>
-            )}
-
-            {/* Cart Icon - Mobile */}
+            {/* Cart Icon - Only in Top Navbar */}
             {!isMobileSearchOpen && (
               <button
                 onClick={onOpenCart}
@@ -118,9 +107,7 @@ export default function MobileNavbar({
               </button>
             )}
 
-
-
-            {/* Mobile User Type Button */}
+            {/* User Type Button */}
             {!isMobileSearchOpen && (
               <motion.button
                 onClick={() => setIsUserTypePopupOpen(true)}
