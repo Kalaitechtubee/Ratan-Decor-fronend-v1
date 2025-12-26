@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaHome, FaBars, FaSearch, FaUser, FaSignOutAlt, FaSignInAlt, FaShoppingCart } from 'react-icons/fa';
+import { FaHome, FaBars, FaSearch, FaUser, FaSignOutAlt, FaSignInAlt } from 'react-icons/fa';
 import { MdGridView } from 'react-icons/md';
 import { useState, useEffect } from 'react';
 
@@ -16,41 +16,27 @@ export default function MobileBottomNav({
   setIsMoreMenuOpen,
   currentUserType,
   isMobileSearchOpen,
-  onOpenCart,
-  isCartOpen,
-  cartCount = 0
+  setIsMobileSearchOpen
 }) {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  // Debug: Log state changes
-  useEffect(() => {
-    console.log('Mobile search open state:', isMobileSearchOpen);
-  }, [isMobileSearchOpen]);
-
   useEffect(() => {
     let scrollTimeout;
-
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setIsVisible(false);
       } else {
         setIsVisible(true);
       }
-
       setLastScrollY(currentScrollY);
-
       clearTimeout(scrollTimeout);
-
       scrollTimeout = setTimeout(() => {
         setIsVisible(true);
       }, 150);
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
-
     return () => {
       window.removeEventListener('scroll', handleScroll);
       clearTimeout(scrollTimeout);
@@ -70,10 +56,10 @@ export default function MobileBottomNav({
       isProductMenu: true
     },
     {
-      path: '#cart',
-      icon: FaShoppingCart,
-      label: 'Cart',
-      isCart: true
+      path: '#search',
+      icon: FaSearch,
+      label: 'Search',
+      isSearch: true
     },
     {
       path: isAuthenticated ? '/profile' : '/register',
@@ -108,14 +94,14 @@ export default function MobileBottomNav({
         {bottomNavItems.map((item, index) => {
           const Icon = item.icon;
           const isActive = isActiveRoute(item.path);
-
-          const buttonClasses = `flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 relative touch-target w-20 h-16 font-roboto ${isActive ||
+          const buttonClasses = `flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 relative touch-target w-20 h-16 font-roboto ${
+            isActive ||
             (item.isProductMenu && location.pathname.startsWith('/products')) ||
             (item.isMoreMenu && isMoreMenuOpen) ||
             (item.isSearch && isMobileSearchOpen)
-            ? 'text-[#ff4747] scale-110 shadow-sm'
-            : 'text-gray-600 hover:text-[#ff4747] active:scale-95'
-            }`;
+              ? 'text-[#ff4747] scale-110 shadow-sm'
+              : 'text-gray-600 hover:text-[#ff4747] active:scale-95'
+          }`;
 
           if (item.isProductMenu) {
             return (
@@ -124,7 +110,6 @@ export default function MobileBottomNav({
                 onClick={() => setIsProductSidebarOpen(true)}
                 className={buttonClasses}
                 aria-label="Open products menu"
-                role="button"
                 whileTap={{ scale: 0.9 }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -138,28 +123,28 @@ export default function MobileBottomNav({
             );
           }
 
-          if (item.isCart) {
+          if (item.isSearch) {
             return (
               <motion.button
-                key="cart"
-                onClick={onOpenCart}
+                key="search"
+                onClick={toggleMobileSearch}
                 className={buttonClasses}
-                aria-label="Open cart"
-                role="button"
+                aria-label={isMobileSearchOpen ? "Close search" : "Open search"}
                 whileTap={{ scale: 0.9 }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
                 <div className="flex flex-col items-center justify-center h-full">
-                  <div className="relative">
-                    <Icon className={`text-xl mb-1 transition-colors duration-200 ${isActiveRoute('/cart') || isCartOpen ? 'text-[#ff4747]' : 'text-gray-600'}`} />
-                    {cartCount > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 bg-[#ff4747] text-white text-[8px] font-bold h-3.5 min-w-[14px] px-1 rounded-full border border-white flex items-center justify-center shadow-sm">
-                        {cartCount > 99 ? '99+' : cartCount}
-                      </span>
-                    )}
-                  </div>
+                  <motion.div
+                    animate={{
+                      rotate: isMobileSearchOpen ? 45 : 0,
+                      scale: isMobileSearchOpen ? 1.1 : 1
+                    }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Icon className="text-xl mb-1" />
+                  </motion.div>
                   <span className="text-xs font-medium font-roboto text-center leading-tight">{item.label}</span>
                 </div>
               </motion.button>
@@ -191,15 +176,11 @@ export default function MobileBottomNav({
 
           if (item.isMoreMenu) {
             return (
-              <motion.div
-                key="more"
-                className="relative"
-              >
+              <motion.div key="more" className="relative">
                 <motion.button
                   onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
                   className={buttonClasses}
                   aria-label="Open more menu"
-                  role="button"
                   whileTap={{ scale: 0.9 }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -215,7 +196,6 @@ export default function MobileBottomNav({
                     <span className="text-xs font-medium font-roboto text-center leading-tight">{item.label}</span>
                   </div>
                 </motion.button>
-
                 <AnimatePresence>
                   {isMoreMenuOpen && (
                     <motion.div
