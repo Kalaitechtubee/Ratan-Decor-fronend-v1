@@ -93,9 +93,11 @@ export default function MobileNavbar({
                 className="flex items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-all duration-200 touch-target flex-shrink-0 font-roboto"
                 aria-label="Go to cart"
               >
-                <FaShoppingCart className="text-[#ff4747] text-lg" />
+                <FaShoppingCart className="text-[#ff4747] text-3xl" />
               </Link>
             )}
+
+
 
             {/* Mobile User Type Button */}
             {!isMobileSearchOpen && (

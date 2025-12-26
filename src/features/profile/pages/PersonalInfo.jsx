@@ -2,14 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { FaUser, FaEnvelope, FaPhone, FaBuilding, FaMapMarkerAlt, FaEdit, FaSave } from 'react-icons/fa';
 import { FiHome, FiCoffee, FiGrid, FiBriefcase } from 'react-icons/fi';
 import { motion } from 'framer-motion';
-import { useSelector } from 'react-redux';
 import axios from '../../../services/axios';
 import toast from 'react-hot-toast';
 
-const PersonalInfo = ({ isEditing, setIsEditing, formData, handleInputChange, handleUserTypeChange, handleUpdateProfile, handleCancel, isLoading, userTypes = [] }) => {
+const PersonalInfo = ({ 
+  isEditing, 
+  setIsEditing, 
+  formData, 
+  handleInputChange, 
+  handleUserTypeChange, 
+  handleUpdateProfile, 
+  handleCancel, 
+  isLoading, 
+  userTypes = [] 
+}) => {
   const [selectedUserTypeName, setSelectedUserTypeName] = useState('');
 
-  // Get icon for user type
   const getIconForUserType = (userTypeName) => {
     if (!userTypeName) return FiGrid;
     const lowerName = userTypeName.toLowerCase();
@@ -19,7 +27,6 @@ const PersonalInfo = ({ isEditing, setIsEditing, formData, handleInputChange, ha
     return FiGrid;
   };
 
-  // Build user type options from fetched data
   const userTypeOptions = userTypes.map((type) => ({
     value: String(type.id),
     label: type.name,
@@ -27,7 +34,6 @@ const PersonalInfo = ({ isEditing, setIsEditing, formData, handleInputChange, ha
     description: type.description || 'Customer type',
   }));
 
-  // Update selected user type name whenever formData.userTypeId changes
   useEffect(() => {
     if (formData.userTypeId && userTypes.length > 0) {
       const userType = userTypes.find((type) => type.id === formData.userTypeId);
@@ -39,12 +45,25 @@ const PersonalInfo = ({ isEditing, setIsEditing, formData, handleInputChange, ha
     const value = e.target.value;
     handleUserTypeChange(value);
     
-    // Update selected name for display
     const selected = userTypes.find((type) => type.id === parseInt(value));
     if (selected) {
       setSelectedUserTypeName(selected.name);
     }
   };
+
+  const inputFields = [
+    { name: 'name', label: 'Full Name', icon: FaUser, type: 'text', required: true },
+    { name: 'email', label: 'Email Address', icon: FaEnvelope, type: 'email', disabled: true },
+    { name: 'mobile', label: 'Mobile Number', icon: FaPhone, type: 'tel' },
+    { name: 'company', label: 'Company', icon: FaBuilding, type: 'text' },
+  ];
+
+  const locationFields = [
+    { name: 'city', label: 'City' },
+    { name: 'state', label: 'State' },
+    { name: 'country', label: 'Country' },
+    { name: 'pincode', label: 'PIN Code' },
+  ];
 
   return (
     <motion.div
@@ -52,130 +71,74 @@ const PersonalInfo = ({ isEditing, setIsEditing, formData, handleInputChange, ha
       animate="visible"
       exit="hidden"
       variants={{ hidden: { opacity: 0, x: 20 }, visible: { opacity: 1, x: 0, transition: { duration: 0.3 } } }}
-      className="space-y-6"
+      className="space-y-4 sm:space-y-6"
     >
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-semibold text-neutral-900">Personal Information</h3>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+          <h3 className="text-base sm:text-lg font-semibold text-neutral-900">Personal Information</h3>
+          <p className="text-xs text-neutral-500 mt-1">Update your profile details</p>
+        </motion.div>
         {!isEditing ? (
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200"
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-medium text-xs sm:text-sm w-full sm:w-auto justify-center sm:justify-start"
           >
-            <FaEdit size={18} />
-            Edit Profile
-          </button>
-        ) : (
-          <div className="flex gap-3">
-            <button
-              onClick={handleCancel}
-              className="px-4 py-2 bg-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-300 transition-colors duration-200"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleUpdateProfile}
-              disabled={isLoading}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <FaSave size={18} />
-              )}
-              {isLoading ? 'Saving...' : 'Save Changes'}
-            </button>
-          </div>
-        )}
+            <FaEdit size={16} />
+            <span>Edit Profile</span>
+          </motion.button>
+        ) : null}
       </div>
 
-      <form onSubmit={handleUpdateProfile} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Full Name */}
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">Full Name *</label>
-            <div className="relative">
-              <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" size={18} />
-              <input
-                type="text"
-                name="name"
-                value={formData.name || ''}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                className={`pl-10 w-full p-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors ${
-                  !isEditing ? 'bg-neutral-50 cursor-not-allowed' : 'bg-white'
-                }`}
-                placeholder="Enter your full name"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Email Address */}
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">Email Address</label>
-            <div className="relative">
-              <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" size={18} />
-              <input
-                type="email"
-                value={formData.email || ''}
-                disabled
-                className="pl-10 w-full p-3 border border-neutral-200 rounded-lg bg-neutral-50 cursor-not-allowed"
-              />
-            </div>
-          </div>
-
-          {/* Mobile Number */}
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">Mobile Number</label>
-            <div className="relative">
-              <FaPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" size={18} />
-              <input
-                type="tel"
-                name="mobile"
-                value={formData.mobile || ''}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                className={`pl-10 w-full p-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors ${
-                  !isEditing ? 'bg-neutral-50 cursor-not-allowed' : 'bg-white'
-                }`}
-                placeholder="Enter your mobile number"
-              />
-            </div>
-          </div>
-
-          {/* Company */}
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">Company</label>
-            <div className="relative">
-              <FaBuilding className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" size={18} />
-              <input
-                type="text"
-                name="company"
-                value={formData.company || ''}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                className={`pl-10 w-full p-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors ${
-                  !isEditing ? 'bg-neutral-50 cursor-not-allowed' : 'bg-white'
-                }`}
-                placeholder="Enter your company name"
-              />
-            </div>
-          </div>
-
-          {/* Project Type - Dynamic */}
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">Project Type *</label>
-            <div className="relative">
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400">
-                {React.createElement(getIconForUserType(selectedUserTypeName), { size: 18 })}
+      <div className="space-y-4 sm:space-y-6">
+        {/* ========== BASIC FIELDS ========== */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6"
+        >
+          {inputFields.map((field) => (
+            <motion.div key={field.name} whileHover={{ y: isEditing ? -2 : 0 }}>
+              <label className="block text-xs sm:text-sm font-medium text-neutral-700 mb-1 sm:mb-2 flex items-center gap-2">
+                <field.icon className="text-neutral-600 flex-shrink-0" size={14} />
+                <span className="truncate">{field.label} {field.required && <span className="text-red-500">*</span>}</span>
+              </label>
+              <div className="relative">
+                <input
+                  type={field.type}
+                  name={field.name}
+                  value={formData[field.name] || ''}
+                  onChange={handleInputChange}
+                  disabled={!isEditing || field.disabled}
+                  placeholder={`Enter ${field.label.toLowerCase()}`}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 font-medium text-neutral-900 text-xs sm:text-sm ${
+                    isEditing && !field.disabled
+                      ? 'bg-white cursor-text'
+                      : 'bg-neutral-50 cursor-not-allowed text-neutral-600'
+                  }`}
+                />
               </div>
+            </motion.div>
+          ))}
+
+          {/* ========== PROJECT TYPE ========== */}
+          <motion.div whileHover={{ y: isEditing ? -2 : 0 }}>
+            <label className="block text-xs sm:text-sm font-medium text-neutral-700 mb-1 sm:mb-2 flex items-center gap-2">
+              <FiGrid className="text-neutral-600 flex-shrink-0" size={14} />
+              <span className="truncate">Project Type <span className="text-red-500">*</span></span>
+            </label>
+            <div className="relative">
               <select
                 name="userTypeId"
                 value={formData.userTypeId || ''}
                 onChange={handleUserTypeSelectChange}
                 disabled={!isEditing}
-                className={`pl-10 w-full p-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors ${
-                  !isEditing ? 'bg-neutral-50 cursor-not-allowed' : 'bg-white'
+                className={`w-full px-3 sm:px-4 py-2 sm:py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 font-medium appearance-none text-neutral-900 text-xs sm:text-sm ${
+                  isEditing
+                    ? 'bg-white cursor-pointer'
+                    : 'bg-neutral-50 cursor-not-allowed text-neutral-600'
                 }`}
               >
                 <option value="">Select Project Type</option>
@@ -187,92 +150,103 @@ const PersonalInfo = ({ isEditing, setIsEditing, formData, handleInputChange, ha
               </select>
             </div>
             {selectedUserTypeName && (
-              <p className="text-xs text-neutral-500 mt-1">
-                Selected: <span className="font-medium text-primary">{selectedUserTypeName}</span>
-              </p>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-xs text-neutral-500 mt-1 sm:mt-2 font-medium"
+              >
+                Selected: <span className="text-primary font-semibold">{selectedUserTypeName}</span>
+              </motion.p>
             )}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
-        {/* Address */}
-        <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-2">Address</label>
+        {/* ========== ADDRESS ========== */}
+        <motion.div whileHover={{ y: isEditing ? -2 : 0 }}>
+          <label className="block text-xs sm:text-sm font-medium text-neutral-700 mb-1 sm:mb-2 flex items-center gap-2">
+            <FaMapMarkerAlt className="text-neutral-600 flex-shrink-0" size={14} />
+            Address
+          </label>
           <div className="relative">
-            <FaMapMarkerAlt className="absolute left-3 top-3 text-neutral-400" size={18} />
             <textarea
               name="address"
               value={formData.address || ''}
               onChange={handleInputChange}
               disabled={!isEditing}
               rows={3}
-              className={`pl-10 w-full p-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors resize-none ${
-                !isEditing ? 'bg-neutral-50 cursor-not-allowed' : 'bg-white'
-              }`}
               placeholder="Enter your full address"
+              className={`w-full px-3 sm:px-4 py-2 sm:py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 font-medium text-neutral-900 resize-none text-xs sm:text-sm ${
+                isEditing
+                  ? 'bg-white cursor-text'
+                  : 'bg-neutral-50 cursor-not-allowed text-neutral-600'
+              }`}
             />
           </div>
+        </motion.div>
+
+        {/* ========== LOCATION FIELDS ========== */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 pt-0 sm:pt-2">
+          {locationFields.map((field) => (
+            <motion.div key={field.name} whileHover={{ y: isEditing ? -2 : 0 }}>
+              <label className="block text-xs sm:text-sm font-medium text-neutral-700 mb-1 sm:mb-2 truncate">{field.label}</label>
+              <input
+                type="text"
+                name={field.name}
+                value={formData[field.name] || ''}
+                onChange={handleInputChange}
+                disabled={!isEditing}
+                placeholder={field.label}
+                className={`w-full px-3 sm:px-4 py-2 sm:py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 font-medium text-neutral-900 text-xs sm:text-sm ${
+                  isEditing
+                    ? 'bg-white cursor-text'
+                    : 'bg-neutral-50 cursor-not-allowed text-neutral-600'
+                }`}
+              />
+            </motion.div>
+          ))}
         </div>
 
-        {/* City, State, Country, PIN */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">City</label>
-            <input
-              type="text"
-              name="city"
-              value={formData.city || ''}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className={`w-full p-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors ${
-                !isEditing ? 'bg-neutral-50 cursor-not-allowed' : 'bg-white'
-              }`}
-              placeholder="City"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">State</label>
-            <input
-              type="text"
-              name="state"
-              value={formData.state || ''}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className={`w-full p-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors ${
-                !isEditing ? 'bg-neutral-50 cursor-not-allowed' : 'bg-white'
-              }`}
-              placeholder="State"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">Country</label>
-            <input
-              type="text"
-              name="country"
-              value={formData.country || ''}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className={`w-full p-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors ${
-                !isEditing ? 'bg-neutral-50 cursor-not-allowed' : 'bg-white'
-              }`}
-              placeholder="Country"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">PIN Code</label>
-            <input
-              type="text"
-              name="pincode"
-              value={formData.pincode || ''}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className={`w-full p-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors ${
-                !isEditing ? 'bg-neutral-50 cursor-not-allowed' : 'bg-white'
-              }`}
-              placeholder="PIN Code"
-            />
-          </div>
-        </div>
-      </form>
+        {/* ========== ACTION BUTTONS ========== */}
+        {isEditing && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4 sm:pt-6 border-t border-neutral-200"
+          >
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleCancel}
+              className="flex-1 px-4 py-2 sm:py-3 bg-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-300 transition-colors duration-200 font-semibold text-xs sm:text-sm"
+            >
+              Cancel
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleUpdateProfile}
+              disabled={isLoading}
+              className="flex-1 px-4 py-2 sm:py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
+            >
+              {isLoading ? (
+                <>
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                    className="w-3 sm:w-4 h-3 sm:h-4 border-2 border-white border-t-transparent rounded-full flex-shrink-0"
+                  />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <FaSave size={16} />
+                  <span>Save Changes</span>
+                </>
+              )}
+            </motion.button>
+          </motion.div>
+        )}
+      </div>
     </motion.div>
   );
 };
