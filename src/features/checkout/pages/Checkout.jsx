@@ -448,6 +448,9 @@ const Checkout = () => {
 
       console.log('Checkout: Placing order with data:', orderData);
 
+      // Capture current total before clearing cart or if API response is partial
+      const currentTotal = cartSummary.totalAmount;
+
       const response = await OrderAPI.createOrder(orderData);
       console.log('Checkout: Order creation response:', response);
 
@@ -457,7 +460,11 @@ const Checkout = () => {
       }
 
       // Set order details and show confirmation popup
-      setOrderDetails(response.order);
+      // Ensure totalAmount is preserved even if API doesn't return it immediately or matches cart total
+      setOrderDetails({
+        ...response.order,
+        totalAmount: response.order.totalAmount || currentTotal
+      });
       setShowOrderConfirmation(true);
       console.log('Checkout: Order placed successfully', { orderId: response.order.id });
 
@@ -589,9 +596,6 @@ const Checkout = () => {
                       <p className='text-sm text-gray-600'>
                         {`${billingAddress.address}, ${billingAddress.city}, ${billingAddress.state}, ${billingAddress.country} ${billingAddress.pincode}`}
                       </p>
-                      <span className='inline-block mt-1 px-2 py-1 text-xs bg-green-100 text-green-600 rounded'>
-                        From Profile
-                      </span>
                     </div>
                   </div>
                 </div>
@@ -1075,85 +1079,72 @@ const Checkout = () => {
 
         {/* Order Confirmation Popup */}
         {showOrderConfirmation && orderDetails && (
-          <div className='fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50'>
-            <div className='bg-white rounded-xl p-8 w-full max-w-lg mx-6 shadow-2xl animate-fade-in'>
+          <div className='fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300'>
+            <div className='bg-white rounded-2xl p-8 w-full max-w-md mx-6 shadow-2xl transform transition-all scale-100 animate-fade-in-up border border-gray-100'>
               <div className='flex flex-col items-center text-center'>
-                <CheckCircle className='w-16 h-16 text-green-500 mb-4' />
-                <h2 className='text-2xl font-bold text-gray-900 mb-2'>Order Confirmed!</h2>
-                <p className='text-gray-600 mb-6'>
-                  Thank you for your order. You'll receive a confirmation email soon.
+                <div className='w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-6 ring-8 ring-green-50/50'>
+                  <CheckCircle className='w-10 h-10 text-green-500' strokeWidth={3} />
+                </div>
+
+                <h2 className='text-3xl font-bold text-gray-900 mb-2'>Order Confirmed!</h2>
+                <p className='text-gray-500 mb-8 max-w-[80%] leading-relaxed'>
+                  Thank you for your purchase. We have received your order and will begin processing it right away.
                 </p>
 
-                <div className='w-full bg-gray-50 p-4 rounded-lg mb-6'>
-                  <h3 className='text-lg font-semibold text-gray-900 mb-3'>Order Details</h3>
-                  <div className='text-left space-y-2'>
-                    <p className='text-sm'>
-                      <span className='font-medium text-gray-700'>Order ID:</span> {orderDetails.id}
-                    </p>
-                    <p className='text-sm'>
-                      <span className='font-medium text-gray-700'>Total Amount:</span>{' '}
-                      {formatPrice(orderDetails.totalAmount || cartSummary.totalAmount)}
-                    </p>
-                    <p className='text-sm'>
-                      <span className='font-medium text-gray-700'>Payment Method:</span> {paymentMethod}
-                    </p>
-                    <p className='text-sm'>
-                      <span className='font-medium text-gray-700'>Shipping Address:</span>
-                      {sameAsBilling
-                        ? `${billingAddress.address}, ${billingAddress.city}, ${billingAddress.state}, ${billingAddress.country} ${billingAddress.pincode}`
-                        : `${selectedShippingAddress.address}, ${selectedShippingAddress.city}, ${selectedShippingAddress.state}, ${selectedShippingAddress.country} ${selectedShippingAddress.pincode}`}
-                    </p>
-                    {expectedDeliveryDate && (
-                      <p className='text-sm'>
-                        <span className='font-medium text-gray-700'>Expected Delivery:</span>
-                        {new Date(expectedDeliveryDate).toLocaleDateString()}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                <div className='w-full bg-gray-50 rounded-xl p-6 mb-8 border border-gray-100'>
+                  <h3 className='text-sm uppercase tracking-wider font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2'>Order Summary</h3>
+                  <div className='space-y-4'>
+                    <div className='flex justify-between items-center group'>
+                      <span className='text-sm text-gray-500 group-hover:text-gray-700 transition-colors'>Order ID</span>
+                      <span className='font-mono font-medium text-gray-900 bg-white px-2 py-1 rounded border border-gray-200'>#{orderDetails.id}</span>
+                    </div>
 
-                {/* Coupon Section */}
-                <div className='w-full bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg mb-6 border border-green-200'>
-                  <div className='flex items-center justify-center mb-2'>
-                    <span className='text-2xl'>🎉</span>
-                    <h3 className='text-lg font-semibold text-gray-900 ml-2'>Special Offer!</h3>
-                  </div>
-                  <p className='text-sm text-gray-600 mb-3 text-center'>
-                    Use this coupon code for your next purchase and get 10% off!
-                  </p>
-                  <div className='bg-white p-3 rounded-lg border-2 border-dashed border-green-200'>
-                    <div className='flex items-center justify-between'>
-                      <div className='flex items-center'>
-                        <span className='text-lg font-bold text-green-600 mr-2'>WELCOME10</span>
-                        <span className='text-xs text-gray-500'>(10% off on orders above ₹1000)</span>
+                    <div className='flex justify-between items-center'>
+                      <span className='text-sm text-gray-500'>Amount Paid</span>
+                      <span className='font-bold text-gray-900 text-lg'>
+                        {formatPrice(orderDetails.totalAmount || cartSummary.totalAmount)}
+                      </span>
+                    </div>
+
+                    <div className='flex justify-between items-center'>
+                      <span className='text-sm text-gray-500'>Payment Method</span>
+                      <span className='font-medium text-gray-900 px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-sm border border-blue-100'>
+                        {paymentMethod}
+                      </span>
+                    </div>
+
+                    <div className='border-t border-gray-200 mt-2 pt-3'>
+                      <div className='flex justify-between items-start text-left'>
+                        <span className='text-sm text-gray-500 mt-1'>Shipping to</span>
+                        <span className='text-sm font-medium text-gray-900 max-w-[60%] text-right leading-snug'>
+                          {sameAsBilling
+                            ? `${billingAddress.address}, ${billingAddress.city}, ${billingAddress.state}`
+                            : `${selectedShippingAddress.address}, ${selectedShippingAddress.city}, ${selectedShippingAddress.state}`}
+                        </span>
                       </div>
-                      <button
-                        onClick={handleCopyCoupon}
-                        className='px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors'
-                      >
-                        Copy
-                      </button>
+                      <div className='flex justify-end mt-1'>
+                        <span className='text-xs text-gray-500'>
+                          {sameAsBilling ? billingAddress.pincode : selectedShippingAddress.pincode}, {sameAsBilling ? billingAddress.country : selectedShippingAddress.country}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <p className='text-xs text-gray-500 mt-2 text-center'>
-                    Valid for 30 days from today. Minimum order value: ₹1000
-                  </p>
                 </div>
 
-                <div className='flex w-full space-x-4'>
+                <div className='flex w-full gap-4'>
                   <button
                     onClick={() => {
                       setIsNavigating(true);
                       navigate('/products');
                       closeOrderConfirmation();
                     }}
-                    className='flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors'
+                    className='flex-1 px-6 py-3.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 hover:border-gray-400 hover:text-gray-900 transition-all duration-200 focus:ring-4 focus:ring-gray-100'
                   >
                     Continue Shopping
                   </button>
                   <button
                     onClick={handleViewOrder}
-                    className='flex-1 px-4 py-2 text-white bg-[#ff4747] rounded-lg hover:bg-red-700 transition-colors'
+                    className='flex-1 px-6 py-3.5 text-sm font-medium text-white bg-[#ff4747] rounded-xl hover:bg-[#e63e3e] hover:shadow-lg hover:shadow-red-500/20 transition-all duration-200 transform hover:-translate-y-0.5 focus:ring-4 focus:ring-red-100'
                   >
                     View Order
                   </button>

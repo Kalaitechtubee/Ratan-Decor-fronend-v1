@@ -447,27 +447,21 @@ function ProductPage() {
                   <div className="flex items-center gap-1.5 mx-2">
                     {(() => {
                       const pages = [];
-                      const maxVisible = window.innerWidth < 640 ? 3 : 5;
+                      const maxVisible = 3;
 
                       if (totalPages <= maxVisible) {
                         for (let i = 1; i <= totalPages; i++) pages.push(i);
                       } else {
-                        if (currentPage <= 3) {
-                          for (let i = 1; i <= 4; i++) pages.push(i);
-                          pages.push('...');
-                          pages.push(totalPages);
-                        } else if (currentPage >= totalPages - 2) {
-                          pages.push(1);
-                          pages.push('...');
-                          for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
-                        } else {
-                          pages.push(1);
-                          pages.push('...');
-                          pages.push(currentPage - 1);
-                          pages.push(currentPage);
-                          pages.push(currentPage + 1);
-                          pages.push('...');
-                          pages.push(totalPages);
+                        let startPage = Math.max(1, currentPage - 1);
+                        let endPage = startPage + maxVisible - 1;
+
+                        if (endPage > totalPages) {
+                          endPage = totalPages;
+                          startPage = Math.max(1, endPage - maxVisible + 1);
+                        }
+
+                        for (let i = startPage; i <= endPage; i++) {
+                          pages.push(i);
                         }
                       }
 

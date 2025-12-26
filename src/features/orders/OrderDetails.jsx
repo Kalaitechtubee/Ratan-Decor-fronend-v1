@@ -366,48 +366,17 @@ const OrderDetails = () => {
                                 {product.name || 'Unknown Product'}
                               </button>
                             </h3>
-                            {product.description && (
-                              <p className='text-xs sm:text-sm text-gray-600 mt-1 line-clamp-2'>
-                                {product.description}
-                              </p>
-                            )}
-                            <div className='flex items-center space-x-2 mt-2 flex-wrap'>
-                              <span className='text-xs sm:text-sm text-gray-500'>
+                            <div className='mt-2 space-y-1'>
+                              <p className='text-xs sm:text-sm text-gray-500'>
                                 Qty: {item.quantity}
-                              </span>
-                              <span className='text-xs sm:text-sm text-gray-500'>
-                                Unit Price: {formatPrice(unitPrice)}
-                              </span>
-                              {product.category && (
-                                <span className='text-xs px-1 sm:px-2 py-1 bg-gray-100 text-gray-600 rounded'>
-                                  {product.category.name || product.category}
-                                </span>
-                              )}
+                              </p>
+                              <p className='text-xs sm:text-sm text-gray-500'>
+                                Price: {formatPrice(unitPrice)}
+                              </p>
+                              <p className='text-xs sm:text-sm text-gray-500'>
+                                Unit Type: {product.unitType || 'Sheet'}
+                              </p>
                             </div>
-                            {product.colors && product.colors.length > 0 && (
-                              <div className='flex items-center space-x-1 mt-2 flex-wrap'>
-                                <span className='text-xs sm:text-sm text-gray-500'>
-                                  Colors:
-                                </span>
-                                <div className='flex space-x-1'>
-                                  {product.colors
-                                    .slice(0, 3)
-                                    .map((color, colorIndex) => (
-                                      <span
-                                        key={colorIndex}
-                                        className='text-xs sm:text-sm px-1 sm:px-2 py-1 bg-blue-50 text-blue-600 rounded'
-                                      >
-                                        {color}
-                                      </span>
-                                    ))}
-                                  {product.colors.length > 3 && (
-                                    <span className='text-xs sm:text-sm text-gray-500'>
-                                      +{product.colors.length - 3} more
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            )}
                           </div>
                           <div className='text-right mt-2 sm:mt-0'>
                             <p className='font-semibold text-base sm:text-lg text-gray-900'>
