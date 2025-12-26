@@ -107,7 +107,7 @@ const CartList = () => {
     if (!product) {
       return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik02MCA2NUM2Mi43NjE0IDY1IDY1IDY3LjIzODYgNjUgNzBDNjUgNzIuNzYxNCA2Mi43NjE0IDc1IDYwIDc1QzU3LjIzODYgNzUgNTUgNzIuNzYxNCA1NSA3MEM1NSA2Ny4yMzg2IDU3LjIzODYgNjUgNjAgNjVaIiBmaWxsPSIjOUI5QkEwIi8+CjxwYXRoIGQ9Ik02MCA4NUM2Mi43NjE0IDg1IDY1IDg3LjIzODYgNjUgOTBDNjUgOTIuNzYxNCA2Mi43NjE0IDk1IDYwIDk1QzU3LjIzODYgOTUgNTUgOTIuNzYxNCA1NSA5MEM1NSA4Ny4yMzg2IDU3LjIzODYgODUgNjAgODVaIiBmaWxsPSIjOUI5QkEwIi8+Cjwvc3ZnPgo=';
     }
-   
+
     const imageUrl = getProductImageUrl(product);
     return imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik02MCA2NUM2Mi43NjE0IDY1IDY1IDY3LjIzODYgNjUgNzBDNjUgNzIuNzYxNCA2Mi43NjE0IDc1IDYwIDc1QzU3LjIzODYgNzUgNTUgNzIuNzYxNCA1NSA3MEM1NSA2Ny4yMzg2IDU3LjIzODYgNjUgNjAgNjVaIiBmaWxsPSIjOUI5QkEwIi8+CjxwYXRoIGQ9Ik02MCA4NUM2Mi43NjE0IDg1IDY1IDg3LjIzODYgNjUgOTBDNjUgOTIuNzYxNCA2Mi43NjE0IDk1IDYwIDk1QzU3LjIzODYgOTUgNTUgOTIuNzYxNCA1NSA5MEM1NSA4Ny4yMzg2IDU3LjIzODYgODUgNjAgODVaIiBmaWxsPSIjOUI5QkEwIi8+Cjwvc3ZnPgo=';
   };
@@ -182,40 +182,27 @@ const CartList = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-     
-      <div className="px-4 pt-12 lg:pt-24 pb-32 lg:pb-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
+
+      <div className="px-4 pt-28 lg:pt-24 pb-32 lg:pb-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
         {/* Back Button & Header */}
         <div className="mb-6 lg:mb-12">
-          {/* Mobile: floating icon-only back button */}
-          <button
-            onClick={() => navigate(-1)}
-            aria-label="Go back"
-            className="lg:hidden fixed top-16 left-4 z-50 bg-white border border-gray-200 p-2 rounded-full shadow-md text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            <ArrowLeftIcon className="w-5 h-5" />
-          </button>
+          {/* Old mobile back button removed as it's now in the header area */}
 
-          {/* Desktop: inline back button with space below */}
-          <div className="hidden lg:block mb-8">
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors group"
-            >
-              <ArrowLeftIcon className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
-              <span className="font-medium text-sm lg:text-base">Continue Shopping</span>
-            </button>
-          </div>
+          {/* Old desktop back button removed */}
 
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 lg:gap-4">
+          <div className="flex flex-row items-start justify-between gap-3 lg:gap-4">
             <div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Shopping Cart</h1>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">Shopping Cart</h1>
               <p className="text-gray-600 mt-1 text-sm lg:text-base">{cartSummary.itemCount} {cartSummary.itemCount === 1 ? 'item' : 'items'} in your cart</p>
             </div>
-           
-            <div className="flex items-center bg-green-50 border border-green-200 rounded-xl px-3 py-2 lg:px-4 lg:py-2 w-fit">
-              <TruckIcon className="w-4 h-4 lg:w-5 lg:h-5 text-green-600 mr-2" />
-              <span className="text-green-800 font-medium text-xs lg:text-sm">Free shipping on all orders!</span>
-            </div>
+
+            <button
+              onClick={() => navigate('/products')}
+              className="flex items-center bg-green-50 border border-green-200 rounded-xl px-3 py-2 lg:px-4 lg:py-2 w-fit hover:bg-green-100 transition-colors group flex-shrink-0"
+            >
+              <ArrowLeftIcon className="w-4 h-4 lg:w-5 lg:h-5 text-green-600 mr-1 lg:mr-2 group-hover:-translate-x-1 transition-transform" />
+              <span className="text-green-800 font-medium text-xs lg:text-sm">Continue Shopping</span>
+            </button>
           </div>
         </div>
 
@@ -229,7 +216,7 @@ const CartList = () => {
               const gstAmount = item.itemCalculations?.gstAmount || ((productPrice * item.quantity * gstRate) / 100);
               const productGST = formatGST(gstRate);
               const productName = product.name || 'Unnamed Product';
-              const productDescription = product.description || 'No description available';
+              const productDesignNumber = product.designNumber;
               const productImage = getProductImage(product);
               const isRemoving = removingItems.has(item.id);
               const isUpdating = updatingItems.has(item.id);
@@ -248,9 +235,7 @@ const CartList = () => {
                             e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik02MCA2NUM2Mi43NjE0IDY1IDY1IDY3LjIzODYgNjUgNzBDNjUgNzIuNzYxNCA2Mi43NjE0IDc1IDYwIDc1QzU3LjIzODYgNzUgNTUgNzIuNzYxNCA1NSA3MEM1NSA2Ny4yMzg2IDU3LjIzODYgNjUgNjAgNjVaIiBmaWxsPSIjOUI5QkEwIi8+CjxwYXRoIGQ9Ik02MCA4NUM2Mi43NjE0IDg1IDY1IDg3LjIzODYgNjUgOTBDNjUgOTIuNzYxNCA2Mi43NjE0IDk1IDYwIDk1QzU3LjIzODYgOTUgNTUgOTIuNzYxNCA1NSA5MEM1NSA4Ny4yMzg2IDU3LjIzODYgODUgNjAgODVaIiBmaWxsPSIjOUI5QkEwIi8+Cjwvc3ZnPgo=';
                           }}
                         />
-                        <div className="absolute -top-1 -right-1 lg:-top-2 lg:-right-2 bg-green-100 text-green-800 text-xs font-semibold px-1.5 py-0.5 lg:px-2 lg:py-1 rounded-full">
-                          In Stock
-                        </div>
+                        {/* In Stock badge removed */}
                       </div>
 
                       {/* Product Details */}
@@ -260,9 +245,11 @@ const CartList = () => {
                             <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 mb-1 line-clamp-2 break-words">
                               {productName}
                             </h3>
-                            <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mb-2 lg:mb-3 break-words">
-                              {productDescription}
-                            </p>
+                            {productDesignNumber && (
+                              <p className="text-xs sm:text-sm text-gray-500 font-medium mb-2 lg:mb-3">
+                                Design No: {productDesignNumber}
+                              </p>
+                            )}
                             <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
                               <span className="flex items-center whitespace-nowrap">
                                 <ShieldCheckIcon className="w-3 h-3 mr-1 flex-shrink-0" />
@@ -336,39 +323,28 @@ const CartList = () => {
             <div className="sticky top-24 space-y-6">
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Order Summary</h2>
-               
+
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between text-gray-600">
                     <span>Subtotal ({cartSummary.itemCount} items)</span>
                     <span className="font-semibold">{formatPrice(cartSummary.subtotal)}</span>
                   </div>
-                 
+
                   <div className="flex justify-between text-gray-600">
                     <span>Tax & GST</span>
                     <span className="font-semibold">{formatPrice(cartSummary.gstAmount)}</span>
                   </div>
-                 
-                  <div className="flex justify-between text-gray-600">
-                    <div className="flex items-center">
-                      <TruckIcon className="w-4 h-4 mr-1" />
-                      <span>Shipping</span>
-                    </div>
-                    <span className="font-semibold text-green-600">Free</span>
-                  </div>
-                 
+
+                  {/* Shipping line removed */}
+
                   <div className="border-t border-gray-200 pt-4">
                     <div className="flex justify-between text-lg font-bold text-gray-900">
-                      <span>Total</span>
+                      <span>Grand Total</span>
                       <span className="text-primary">{formatPrice(cartSummary.totalAmount)}</span>
                     </div>
                   </div>
                 </div>
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
-                  <div className="flex items-center text-green-800">
-                    <CheckCircleIcon className="w-5 h-5 mr-2 text-green-600" />
-                    <span className="font-semibold text-sm">You're saving ₹200 on shipping!</span>
-                  </div>
-                </div>
+                {/* Saving badge removed */}
                 <button
                   onClick={handleCheckout}
                   disabled={cartLoading || cart.length === 0}
@@ -388,16 +364,9 @@ const CartList = () => {
                     <ShieldCheckIcon className="w-4 h-4 mr-2" />
                     <span>Secure SSL encrypted checkout</span>
                   </div>
-                 
+
                   <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-gray-500">
-                    <div className="flex items-center">
-                      <CreditCardIcon className="w-4 h-4 mr-1" />
-                      <span>All cards accepted</span>
-                    </div>
-                    <div className="flex items-center">
-                      <TruckIcon className="w-4 h-4 mr-1" />
-                      <span>Free returns</span>
-                    </div>
+                    {/* All cards accepted and Free returns removed */}
                   </div>
                 </div>
               </div>
@@ -410,7 +379,7 @@ const CartList = () => {
           <div className="px-4 py-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-600">Order Total</p>
+                <p className="text-xs text-gray-600">Grand Total</p>
                 <p className="text-xl font-bold text-primary">{formatPrice(cartSummary.totalAmount)}</p>
               </div>
               <div className="flex gap-3">
@@ -436,10 +405,7 @@ const CartList = () => {
                 </button>
               </div>
             </div>
-            <p className="text-center text-xs text-green-700 font-medium mt-2">
-              <TruckIcon className="w-3 h-3 inline mr-1" />
-              Free shipping included
-            </p>
+            {/* Mobile free shipping text removed */}
           </div>
         </div>
 
@@ -458,39 +424,28 @@ const CartList = () => {
                     <XMarkIcon className="w-6 h-6" />
                   </button>
                 </div>
-               
+
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between text-gray-600">
                     <span>Subtotal ({cartSummary.itemCount} items)</span>
                     <span className="font-semibold">{formatPrice(cartSummary.subtotal)}</span>
                   </div>
-                 
+
                   <div className="flex justify-between text-gray-600">
                     <span>Tax & GST</span>
                     <span className="font-semibold">{formatPrice(cartSummary.gstAmount)}</span>
                   </div>
-                 
-                  <div className="flex justify-between text-gray-600">
-                    <div className="flex items-center">
-                      <TruckIcon className="w-4 h-4 mr-1" />
-                      <span>Shipping</span>
-                    </div>
-                    <span className="font-semibold text-green-600">Free</span>
-                  </div>
-                 
+
+                  {/* Mobile modal shipping line removed */}
+
                   <div className="border-t border-gray-200 pt-4">
                     <div className="flex justify-between text-lg font-bold text-gray-900">
-                      <span>Total</span>
+                      <span>Grand Total</span>
                       <span className="text-primary">{formatPrice(cartSummary.totalAmount)}</span>
                     </div>
                   </div>
                 </div>
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
-                  <div className="flex items-center text-green-800">
-                    <CheckCircleIcon className="w-5 h-5 mr-2 text-green-600" />
-                    <span className="font-semibold text-sm">You're saving ₹200 on shipping!</span>
-                  </div>
-                </div>
+                {/* Mobile modal saving badge removed */}
                 <button
                   onClick={handleCheckout}
                   disabled={cartLoading || cart.length === 0}
@@ -510,16 +465,9 @@ const CartList = () => {
                     <ShieldCheckIcon className="w-4 h-4 mr-2" />
                     <span>Secure SSL encrypted checkout</span>
                   </div>
-                 
+
                   <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-gray-500">
-                    <div className="flex items-center">
-                      <CreditCardIcon className="w-4 h-4 mr-1" />
-                      <span>All cards accepted</span>
-                    </div>
-                    <div className="flex items-center">
-                      <TruckIcon className="w-4 h-4 mr-1" />
-                      <span>Free returns</span>
-                    </div>
+                    {/* Mobile modal cards and returns removed */}
                   </div>
                 </div>
               </div>
@@ -527,7 +475,7 @@ const CartList = () => {
           </div>
         )}
       </div>
-     
+
       <Footer />
     </div>
   );

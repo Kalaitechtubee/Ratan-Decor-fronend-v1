@@ -79,11 +79,10 @@ const Products = ({ product }) => {
           <div className="flex-grow flex items-center justify-center">
             <button
               aria-label="Add to Cart"
-              className={`transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 flex items-center space-x-2 px-4 py-2 rounded-full font-medium ${
-                isInCart || product.stock <= 0
+              className={`transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 flex items-center space-x-2 px-4 py-2 rounded-full font-medium ${isInCart || product.stock <= 0
                   ? 'bg-gray-500/90 cursor-not-allowed text-white'
                   : 'bg-[#ff4747]/90 hover:bg-[#ff4747] text-white shadow-lg'
-              }`}
+                }`}
               onClick={isInCart || product.stock <= 0 ? null : handleAddToCart}
               disabled={isInCart || cartLoading || product.stock <= 0}
               title={isInCart ? 'Already in Cart' : product.stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
@@ -114,11 +113,10 @@ const Products = ({ product }) => {
 
           <button
             aria-label="Add to Cart (Mobile)"
-            className={`md:hidden flex items-center space-x-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors mt-2 ${
-              isInCart || product.stock <= 0
+            className={`md:hidden flex items-center space-x-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors mt-2 ${isInCart || product.stock <= 0
                 ? 'bg-gray-400 cursor-not-allowed text-white'
                 : 'bg-[#ff4747] hover:bg-[#e63e3e] text-white'
-            }`}
+              }`}
             onClick={isInCart || product.stock <= 0 ? null : handleAddToCart}
             disabled={isInCart || cartLoading || product.stock <= 0}
             title={isInCart ? 'Already in Cart' : product.stock <= 0 ? 'Out of Stock' : 'Add to Cart'}

@@ -22,7 +22,7 @@ import CookiesPolicy from '../Pages/CookiesPolicy';
 import Disclaimer from '../Pages/Disclaimer';
 import Privacy from '../Pages/Privacy';
 import ReturnsAndRefundsPolicy from '../Pages/Returns and refunds policy';
-import VideoCall from '../features/VideoCall/VideoCall';
+import EnquiryFormPage from '../features/OrderEnquiryForm/EnquiryFormPage';
 import Terms from '../Pages/Terms';
 import useScrollToTop from '../app/useScrollToTop';
 
@@ -86,7 +86,7 @@ function AppRoutes() {
       {/* Products */}
       <Route path="/products" element={<ProductPage />} />
       <Route path="/products/:id/:slug?" element={<ProductDetail />} />
-      <Route path="/video-call" element={<VideoCall />} />
+      <Route path="/enquiry-form" element={<EnquiryFormPage />} />
 
       {/* Cart */}
       <Route path="/cart" element={<CartList />} />

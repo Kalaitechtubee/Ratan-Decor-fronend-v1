@@ -61,21 +61,18 @@ export const getProducts = async ({
     const response = await api.get('/products', { params });
 
     if (response.data) {
-      // Debug logging in development
-      if (import.meta.env.DEV && response.data.appliedPriceRange) {
-        console.log('Price filtering applied:', response.data.appliedPriceRange);
-      }
+      const { products, pagination, summary, userRole: respRole, userType: respType } = response.data;
 
       return {
-        products: response.data.products || [],
-        totalPages: response.data.totalPages || 1,
-        currentPage: response.data.currentPage || page,
-        count: response.data.count || 0,
-        totalCount: response.data.totalCount || response.data.count || 0,
-        activeCount: response.data.activeCount || response.data.count || 0,
-        inactiveCount: response.data.inactiveCount || 0,
-        userType: response.data.userType || userType,
-        userRole: response.data.userRole || userRole,
+        products: products || [],
+        totalPages: pagination?.totalPages || 1,
+        currentPage: pagination?.currentPage || page,
+        count: pagination?.total || 0,
+        totalCount: summary?.total || pagination?.total || 0,
+        activeCount: summary?.active || 0,
+        inactiveCount: summary?.inactive || 0,
+        userType: respType || userType,
+        userRole: respRole || userRole,
         isActiveFilter: response.data.isActiveFilter,
         designNumberFilter: response.data.designNumberFilter || designNumber,
         minDesignNumberFilter: response.data.minDesignNumberFilter || minDesignNumber,
@@ -140,20 +137,21 @@ export const getProductById = async ({ id, userRole, userType }) => {
   }
 };
 
-export const searchProductsByName = async ({ name, userType, page = 1, limit = 20 }) => {
+export const searchProductsByName = async ({ name, userType, page = 1, limit = 12 }) => {
   try {
     const params = { name, page, limit };
     if (userType && userType !== '') params.userType = userType;
 
     const response = await api.get('/products/search', { params });
+    const { products, pagination, userRole, userType: respType } = response.data;
 
     return {
-      products: response.data.products || [],
-      totalPages: response.data.totalPages || 1,
-      currentPage: response.data.currentPage || page,
-      count: response.data.count || 0,
-      userType: response.data.userType,
-      userRole: response.data.userRole
+      products: products || [],
+      totalPages: pagination?.totalPages || 1,
+      currentPage: pagination?.currentPage || page,
+      count: pagination?.total || 0,
+      userType: respType || userType,
+      userRole: userRole
     };
   } catch (error) {
     throw error;

@@ -11,7 +11,7 @@ import {
   Check,
   X,
 } from "lucide-react";
-import appointmentApi from "../../features/VideoCall/appointmentApi";
+import appointmentApi from "../../features/OrderEnquiryForm/appointmentApi";
 import { useAuth } from "../../features/auth/hooks/useAuth";
 
 const VideoCallPopup = ({ isOpen, onClose }) => {
@@ -240,7 +240,7 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
                 </p> */}
               </div>
 
-        
+
 
               {/* Name and Phone: Same row, two columns */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -292,7 +292,7 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
                   required
                 />
               </div>
-   <div className="flex justify-end pt-2">
+              <div className="flex justify-end pt-2">
                 <button
                   onClick={nextStep}
                   className="px-4 py-2 bg-primary text-white rounded-xl hover:bg-accent focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 font-medium text-sm font-roboto"
@@ -321,7 +321,7 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
                 </div>
               </div>
 
-           
+
             </div>
           )}
 
@@ -543,24 +543,24 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
           )}
         </div>
 
-              {!user && (
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
-                  <p className="text-xs text-gray-800 text-center font-roboto">
-                    <span className="font-medium">Guest booking</span> •{" "}
-                    <a href="/login" className="underline hover:text-primary">
-                      Log in
-                    </a>{" "}
-                    or{" "}
-                    <a
-                      href="/register"
-                      className="underline hover:text-primary"
-                    >
-                      register
-                    </a>{" "}
-                    to manage your appointments
-                  </p>
-                </div>
-              )}
+        {!user && (
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
+            <p className="text-xs text-gray-800 text-center font-roboto">
+              <span className="font-medium">Guest booking</span> •{" "}
+              <a href="/login" className="underline hover:text-primary">
+                Log in
+              </a>{" "}
+              or{" "}
+              <a
+                href="/register"
+                className="underline hover:text-primary"
+              >
+                register
+              </a>{" "}
+              to manage your appointments
+            </p>
+          </div>
+        )}
 
         <style jsx>{`
           @keyframes fade-in {

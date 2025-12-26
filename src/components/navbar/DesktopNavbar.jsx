@@ -25,7 +25,10 @@ export default function DesktopNavbar({
   profileRef,
   categoryRef,
   handleCategoryClick,
-  onOpenVideoCallPopup, // New prop to open the popup
+  onOpenVideoCallPopup,
+  onOpenCart,
+  isCartOpen,
+  cartCount = 0
 }) {
   // Animation variants
   const dropdownVariants = {
@@ -147,20 +150,59 @@ export default function DesktopNavbar({
                   <FaVideo className="text-[#ff4747] text-lg" />
                   Shop on call
                 </button>
-                <Link
-                  to="/cart"
-                  aria-label="Go to cart"
-                  className={`flex items-center gap-2 px-3 py-2 text-base font-medium rounded-lg
-    underline-animation font-roboto transition-colors duration-200
-    ${isActiveRoute('/cart')
-                      ? 'text-[#ff4747]'        // active: red text
-                      : 'text-gray-700 hover:text-[#ff4747]' // hover: text only
-                    }
-  `}
-                >
-                  <FaShoppingCart className="text-[#ff4747] text-lg" />
-                  <h1 className="mr-2">Cart</h1>
-                </Link>
+<button
+  onClick={onOpenCart}
+  aria-label="Open cart"
+  className={`flex items-center gap-3 px-4 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200
+    ${isCartOpen || isActiveRoute('/cart')
+      ? 'text-[#ff4747] bg-[#ff4747]/10'
+      : 'text-gray-700 hover:text-[#ff4747]'
+    }`}
+>
+  {/* Cart Icon + Badge */}
+  <div className="relative flex items-center justify-center">
+    <FaShoppingCart
+      className={`text-lg transition-colors duration-200
+        ${isCartOpen || isActiveRoute('/cart')
+          ? 'text-[#ff4747]'
+          : 'text-gray-700'
+        }`}
+    />
+
+    {cartCount > 0 && (
+      <span
+        className="
+          absolute
+          -top-2.5
+          -right-3
+          bg-[#ff4747]
+          text-white
+          text-[11px]
+          font-bold
+          h-5
+          min-w-[22px]
+          px-1.5
+          rounded-full
+          border-2
+          border-white
+          flex
+          items-center
+          justify-center
+          shadow-lg
+        "
+      >
+        {cartCount > 99 ? '99+' : cartCount}
+      </span>
+    )}
+  </div>
+
+  {/* Cart Text */}
+  <span className="tracking-wide font-medium">
+    Cart
+  </span>
+</button>
+
+
 
 
 

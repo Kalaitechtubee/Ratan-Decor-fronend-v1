@@ -2,12 +2,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Package, Loader2, AlertCircle } from 'lucide-react';
 import EnhancedProductCard from './EnhancedProductCard';
 
-function ProductGrid({ 
-  products = [], 
-  viewMode = 'grid', 
-  status = 'idle', 
+function ProductGrid({
+  products = [],
+  viewMode = 'grid',
+  status = 'idle',
   error = null,
-  onRetry = null 
+  onRetry = null
 }) {
   console.log('ProductGrid received:', { products: products.length, viewMode, status, error });
 
@@ -61,7 +61,7 @@ function ProductGrid({
           </div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">No Products Found</h3>
           <p className="text-gray-600 mb-6 text-center max-w-md">
-            We couldn't find any products matching your current search criteria. 
+            We couldn't find any products matching your current search criteria.
             Try adjusting your filters or search terms to see more results.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
@@ -111,8 +111,8 @@ function ProductGrid({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              transition={{ 
-                duration: 0.3, 
+              transition={{
+                duration: 0.3,
                 delay: index * 0.05 // Stagger animation
               }}
               layout
@@ -126,36 +126,15 @@ function ProductGrid({
         </AnimatePresence>
       </div>
 
-      {/* Product Grid Summary */}
-      {products.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white rounded-lg border border-gray-200 p-4"
-        >
-          <div className="flex flex-wrap items-center justify-between text-sm text-gray-600">
-            <div className="flex items-center space-x-4">
-              <span>Showing {products.length} products</span>
-              <span className="text-gray-400">•</span>
-              <span>View: {viewMode === 'grid' ? 'Grid' : 'List'}</span>
-            </div>
-            <div className="flex items-center space-x-2 mt-2 sm:mt-0">
-              <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-                Page {Math.min(products.length, 8)} items per page
-              </span>
-            </div>
-          </div>
-        </motion.div>
-      )}
+
     </motion.div>
   );
 }
 
 // Skeleton loader component for better UX
 export function ProductGridSkeleton({ viewMode = 'grid', count = 8 }) {
-  const gridConfig = viewMode === 'grid' 
-    ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+  const gridConfig = viewMode === 'grid'
+    ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
     : 'grid-cols-1';
 
   return (

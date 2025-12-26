@@ -15,6 +15,7 @@ import MobileBottomNav from './navbar/MobileBottomNav';
 import ProductSidebar from './navbar/ProductSidebar';
 import MoreMenu from './navbar/MoreMenu';
 import CategoryDropdown from './CategoryDropdown';
+import CartSidePanel from '../features/cart/components/CartSidePanel';
 
 export default function Navbar() {
   const dispatch = useDispatch();
@@ -22,13 +23,14 @@ export default function Navbar() {
   const location = useLocation();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const { userType } = useSelector((state) => state.userType);
-  const { clearCart } = useCart();
-  
+  const { clearCart, cart } = useCart();
+  const cartCount = cart?.length || 0;
+
   // Refs for click outside detection
   const profileRef = useRef(null);
   const categoryRef = useRef(null);
   const moreMenuRef = useRef(null);
- 
+
   // UI State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -39,7 +41,7 @@ export default function Navbar() {
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isVideoCallPopupOpen, setIsVideoCallPopupOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
- 
+
   // User Type State
   const [currentUserType, setCurrentUserType] = useState(() => {
     const stored = localStorage.getItem('userType');
@@ -161,10 +163,10 @@ export default function Navbar() {
   const handleCategoryClick = (category) => {
     console.log('Navbar: Category clicked:', category);
     setActiveCategory(category);
-    
+
     // Close dropdown immediately
     setIsCategoryDropdownOpen(false);
-    
+
     // Navigate based on category data
     if (category && category.id) {
       const url = `/products?categoryId=${category.id}&categoryName=${encodeURIComponent(category.name)}`;
@@ -178,7 +180,7 @@ export default function Navbar() {
       console.log('Navbar: Navigating to all products');
       navigate('/products');
     }
-    
+
     // Close mobile sidebar if open
     if (window.innerWidth < 768) {
       setIsProductSidebarOpen(false);
@@ -234,6 +236,16 @@ export default function Navbar() {
     profileRef,
     categoryRef,
     moreMenuRef
+  };
+
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // New shared props including cart open handler
+  const cartProps = {
+    ...sharedProps,
+    isCartOpen,
+    onOpenCart: () => setIsCartOpen(true),
+    cartCount
   };
 
   return (
@@ -344,34 +356,34 @@ export default function Navbar() {
           }
         `}
       </style>
-     
+
       {/* Desktop Navigation */}
-      <DesktopNavbar 
-        {...sharedProps}
+      <DesktopNavbar
+        {...cartProps}
         {...stateProps}
         {...refProps}
       />
 
       {/* Mobile Navigation */}
-      <MobileNavbar 
-        {...sharedProps}
+      <MobileNavbar
+        {...cartProps}
         {...stateProps}
       />
 
       {/* Mobile Bottom Navigation */}
-      <MobileBottomNav 
-        {...sharedProps}
+      <MobileBottomNav
+        {...cartProps}
         {...stateProps}
       />
 
       {/* Product Sidebar for Mobile */}
-      <ProductSidebar 
+      <ProductSidebar
         {...sharedProps}
         {...stateProps}
       />
 
       {/* More Menu for Mobile */}
-      <MoreMenu 
+      <MoreMenu
         {...sharedProps}
         {...stateProps}
       />
@@ -402,6 +414,11 @@ export default function Navbar() {
           />
         )}
       </AnimatePresence>
+      {/* Cart Side Panel */}
+      <CartSidePanel
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+      />
     </>
   );
 }
