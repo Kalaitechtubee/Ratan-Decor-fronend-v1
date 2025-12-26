@@ -11,6 +11,7 @@ const Orders = ({ navigate }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalOrders, setTotalOrders] = useState(0);
 
   const abortControllerRef = useRef(null);
   const isMountedRef = useRef(true);
@@ -45,10 +46,11 @@ const Orders = ({ navigate }) => {
             notes: order.notes || 'N/A',
             expectedDeliveryDate: order.expectedDeliveryDate,
           }));
-          
+
           if (isMountedRef.current && !signal.aborted) {
             setOrders(mappedOrders);
             setTotalPages(response.data.pagination.totalPages || 1);
+            setTotalOrders(response.data.pagination.total || mappedOrders.length);
           }
         } else {
           throw new Error(response.data.message || 'Failed to fetch orders');
@@ -56,7 +58,7 @@ const Orders = ({ navigate }) => {
       } catch (err) {
         if (signal.aborted) return;
         console.error('Fetch orders error:', err);
-        
+
         if (err.response?.status === 403 && isMountedRef.current) {
           setOrders([]);
         } else if (isMountedRef.current) {
@@ -81,20 +83,20 @@ const Orders = ({ navigate }) => {
   }, [currentPage]);
 
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-IN', { 
-      style: 'currency', 
-      currency: 'INR', 
-      minimumFractionDigits: 2 
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 2
     }).format(price || 0);
   };
 
   const formatDate = (dateString) => {
-    return dateString 
-      ? new Date(dateString).toLocaleDateString('en-IN', { 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
-        })
+    return dateString
+      ? new Date(dateString).toLocaleDateString('en-IN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
       : 'N/A';
   };
 
@@ -127,6 +129,29 @@ const Orders = ({ navigate }) => {
     }
   };
 
+  const getPageNumbers = () => {
+    const pages = [];
+    const showMax = 5;
+
+    if (totalPages <= showMax) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push('...');
+
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+
+      for (let i = start; i <= end; i++) {
+        if (!pages.includes(i)) pages.push(i);
+      }
+
+      if (currentPage < totalPages - 2) pages.push('...');
+      if (!pages.includes(totalPages)) pages.push(totalPages);
+    }
+    return pages;
+  };
+
   if (isLoading && orders.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -150,7 +175,7 @@ const Orders = ({ navigate }) => {
       <div className="bg-white p-4 sm:p-6 rounded-lg shadow-card border border-neutral-100">
         <h3 className="text-base sm:text-lg font-semibold text-neutral-900 mb-4 sm:mb-6 flex items-center gap-2">
           <FaShoppingBag className="text-primary text-sm sm:text-base" />
-          <span className="truncate">Your Orders ({orders.length})</span>
+          <span className="truncate">Your Orders ({totalOrders})</span>
         </h3>
         {orders.length === 0 ? (
           <motion.div
@@ -194,7 +219,7 @@ const Orders = ({ navigate }) => {
                       <FaBoxOpen className="text-primary text-sm sm:text-base flex-shrink-0" />
                       <h4 className="text-sm sm:text-base font-semibold text-neutral-900 truncate">Order #{order.id}</h4>
                     </div>
-                    
+
                     <div className="space-y-2 text-xs sm:text-sm">
                       <p className="text-neutral-600 flex items-center gap-2">
                         <FaCalendarAlt className="text-neutral-400 flex-shrink-0" />
@@ -275,17 +300,19 @@ const Orders = ({ navigate }) => {
                   Previous
                 </motion.button>
 
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                {getPageNumbers().map((page, index) => (
                   <motion.button
-                    key={page}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handlePageChange(page)}
-                    className={`px-2 sm:px-3 py-1 rounded-lg font-medium text-xs sm:text-sm ${
-                      currentPage === page
-                        ? 'bg-primary text-white'
-                        : 'bg-gray-200 text-neutral-800 hover:bg-gray-300'
-                    }`}
+                    key={index}
+                    whileHover={page === '...' ? {} : { scale: 1.05 }}
+                    whileTap={page === '...' ? {} : { scale: 0.95 }}
+                    onClick={() => page !== '...' && handlePageChange(page)}
+                    disabled={page === '...'}
+                    className={`px-2 sm:px-3 py-1 rounded-lg font-medium text-xs sm:text-sm transition-all ${currentPage === page
+                        ? 'bg-primary text-white shadow-md'
+                        : page === '...'
+                          ? 'bg-transparent text-neutral-400 cursor-default'
+                          : 'bg-gray-100 text-neutral-800 hover:bg-gray-200 border border-neutral-200'
+                      }`}
                   >
                     {page}
                   </motion.button>
