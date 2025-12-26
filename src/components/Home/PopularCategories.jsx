@@ -87,7 +87,7 @@ const PopularCategories = ({ onCategoryClick }) => {
 
   if (isLoading) {
     return (
-      <div className="w-full bg-white py-16 lg:py-20">
+      <div className="w-full bg-white py-8 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <Loader2 className="w-10 h-10 animate-spin mx-auto mb-4" style={{ color: primaryColor }} />
@@ -136,7 +136,7 @@ const PopularCategories = ({ onCategoryClick }) => {
   }
 
   return (
-    <section className="w-full py-16 lg:py-20">
+    <section className="w-full py-12 lg:py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           className="text-center mb-12 lg:mb-16"

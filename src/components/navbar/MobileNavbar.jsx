@@ -118,6 +118,8 @@ export default function MobileNavbar({
               </button>
             )}
 
+
+
             {/* Mobile User Type Button */}
             {!isMobileSearchOpen && (
               <motion.button

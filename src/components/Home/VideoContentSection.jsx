@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FaVideo, FaArrowRight } from 'react-icons/fa';
 
-const VideoContentSection = () => {
+const VideoContentSection = ({ onOpenVideoCallPopup }) => {
+  const navigate = useNavigate();
   const [isPlaying, setIsPlaying] = useState(false);
 
   const handlePlayVideo = () => {
@@ -8,7 +11,7 @@ const VideoContentSection = () => {
   };
 
   return (
-    <div className="mb-8 mt-10 w-full max-w-7xl mx-auto px-4 sm:px-6 bg-gray-50 flex flex-col lg:flex-row items-center gap-8 sm:gap-12 lg:gap-16">
+    <div className="mb-4 w-full max-w-7xl mx-auto px-4 sm:px-6 bg-gray-50 flex flex-col lg:flex-row items-center gap-8 sm:gap-12 lg:gap-16">
       {/* Left Side Content */}
       <div className="w-full lg:w-1/2 animate-fade-in-left">
         <div className="relative">
@@ -33,19 +36,26 @@ Step inside our store and explore a wide range of plywood, mica, veneers, doors,
 
         </p>
         
-        {/* Mobile button layout adjustments */}
+        {/* Updated button layout - Shop on Call and View Products */}
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-          <button className="group px-6 sm:px-8 py-3 sm:py-4 bg-primary text-white font-title font-semibold rounded-xl hover:bg-opacity-90 transition-all duration-300 transform hover:scale-105 hover:shadow-lg w-full sm:w-auto">
+          <button 
+            onClick={onOpenVideoCallPopup}
+            className="group px-6 sm:px-8 py-3 sm:py-4 bg-primary text-white font-title font-semibold rounded-xl hover:bg-opacity-90 transition-all duration-300 transform hover:scale-105 hover:shadow-lg w-full sm:w-auto"
+          >
             <span className="flex items-center justify-center gap-2 text-sm sm:text-base">
-              Learn More
-              <svg className="w-4 sm:w-5 h-4 sm:h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
+              <FaVideo className="text-white" />
+              Shop on Call
             </span>
           </button>
           
-          <button className="px-6 sm:px-8 py-3 sm:py-4 border-2 border-primary text-primary font-title font-semibold rounded-xl hover:bg-primary hover:text-white transition-all duration-300 transform hover:scale-105 text-sm sm:text-base w-full sm:w-auto">
-            View Portfolio
+          <button 
+            onClick={() => navigate('/products')}
+            className="px-6 sm:px-8 py-3 sm:py-4 border-2 border-primary text-primary font-title font-semibold rounded-xl hover:bg-primary hover:text-white transition-all duration-300 transform hover:scale-105 text-sm sm:text-base w-full sm:w-auto group"
+          >
+            <span className="flex items-center justify-center gap-2">
+              View Products
+              <FaArrowRight className="transition-transform group-hover:translate-x-1" />
+            </span>
           </button>
         </div>
       </div>
@@ -98,13 +108,6 @@ Step inside our store and explore a wide range of plywood, mica, veneers, doors,
           <div className="absolute top-6 sm:top-8 right-6 sm:right-8 w-1.5 sm:w-2 h-1.5 sm:h-2 bg-white rounded-full opacity-40"></div>
           <div className="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 w-2 sm:w-3 h-2 sm:h-3 bg-white rounded-full opacity-60"></div>
           <div className="absolute bottom-6 sm:bottom-8 left-6 sm:left-8 w-1.5 sm:w-2 h-1.5 sm:h-2 bg-white rounded-full opacity-40"></div>
-        </div>
-
-        {/* Video description - Mobile text alignment */}
-        <div className="mt-6 p-5 sm:mt-6 text-center sm:text-left">
-          <p className="text-gray-600 font-poppins text-xs sm:text-sm">
-            Experience the artistry and dedication that goes into every piece
-          </p>
         </div>
       </div>
     </div>

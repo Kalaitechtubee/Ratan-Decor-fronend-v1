@@ -258,7 +258,7 @@ export default function DesktopNavbar({
                             className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-all duration-300 font-roboto"
                           >
                             <FaSignOutAlt className="inline mr-3 text-base" />
-                            Sign Out
+                            Logout
                           </button>
                         </div>
                       </motion.div>

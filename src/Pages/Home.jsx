@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import HomeSlider from "../components/HomeSlider";
@@ -13,6 +14,7 @@ import CounterComponent from "../components/Home/CounterComponent";
 import PopularCategories from "../components/Home/PopularCategories";
 import FeaturesSection from "../components/Home/FeaturesSection";
 import VideoContentSection from "../components/Home/VideoContentSection";
+import VideoCallPopup from "../components/Home/VideoCallPopup";
 import Contact from "../Pages/Contact";
 
 function Home() {
@@ -25,6 +27,7 @@ function Home() {
   const [showUserTypePopup, setShowUserTypePopup] = useState(false);
   const hasFetchedRef = useRef(false);
   const popupTriggeredRef = useRef(false);
+  const [isVideoCallPopupOpen, setIsVideoCallPopupOpen] = useState(false);
 
   // Trigger popup based on authentication status
   useEffect(() => {
@@ -160,14 +163,22 @@ function Home() {
 
             {/* Video Content Section */}
             <section>
-              <VideoContentSection />
+              <VideoContentSection onOpenVideoCallPopup={() => setIsVideoCallPopupOpen(true)} />
             </section>
              <section>
-             <Contact />
+              <Contact />
             </section>
           </main>
         </div>
       </div>
+      <AnimatePresence>
+        {isVideoCallPopupOpen && (
+          <VideoCallPopup
+            isOpen={isVideoCallPopupOpen}
+            onClose={() => setIsVideoCallPopupOpen(false)}
+          />
+        )}
+      </AnimatePresence>
       <Footer />
     </>
   );
