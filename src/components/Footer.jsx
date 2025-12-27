@@ -85,7 +85,7 @@ const Footer = () => {
               <ul className="space-y-2">
                 {[
                   { text: 'Home', route: '/' },
-                  { text: 'About us', route: '/about' },
+                  { text: 'Company', route: '/about' },
                   { text: 'Shop', route: '/products' },
                   { text: 'Contact us', route: '/contact' },
                 ].map((item, index) => (

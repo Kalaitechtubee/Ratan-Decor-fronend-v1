@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import { Phone, Mail, MapPin } from "lucide-react";
 import { ContactService } from "../services/apiServices";
 
-const Contact = () => {
+const Contact = ({ isHome = false }) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -99,8 +99,13 @@ const Contact = () => {
 
   return (
     <div>
-      <Navbar />
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 min-h-screen font-sans">
+  {!isHome && <Navbar />}
+
+      <div
+  className={`max-w-7xl mx-auto px-4 sm:px-6 font-sans ${
+    isHome ? "pt-6 pb-12 min-h-fit" : "pt-24 pb-16 min-h-screen"
+  }`}
+>
         <div className="rounded-lg shadow-sm p-6 sm:p-8 ">
           {/* Header */}
           <div className="mb-8">
@@ -162,7 +167,9 @@ const Contact = () => {
                       }`}
                     />
                     {errors.email && (
-                      <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.email}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -286,10 +293,12 @@ const Contact = () => {
             <div className="space-y-8">
               <div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
-               Let’s Discuss Your Requirement
+                  Let’s Discuss Your Requirement
                 </h2>
                 <p className="text-gray-600 text-base sm:text-lg leading-relaxed">
-Tell us your requirements and our team will get back to you with product details, pricing, and expert guidance for your project.
+                  Tell us your requirements and our team will get back to you
+                  with product details, pricing, and expert guidance for your
+                  project.
                 </p>
               </div>
 
@@ -321,6 +330,7 @@ Tell us your requirements and our team will get back to you with product details
           </div>
         </div>
       </div>
+      {!isHome && <Footer/>}
     </div>
   );
 };
