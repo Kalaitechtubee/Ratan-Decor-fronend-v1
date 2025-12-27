@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from '../../../services/axios';
 import { logout } from '../../../features/auth/authSlice';
@@ -14,178 +14,82 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Overview from './Overview';
 import PersonalInfo from './PersonalInfo';
 import Orders from './Orders';
-import { FaUser, FaIdCard, FaShoppingBag, FaCheckCircle, FaBoxOpen, FaInfoCircle, FaTimes, FaSignOutAlt } from 'react-icons/fa';
+import { FaUser, FaIdCard, FaShoppingBag, FaSignOutAlt, FaBars, FaTimes } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
-// Enhanced Tab Navigation Component with Mobile Responsive
-const TabNavigation = ({ tabs, activeTab, handleTabChange }) => (
-  <div className="bg-white rounded-lg shadow-card overflow-hidden mb-4 sm:mb-6 border border-neutral-100">
-    <nav className="flex border-b border-neutral-200 overflow-x-auto tab-scroll no-scrollbar">
-      {tabs.map((tab) => (
-        <motion.button
-          key={tab.id}
-          whileHover={{ 
-            backgroundColor: activeTab === tab.id ? 'rgba(59, 130, 246, 0.1)' : 'rgba(220, 38, 38, 0.08)',
-            scale: 1.02
-          }}
-          whileTap={{ scale: 0.98 }}
-          className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-300 relative group flex-1 sm:flex-initial ${
-            activeTab === tab.id 
-              ? 'text-primary border-b-2 border-primary' 
-              : 'text-neutral-600 hover:text-red-600'
-          }`}
-          onClick={() => handleTabChange(tab.id)}
-          role="tab"
-          aria-selected={activeTab === tab.id}
-        >
-          <tab.icon className={`text-sm sm:text-base transition-colors flex-shrink-0 ${activeTab === tab.id ? 'text-primary' : 'group-hover:text-red-600'}`} />
-          <span className="hidden sm:inline">{tab.label}</span>
-          <span className="sm:hidden text-xs">{tab.label.split(' ')[0]}</span>
-          {activeTab !== tab.id && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileHover={{ opacity: 1 }}
-              className="absolute bottom-0 left-0 right-0 h-1 bg-red-500 rounded-t-full"
-            />
-          )}
-        </motion.button>
-      ))}
-    </nav>
-  </div>
-);
-
-// Enhanced Profile Header Component
-// Enhanced Profile Header Component - Logout text visible on MOBILE too
-const ProfileHeader = ({ profile, getRoleColor, getStatusIcon, getStatusColor, onLogoutClick }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.4 }}
-    className="bg-white rounded-lg shadow-card overflow-hidden mb-4 sm:mb-6 border border-neutral-100"
+const SidebarLink = ({ tab, activeTab, handleTabChange }) => (
+  <motion.button
+    whileHover={{ x: 4 }}
+    whileTap={{ scale: 0.98 }}
+    onClick={() => handleTabChange(tab.id)}
+    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 group ${
+      activeTab === tab.id
+        ? 'bg-primary text-white shadow-lg shadow-primary/20'
+        : 'text-neutral-600 hover:bg-primary/10 hover:text-primary'
+    }`}
   >
-    <div className="bg-gradient-to-r from-primary to-primary/80 h-20 sm:h-32" />
-    <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-2 sm:pt-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3 sm:gap-4 -mt-8 sm:-mt-12">
-        <div className="flex items-end gap-3 sm:gap-4 w-full sm:w-auto">
-          <motion.div
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.1 }}
-            className="w-16 h-16 sm:w-24 sm:h-24 bg-white rounded-full border-4 border-white shadow-md flex items-center justify-center flex-shrink-0"
-          >
-            <FaUser className="text-2xl sm:text-4xl text-primary" />
-          </motion.div>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-base sm:text-xl font-semibold text-neutral-900 truncate">{profile?.name || 'User'}</h1>
-            <p className="text-xs sm:text-sm text-neutral-600 truncate">{profile?.email || 'N/A'}</p>
-          </div>
-        </div>
-
-        {/* Right side: Role, Status, Logout */}
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
-          {/* Role Badge */}
-          <motion.span
-            whileHover={{ scale: 1.05 }}
-            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getRoleColor(profile?.role)}`}
-          >
-            <FaIdCard className="mr-1.5 flex-shrink-0" size={11} />
-            <span className="truncate max-w-20">{profile?.role || 'N/A'}</span>
-          </motion.span>
-
-          {/* Status Badge */}
-          <motion.span
-            whileHover={{ scale: 1.05 }}
-            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(profile?.status)}`}
-          >
-            {getStatusIcon(profile?.status)}
-            <span className="ml-1 capitalize truncate max-w-24">{profile?.status || 'N/A'}</span>
-          </motion.span>
-
-          {/* Logout Button - Text visible on mobile too */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onLogoutClick}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-full hover:bg-primary/90 transition-all duration-200 shadow-sm font-medium text-xs min-w-fit"
-            aria-label="Logout"
-          >
-            <FaSignOutAlt className="text-sm flex-shrink-0" />
-            <span className="whitespace-nowrap">Logout</span>
-          </motion.button>
-        </div>
-      </div>
-    </div>
-  </motion.div>
+    <tab.icon className={`text-lg transition-colors duration-300 ${
+      activeTab === tab.id 
+        ? 'text-white' 
+        : 'text-neutral-400 group-hover:text-primary'
+    }`} />
+    <span>{tab.label}</span>
+    {activeTab === tab.id && (
+      <motion.div
+        layoutId="activeTabIcon"
+        className="ml-auto w-1.5 h-1.5 bg-white rounded-full"
+      />
+    )}
+  </motion.button>
 );
 
-// Enhanced Logout Modal Component
-const LogoutModal = ({ isOpen, onClose, onConfirm }) => {
-  const modalVariants = {
-    hidden: { opacity: 0, scale: 0.8, y: 20 },
-    visible: { opacity: 1, scale: 1, y: 0 },
-    exit: { opacity: 0, scale: 0.8, y: 20 },
-  };
-
-  const overlayVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-  };
-
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.div
-            variants={overlayVariants}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            className="fixed inset-0 bg-black/50 z-50"
-            onClick={onClose}
-          />
-          <motion.div
-            variants={modalVariants}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            className="fixed inset-0 flex items-center justify-center z-50 p-4"
-          >
-            <div className="bg-white rounded-lg p-4 sm:p-6 shadow-card max-w-sm w-full">
-                        <div className="text-center mb-4 sm:mb-6">
-              <div className="w-12 sm:w-14 h-12 sm:h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                <FaTimes className="text-lg sm:text-xl text-red-600" />
-              </div>
-              <h3 className="text-base sm:text-lg font-semibold text-neutral-900 mb-2">Confirm Logout</h3>
-              <p className="text-xs sm:text-sm text-neutral-600">Are you sure you want to logout?</p>
+const LogoutModal = ({ isOpen, onClose, onConfirm }) => (
+  <AnimatePresence>
+    {isOpen && (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm"
+        />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
+        >
+          <div className="p-8 text-center">
+            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FaSignOutAlt className="text-2xl" />
             </div>
-            <div className="flex gap-2 sm:gap-3">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={onClose}
-                className="flex-1 px-4 py-2 bg-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-300 transition-all duration-200 font-medium text-xs sm:text-sm"
-              >
-                Cancel
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={onConfirm}
-                className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-200 font-medium text-xs sm:text-sm"
-              >
-                Logout
-              </motion.button>
-            </div>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-  );
-};
+            <h3 className="text-xl font-bold text-neutral-900 mb-2">Ready to Leave?</h3>
+            <p className="text-sm text-neutral-500">Are you sure you want to log out of your account? You will need to sign in again to access your profile.</p>
+          </div>
+          <div className="flex border-t border-neutral-100">
+            <button
+              onClick={onClose}
+              className="flex-1 px-6 py-4 text-sm font-bold text-neutral-600 hover:bg-neutral-50 transition-colors"
+            >
+              Stay Logged In
+            </button>
+            <button
+              onClick={onConfirm}
+              className="flex-1 px-6 py-4 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors border-l border-neutral-100"
+            >
+              Logout Now
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    )}
+  </AnimatePresence>
+);
 
 const ProfilePage = () => {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [profile, setProfile] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
@@ -205,22 +109,14 @@ const ProfilePage = () => {
   useEffect(() => {
     const loadUserTypes = async () => {
       try {
-        console.log('[ProfilePage] Loading user types...');
         const response = await UserTypeAPI.getAllUserTypes();
-        
         if (response.data && Array.isArray(response.data)) {
           setUserTypes(response.data);
-          console.log('[ProfilePage] User types loaded:', {
-            count: response.data.length,
-            cached: response.cached || false
-          });
         }
       } catch (err) {
-        console.error('[ProfilePage] Failed to load user types:', err);
         toast.error('Failed to load user types');
       }
     };
-
     loadUserTypes();
   }, []);
 
@@ -231,16 +127,13 @@ const ProfilePage = () => {
         if (response.data.success) {
           const total = response.data.orderSummary?.totalOrders || 
                        response.data.pagination?.total || 
-                       response.data.orders?.length || 
-                       0;
+                       response.data.orders?.length || 0;
           setTotalOrders(total);
         }
       } catch (err) {
-        console.error('Failed to fetch orders count:', err);
         setTotalOrders(0);
       }
     };
-
     fetchOrdersCount();
   }, []);
 
@@ -252,68 +145,24 @@ const ProfilePage = () => {
           setIsLoading(true);
           const response = await axios.get('/profile');
           const user = response.data.user;
-          
-          console.log('[ProfilePage] Profile loaded:', {
-            userId: user.id,
-            userTypeId: user.userTypeId,
-            email: user.email
-          });
-          
           setProfile(user);
           setFormData(user);
           setError(null);
-
-          if (user.userTypeId && userTypes.length > 0) {
-            const userType = userTypes.find((type) => type.id === user.userTypeId);
-            if (userType) {
-              const normalizedName = userType.name.toLowerCase();
-              localStorage.setItem('userType', normalizedName);
-              localStorage.setItem('userTypeId', user.userTypeId.toString());
-              console.log('[ProfilePage] Synced user type to localStorage:', userType.name);
-            }
-          }
         } catch (err) {
-          console.error('[ProfilePage] Fetch profile error:', err);
           const errorMessage = err.response?.data?.message || 'Failed to load profile data';
           setError(errorMessage);
-          toast.error(errorMessage);
         } finally {
           setIsLoading(false);
         }
       };
-
       fetchProfile();
     }
-  }, [userTypes]);
-
-  useEffect(() => {
-    const handleUserTypeChange = async (e) => {
-      console.log('[ProfilePage] User type changed event received:', e.detail);
-      
-      try {
-        const response = await axios.get('/profile');
-        const updatedUser = response.data.user;
-        
-        setProfile(updatedUser);
-        setFormData(updatedUser);
-        
-        console.log('[ProfilePage] Profile refreshed after user type change');
-      } catch (error) {
-        console.error('[ProfilePage] Failed to refresh profile:', error);
-      }
-    };
-
-    window.addEventListener('userTypeChanged', handleUserTypeChange);
-
-    return () => {
-      window.removeEventListener('userTypeChanged', handleUserTypeChange);
-    };
   }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
-    if (tab === 'orders' || tab === 'personal' || tab === 'overview') {
+    if (['orders', 'personal', 'overview'].includes(tab)) {
       setActiveTab(tab);
     }
   }, [location.search]);
@@ -329,47 +178,20 @@ const ProfilePage = () => {
   };
 
   const handleUpdateProfile = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     try {
       setIsLoading(true);
       const response = await axios.put('/profile', formData);
-      
       const updatedUser = response.data.user || response.data;
-      
       setProfile(updatedUser);
       setFormData(updatedUser);
       setIsEditing(false);
-
-      if (updatedUser.userTypeId && userTypes.length > 0) {
-        const userType = userTypes.find((type) => type.id === updatedUser.userTypeId);
-        if (userType) {
-          const normalizedName = userType.name.toLowerCase();
-          localStorage.setItem('userType', normalizedName);
-          localStorage.setItem('userTypeId', updatedUser.userTypeId.toString());
-          console.log('[ProfilePage] User type updated to:', userType.name);
-          
-          window.dispatchEvent(new CustomEvent('userTypeChanged', {
-            detail: { 
-              userType: userType.name,
-              userTypeId: updatedUser.userTypeId 
-            }
-          }));
-        }
-      }
-
       toast.success('Profile updated successfully');
     } catch (err) {
-      console.error('[ProfilePage] Update profile error:', err);
-      const errorMsg = err.response?.data?.message || 'Failed to update profile';
-      toast.error(errorMsg);
+      toast.error(err.response?.data?.message || 'Failed to update profile');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleCancel = () => {
-    setFormData(profile || {});
-    setIsEditing(false);
   };
 
   const handleTabChange = (tabId) => {
@@ -377,67 +199,6 @@ const ProfilePage = () => {
     const url = new URL(window.location);
     url.searchParams.set('tab', tabId);
     window.history.pushState({}, '', url);
-  };
-
-  const handleClosePopup = () => {
-    dispatch(closePopup());
-  };
-
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'delivered':
-      case 'approved':
-        return 'bg-green-100 text-green-800';
-      case 'shipped':
-      case 'processing':
-        return 'bg-blue-100 text-blue-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled':
-      case 'rejected':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-neutral-100 text-neutral-800';
-    }
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'delivered':
-      case 'approved':
-        return <FaCheckCircle className="text-green-500" />;
-      case 'shipped':
-      case 'processing':
-        return <FaBoxOpen className="text-blue-500" />;
-      case 'pending':
-        return <FaInfoCircle className="text-yellow-500" />;
-      case 'cancelled':
-      case 'rejected':
-        return <FaTimes className="text-red-500" />;
-      default:
-        return <FaInfoCircle className="text-neutral-500" />;
-    }
-  };
-
-  const getRoleColor = (role) => {
-    switch (role?.toLowerCase()) {
-      case 'customer':
-        return 'bg-blue-100 text-blue-800';
-      case 'admin':
-        return 'bg-purple-100 text-purple-800';
-      case 'manager':
-        return 'bg-indigo-100 text-indigo-800';
-      case 'sales':
-        return 'bg-teal-100 text-teal-800';
-      case 'support':
-        return 'bg-cyan-100 text-cyan-800';
-      case 'dealer':
-        return 'bg-orange-100 text-orange-800';
-      case 'architect':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-neutral-100 text-neutral-800';
-    }
   };
 
   const tabs = [
@@ -449,135 +210,271 @@ const ProfilePage = () => {
   const handleLogout = async () => {
     try {
       await logoutApi();
-      try {
-        await clearCart();
-      } catch (cartErr) {
-        console.warn('ProfilePage: Failed to clear cart on logout', cartErr);
-      }
+      await clearCart();
       localStorage.removeItem('guestCart');
       dispatch(logout());
-      setIsLogoutModalOpen(false);
       navigate('/login');
     } catch (err) {
-      console.error('Logout error:', err);
-      try {
-        await clearCart();
-      } catch (cartErr) {
-        console.warn('ProfilePage: Failed to clear cart after logout error', cartErr);
-      }
-      localStorage.removeItem('guestCart');
       dispatch(logout());
-      setIsLogoutModalOpen(false);
       navigate('/login');
     }
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50/50">
         <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-          className="rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"
+          animate={{ scale: [1, 1.2, 1], rotate: 360 }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          className="rounded-full h-10 w-10 border-t-2 border-primary"
         />
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-red-600 text-center font-medium text-sm sm:text-base px-4"
-        >
-          {error}
-        </motion.div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-neutral-50 font-roboto flex flex-col">
+    <div className="min-h-screen bg-[#F8F9FA] font-roboto selection:bg-primary/10">
       <Navbar />
-
-      {/* Main Content Area */}
-      <div className="flex-1 pt-14 sm:pt-16">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              visible: {
-                opacity: 1,
-                y: 0,
-                transition: {
-                  duration: 0.5,
-                  staggerChildren: 0.1,
-                },
-              },
-            }}
-            className="space-y-4 sm:space-y-6"
-          >
-            <ProfileHeader
-              profile={profile}
-              getRoleColor={getRoleColor}
-              getStatusIcon={getStatusIcon}
-              getStatusColor={getStatusColor}
-              onLogoutClick={() => setIsLogoutModalOpen(true)}
-            />
-
-            <TabNavigation
-              tabs={tabs}
-              activeTab={activeTab}
-              handleTabChange={handleTabChange}
-            />
-
+      
+      {/* Mobile Sidebar Overlay & Drawer */}
+      <AnimatePresence>
+        {isMobileSidebarOpen && (
+          <>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white rounded-lg shadow-card border border-neutral-100 overflow-hidden"
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileSidebarOpen(false)}
+              className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+            />
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'tween', duration: 0.3 }}
+              className="lg:hidden fixed left-0 top-0 bottom-0 w-80 bg-white shadow-2xl z-50 overflow-y-auto"
             >
-              <div className="p-4 sm:p-6">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-xl font-bold text-neutral-900">Menu</h2>
+                  <button
+                    onClick={() => setIsMobileSidebarOpen(false)}
+                    className="w-10 h-10 flex items-center justify-center rounded-lg bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition-colors"
+                  >
+                    <FaTimes className="text-lg" />
+                  </button>
+                </div>
+
+                {/* Profile Info */}
+                <div className="flex flex-col items-center text-center mb-8 pb-6 border-b border-neutral-100">
+                  <div className="relative mb-4">
+                    <div className="w-20 h-20 bg-primary/5 rounded-2xl flex items-center justify-center border-2 border-white shadow-md">
+                      <FaUser className="text-3xl text-primary" />
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-2 border-white rounded-full shadow-sm" />
+                  </div>
+                  <h3 className="text-lg font-bold text-neutral-900">{profile?.name}</h3>
+                  <p className="text-xs text-neutral-500 font-medium truncate w-full">{profile?.email}</p>
+                  <span className="mt-3 px-3 py-1 bg-neutral-100 text-neutral-600 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    {profile?.role || 'Customer'}
+                  </span>
+                </div>
+
+                {/* Navigation Links */}
+                <div className="space-y-2 mb-6">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => {
+                        handleTabChange(tab.id);
+                        setIsMobileSidebarOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 group ${
+                        activeTab === tab.id
+                          ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                          : 'text-neutral-600 hover:bg-primary/10 hover:text-primary'
+                      }`}
+                    >
+                      <tab.icon className={`text-lg transition-colors duration-300 ${
+                        activeTab === tab.id 
+                          ? 'text-white' 
+                          : 'text-neutral-400 group-hover:text-primary'
+                      }`} />
+                      <span>{tab.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <hr className="my-6 border-neutral-100" />
+
+                {/* Logout Button in Mobile Sidebar */}
+                <button
+                  onClick={() => {
+                    setIsMobileSidebarOpen(false);
+                    setIsLogoutModalOpen(true);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 transition-all duration-300"
+                >
+                  <FaSignOutAlt className="text-lg" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12">
+        <div className="flex flex-col lg:flex-row gap-8">
+          
+          {/* Desktop Sidebar */}
+          <aside className="hidden lg:block w-72 shrink-0">
+            <div className="sticky top-24 space-y-6">
+              <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6">
+                <div className="flex flex-col items-center text-center mb-8">
+                  <div className="relative mb-4">
+                    <div className="w-20 h-20 bg-primary/5 rounded-2xl flex items-center justify-center border-2 border-white shadow-md">
+                      <FaUser className="text-3xl text-primary" />
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-2 border-white rounded-full shadow-sm" />
+                  </div>
+                  <h2 className="text-lg font-bold text-neutral-900">{profile?.name}</h2>
+                  <p className="text-xs text-neutral-500 font-medium truncate w-full">{profile?.email}</p>
+                  <span className="mt-3 px-3 py-1 bg-neutral-100 text-neutral-600 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    {profile?.role || 'Customer'}
+                  </span>
+                </div>
+
+                <div className="space-y-1">
+                  {tabs.map((tab) => (
+                    <SidebarLink 
+                      key={tab.id} 
+                      tab={tab} 
+                      activeTab={activeTab} 
+                      handleTabChange={handleTabChange} 
+                    />
+                  ))}
+                </div>
+
+                <hr className="my-6 border-neutral-100" />
+
+                <button
+                  onClick={() => setIsLogoutModalOpen(true)}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-300"
+                >
+                  <FaSignOutAlt className="text-lg" />
+                  <span>Logout</span>
+                </button>
+              </div>
+
+              <div className="bg-gradient-to-br from-primary to-[#ff6b6b] rounded-2xl p-6 text-white overflow-hidden relative group">
+                <div className="relative z-10">
+                  <h4 className="text-sm font-semibold mb-1">Need Help?</h4>
+                  <p className="text-xs text-white/85 mb-4 leading-relaxed">
+                    We're here to help you with any questions or support you need.
+                  </p>
+                  <Link to="/contact">
+                    <button className="bg-white text-primary px-4 py-2 rounded-lg text-xs font-semibold hover:shadow-lg transition-transform hover:-translate-y-0.5">
+                      Contact Support
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* Main Content */}
+          <div className="flex-1 min-w-0">
+            {/* Mobile Menu Button */}
+            <div className="lg:hidden flex items-center gap-4 mb-6">
+              <button
+                onClick={() => setIsMobileSidebarOpen(true)}
+                className="flex items-center gap-2 px-4 py-3 bg-white rounded-xl border border-neutral-100 shadow-sm text-neutral-700 font-semibold text-sm hover:bg-neutral-50 transition-all"
+              >
+                <FaBars className="text-base" />
+                <span>Menu</span>
+              </button>
+              <div className="flex-1 text-right">
+                <h2 className="text-lg font-bold text-neutral-900 capitalize">{activeTab === 'overview' ? 'Overview' : activeTab === 'personal' ? 'Personal Info' : 'Orders'}</h2>
+              </div>
+            </div>
+
+            <motion.div
+              layout
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-2xl shadow-sm border border-neutral-100 min-h-[600px] flex flex-col overflow-hidden"
+            >
+              <div className="border-b border-neutral-50 px-6 sm:px-8 py-5 flex items-center justify-between bg-white sticky top-0 z-10 backdrop-blur-sm bg-white/80">
+                <div>
+                  <h1 className="text-xl font-bold text-neutral-900 capitalize">
+                    {activeTab === 'overview' ? 'Overview' : activeTab === 'personal' ? 'Personal Info' : 'Orders'}
+                  </h1>
+                  <p className="text-xs text-neutral-500 font-medium">
+                    {activeTab === 'overview' && 'Overview of your account activities and stats.'}
+                    {activeTab === 'personal' && 'Manage your personal profile and account settings.'}
+                    {activeTab === 'orders' && 'Track and manage your order history.'}
+                  </p>
+                </div>
+                {activeTab === 'personal' && !isEditing && (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setIsEditing(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-neutral-100 text-neutral-900 rounded-lg font-bold text-sm hover:bg-neutral-200 transition-colors"
+                  >
+                    Edit Profile
+                  </motion.button>
+                )}
+              </div>
+
+              <div className="p-6 sm:p-8 flex-1">
                 <AnimatePresence mode="wait">
-                  {activeTab === 'overview' && (
-                    <Overview
-                      profile={profile}
-                      userTypes={userTypes}
-                      getStatusIcon={getStatusIcon}
-                      navigate={navigate}
-                      setIsEditing={setIsEditing}
-                      handleTabChange={handleTabChange}
-                      totalOrders={totalOrders}
-                    />
-                  )}
-                  {activeTab === 'personal' && (
-                    <PersonalInfo
-                      isEditing={isEditing}
-                      setIsEditing={setIsEditing}
-                      formData={formData}
-                      handleInputChange={handleInputChange}
-                      handleUserTypeChange={handleUserTypeChange}
-                      handleUpdateProfile={handleUpdateProfile}
-                      handleCancel={handleCancel}
-                      isLoading={isLoading}
-                      userTypes={userTypes}
-                    />
-                  )}
-                  {activeTab === 'orders' && <Orders navigate={navigate} />}
+                  <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                  >
+                    {activeTab === 'overview' && (
+                      <Overview
+                        profile={profile}
+                        userTypes={userTypes}
+                        navigate={navigate}
+                        setIsEditing={setIsEditing}
+                        handleTabChange={handleTabChange}
+                        totalOrders={totalOrders}
+                      />
+                    )}
+                    {activeTab === 'personal' && (
+                      <PersonalInfo
+                        isEditing={isEditing}
+                        setIsEditing={setIsEditing}
+                        formData={formData}
+                        handleInputChange={handleInputChange}
+                        handleUserTypeChange={handleUserTypeChange}
+                        handleUpdateProfile={handleUpdateProfile}
+                        handleCancel={() => {
+                          setFormData(profile);
+                          setIsEditing(false);
+                        }}
+                        isLoading={isLoading}
+                        userTypes={userTypes}
+                      />
+                    )}
+                    {activeTab === 'orders' && <Orders navigate={navigate} />}
+                  </motion.div>
                 </AnimatePresence>
               </div>
             </motion.div>
-          </motion.div>
+          </div>
         </div>
-      </div>
+      </main>
 
       {isPopupOpen && (
         <UserTypePopup 
-          onClose={handleClosePopup}
+          onClose={() => dispatch(closePopup())}
           redirectToRegister={false}
         />
       )}
@@ -587,7 +484,7 @@ const ProfilePage = () => {
         onClose={() => setIsLogoutModalOpen(false)}
         onConfirm={handleLogout}
       />
-
+      
       <Footer />
     </div>
   );

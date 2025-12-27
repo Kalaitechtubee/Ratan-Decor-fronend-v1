@@ -1,86 +1,76 @@
-import React, { useState, useEffect } from 'react';
-import { FaShoppingBag, FaUser, FaUserTag, FaCheckCircle } from 'react-icons/fa';
+import React, { useEffect, useState } from 'react';
+import {
+  FaShoppingBag,
+  FaHistory,
+  FaCheckCircle,
+  FaUser,
+  FaUserTag,
+} from 'react-icons/fa';
 import { motion } from 'framer-motion';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import axios from '../../../services/axios';
 import toast from 'react-hot-toast';
 import { openPopup } from '../../userType/userTypeSlice';
 
-const Overview = ({ profile, userTypes = [], getStatusIcon, navigate, setIsEditing, handleTabChange }) => {
+const Overview = ({ profile, handleTabChange, setIsEditing }) => {
   const dispatch = useDispatch();
-  const [totalOrders, setTotalOrders] = useState(0);
+
   const [isLoading, setIsLoading] = useState(true);
-  const [currentUserTypeName, setCurrentUserTypeName] = useState('Unknown');
-
-  const reduxUserType = useSelector((state) => state.userType?.userType);
-
-  const getUserTypeName = (userTypeId) => {
-    if (!userTypeId || !userTypes?.length) return 'Unknown';
-    const userType = userTypes.find((type) => type.id === userTypeId);
-    return userType?.name || 'Unknown';
-  };
+  const [summary, setSummary] = useState({
+    totalOrders: 0,
+    statusBreakdown: {},
+  });
 
   useEffect(() => {
-    const fetchOrdersCount = async () => {
+    const fetchOrderSummary = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get('/orders');
-        if (response.data.success) {
-          setTotalOrders(
-            response.data.orderSummary?.totalOrders ||
-            response.data.pagination?.total ||
-            response.data.orders?.length ||
-            0
-          );
+        const res = await axios.get('/orders');
+
+        if (res.data?.success && res.data.orderSummary) {
+          setSummary({
+            totalOrders: res.data.orderSummary.totalOrders || 0,
+            statusBreakdown: res.data.orderSummary.statusBreakdown || {},
+          });
         }
-      } catch (err) {
-        toast.error('Failed to load orders count');
+      } catch (error) {
+        toast.error('Failed to load order data');
       } finally {
         setIsLoading(false);
       }
     };
-    fetchOrdersCount();
+
+    fetchOrderSummary();
   }, []);
 
-  useEffect(() => {
-    if (profile?.userTypeId && userTypes.length > 0) {
-      setCurrentUserTypeName(getUserTypeName(profile.userTypeId));
-    } else if (reduxUserType && reduxUserType !== 'General') {
-      setCurrentUserTypeName(reduxUserType);
-    } else {
-      const stored = localStorage.getItem('userType');
-      setCurrentUserTypeName(
-        stored ? stored.charAt(0).toUpperCase() + stored.slice(1) : 'Not Set'
-      );
-    }
-  }, [profile?.userTypeId, userTypes, reduxUserType]);
+  const pendingCount = summary.statusBreakdown?.Pending?.count || 0;
+  const shippedCount = summary.statusBreakdown?.Shipped?.count || 0;
 
-  const handleUserTypeClick = () => {
-    dispatch(openPopup());
-  };
+  const accountStatus = profile?.status || 'Active';
 
   const statCards = [
     {
+      title: 'Pending Orders',
+      value: isLoading ? '-' : pendingCount,
+      subtitle: 'Awaiting action',
+      icon: FaHistory,
+      bgLight: 'bg-amber-50',
+      textColor: 'text-amber-600',
+      borderHover: 'hover:border-amber-500',
+    },
+    {
       title: 'Total Orders',
-      value: isLoading ? '-' : totalOrders,
+      value: isLoading ? '-' : summary.totalOrders,
       icon: FaShoppingBag,
       bgLight: 'bg-primary/10',
       textColor: 'text-primary',
     },
     {
       title: 'Account Status',
-      value: profile?.status || 'Active',
+      value: accountStatus,
       icon: FaCheckCircle,
       bgLight: 'bg-green-100',
       textColor: 'text-green-600',
-    },
-    {
-      title: 'User Type',
-      value: currentUserTypeName,
-      icon: FaUserTag,
-      bgLight: 'bg-primary/10',
-      textColor: 'text-primary',
-      clickable: true,
     },
   ];
 
@@ -89,110 +79,93 @@ const Overview = ({ profile, userTypes = [], getStatusIcon, navigate, setIsEditi
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3 }}
-      className="space-y-4 sm:space-y-6"
+      className="space-y-6"
     >
-      {/* ================= STAT CARDS =================*/}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {statCards.map((card, idx) => (
           <motion.div
             key={idx}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.1 }}
             whileHover={{ y: -6, scale: 1.02 }}
-            onClick={card.clickable ? handleUserTypeClick : undefined}
-            className={`group bg-white p-4 sm:p-6 rounded-lg border border-neutral-100 shadow-card
-              transition-all duration-300
-              hover:border-primary hover:bg-primary/5 hover:shadow-card-hover
-              ${card.clickable ? 'cursor-pointer' : ''}
+            className={`group bg-white p-5 rounded-lg border border-neutral-100
+              shadow-card transition-all duration-300
+              hover:bg-neutral-50 hover:shadow-card-hover
+              ${card.borderHover || 'hover:border-primary'}
             `}
           >
-            <div className="flex items-center justify-between gap-3 sm:gap-4">
-              <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm font-medium text-neutral-500 group-hover:text-primary transition-colors truncate">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium text-neutral-500">
                   {card.title}
                 </p>
 
-                <motion.p
-                  initial={{ scale: 0.9 }}
-                  animate={{ scale: 1 }}
-                  className="text-xl sm:text-2xl font-semibold text-neutral-900 mt-1 truncate"
-                >
+                <p className="text-2xl font-semibold text-neutral-900 mt-1">
                   {card.value}
-                </motion.p>
+                </p>
 
-                {card.clickable && (
-                  <p className="text-xs text-neutral-400 mt-2 font-medium group-hover:text-primary transition-colors">
-                    Click to change
+                {card.subtitle && (
+                  <p className="text-xs text-neutral-400 mt-1">
+                    {card.subtitle}
                   </p>
                 )}
               </div>
 
               <div
-                className={`p-2 sm:p-3 rounded-lg ${card.bgLight} ${card.textColor}
-                  transition-transform duration-300 group-hover:scale-110 flex-shrink-0
-                `}
+                className={`p-3 rounded-lg ${card.bgLight} ${card.textColor}
+                transition-transform duration-300 group-hover:scale-110`}
               >
-                <card.icon className="text-lg sm:text-xl" />
+                <card.icon className="text-xl" />
               </div>
             </div>
           </motion.div>
         ))}
       </div>
 
-      {/* ================= QUICK ACTIONS =================*/}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="bg-white p-4 sm:p-6 rounded-lg shadow-card border border-neutral-100"
-      >
-        <motion.h3 className="text-base sm:text-lg font-semibold text-neutral-900 mb-3 sm:mb-4">
+      {/* Quick Actions */}
+      <div className="bg-white p-5 rounded-lg shadow-card border border-neutral-100">
+        <h3 className="text-lg font-semibold text-neutral-900 mb-4">
           Quick Actions
-        </motion.h3>
+        </h3>
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+          <button
             onClick={() => handleTabChange('orders')}
-            className="p-3 sm:p-4 border border-neutral-100 rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200 text-center group"
+            className="p-4 border border-neutral-100 rounded-lg
+            hover:border-primary hover:bg-primary/5 transition text-center"
           >
-            <div className="flex flex-col items-center">
-              <FaShoppingBag className="text-xl sm:text-2xl text-primary mb-1 sm:mb-2 group-hover:scale-110 transition-transform" />
-              <span className="text-xs sm:text-sm font-medium text-neutral-700 line-clamp-2">View Orders</span>
-            </div>
-          </motion.button>
+            <FaShoppingBag className="text-2xl text-primary mx-auto mb-2" />
+            <span className="text-sm font-medium text-neutral-700">
+              View Orders
+            </span>
+          </button>
 
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <button
             onClick={() => {
               setIsEditing(true);
               handleTabChange('personal');
             }}
-            className="p-3 sm:p-4 border border-neutral-100 rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200 text-center group"
+            className="p-4 border border-neutral-100 rounded-lg
+            hover:border-primary hover:bg-primary/5 transition text-center"
           >
-            <div className="flex flex-col items-center">
-              <FaUser className="text-xl sm:text-2xl text-primary mb-1 sm:mb-2 group-hover:scale-110 transition-transform" />
-              <span className="text-xs sm:text-sm font-medium text-neutral-700 line-clamp-2">Edit Profile</span>
-            </div>
-          </motion.button>
+            <FaUser className="text-2xl text-primary mx-auto mb-2" />
+            <span className="text-sm font-medium text-neutral-700">
+              Edit Profile
+            </span>
+          </button>
 
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleUserTypeClick}
-            className="p-3 sm:p-4 border border-neutral-100 rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200 text-center group col-span-2 lg:col-span-1"
+          <button
+            onClick={() => dispatch(openPopup())}
+            className="p-4 border border-neutral-100 rounded-lg
+            hover:border-primary hover:bg-primary/5 transition text-center
+            col-span-2 lg:col-span-1"
           >
-            <div className="flex flex-col items-center">
-              <FaUserTag className="text-xl sm:text-2xl text-primary mb-1 sm:mb-2 group-hover:scale-110 transition-transform" />
-              <span className="text-xs sm:text-sm font-medium text-neutral-700 line-clamp-2">Change Type</span>
-            </div>
-          </motion.button>
+            <FaUserTag className="text-2xl text-primary mx-auto mb-2" />
+            <span className="text-sm font-medium text-neutral-700">
+              Change User Type
+            </span>
+          </button>
         </div>
-      </motion.div>
-
+      </div>
     </motion.div>
   );
 };

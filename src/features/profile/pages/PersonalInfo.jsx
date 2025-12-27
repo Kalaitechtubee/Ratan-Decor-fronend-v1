@@ -1,248 +1,269 @@
 import React, { useState, useEffect } from 'react';
-import { FaUser, FaEnvelope, FaPhone, FaBuilding, FaMapMarkerAlt, FaEdit, FaSave } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaPhone, FaBuilding, FaMapMarkerAlt, FaSave, FaUserShield } from 'react-icons/fa';
 import { FiHome, FiCoffee, FiGrid, FiBriefcase } from 'react-icons/fi';
 import { motion } from 'framer-motion';
-import axios from '../../../services/axios';
+import { fetchPincodeData } from '../../../services/pincodeApi';
 import toast from 'react-hot-toast';
 
-const PersonalInfo = ({ 
-  isEditing, 
-  setIsEditing, 
-  formData, 
-  handleInputChange, 
-  handleUserTypeChange, 
-  handleUpdateProfile, 
-  handleCancel, 
-  isLoading, 
-  userTypes = [] 
+const PersonalInfo = ({
+  isEditing,
+  setIsEditing,
+  formData,
+  handleInputChange,
+  handleUserTypeChange,
+  handleUpdateProfile,
+  handleCancel,
+  isLoading,
+  userTypes = []
 }) => {
-  const [selectedUserTypeName, setSelectedUserTypeName] = useState('');
+  const [villageOptions, setVillageOptions] = useState([]);
+  const [isPincodeLoading, setIsPincodeLoading] = useState(false);
 
-  const getIconForUserType = (userTypeName) => {
-    if (!userTypeName) return FiGrid;
-    const lowerName = userTypeName.toLowerCase();
-    if (lowerName.includes('residential')) return FiHome;
-    if (lowerName.includes('commercial')) return FiBriefcase;
-    if (lowerName.includes('kitchen') || lowerName.includes('modular')) return FiCoffee;
-    return FiGrid;
-  };
+  const handlePincodeChange = async (e) => {
+    const pincode = e.target.value;
+    handleInputChange(e);
 
-  const userTypeOptions = userTypes.map((type) => ({
-    value: String(type.id),
-    label: type.name,
-    icon: getIconForUserType(type.name),
-    description: type.description || 'Customer type',
-  }));
+    if (pincode.length === 6) {
+      try {
+        setIsPincodeLoading(true);
+        const data = await fetchPincodeData(pincode);
+        if (data[0]?.Status === 'Success') {
+          const postOffices = data[0].PostOffice;
+          setVillageOptions(postOffices.map(po => po.Name));
 
-  useEffect(() => {
-    if (formData.userTypeId && userTypes.length > 0) {
-      const userType = userTypes.find((type) => type.id === formData.userTypeId);
-      setSelectedUserTypeName(userType?.name || '');
-    }
-  }, [formData.userTypeId, userTypes]);
-
-  const handleUserTypeSelectChange = (e) => {
-    const value = e.target.value;
-    handleUserTypeChange(value);
-    
-    const selected = userTypes.find((type) => type.id === parseInt(value));
-    if (selected) {
-      setSelectedUserTypeName(selected.name);
+          handleInputChange({ target: { name: 'state', value: postOffices[0].State } });
+          handleInputChange({ target: { name: 'country', value: postOffices[0].Country } });
+          handleInputChange({ target: { name: 'city', value: postOffices[0].Block || postOffices[0].District } });
+        } else {
+          toast.error('Invalid pincode');
+          setVillageOptions([]);
+        }
+      } catch (err) {
+        toast.error('Failed to fetch pincode details');
+        setVillageOptions([]);
+      } finally {
+        setIsPincodeLoading(false);
+      }
+    } else if (pincode.length < 6) {
+      setVillageOptions([]);
     }
   };
-
-  const inputFields = [
-    { name: 'name', label: 'Full Name', icon: FaUser, type: 'text', required: true },
-    { name: 'email', label: 'Email Address', icon: FaEnvelope, type: 'email', disabled: true },
-    { name: 'mobile', label: 'Mobile Number', icon: FaPhone, type: 'tel' },
-    { name: 'company', label: 'Company', icon: FaBuilding, type: 'text' },
-  ];
-
-  const locationFields = [
-    { name: 'city', label: 'City' },
-    { name: 'state', label: 'State' },
-    { name: 'country', label: 'Country' },
-    { name: 'pincode', label: 'PIN Code' },
-  ];
 
   return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      exit="hidden"
-      variants={{ hidden: { opacity: 0, x: 20 }, visible: { opacity: 1, x: 0, transition: { duration: 0.3 } } }}
-      className="space-y-6"
-    >
-      <div className="flex justify-between items-center mb-6">
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-          <h3 className="text-lg font-semibold text-neutral-900">Personal Information</h3>
-          <p className="text-xs text-neutral-500 mt-1">Update your profile details</p>
-        </motion.div>
-        {!isEditing ? (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-medium"
-          >
-            <FaEdit size={18} />
-            <span className="hidden sm:inline">Edit Profile</span>
-          </motion.button>
-        ) : null}
-      </div>
+    <div className="space-y-8">
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        
+        {/* Basic Information */}
+        <div className="space-y-6">
+          <h3 className="text-base font-semibold text-neutral-900 border-b border-neutral-200 pb-3">
+            Basic Information
+          </h3>
 
-      <div className="space-y-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        >
-          {inputFields.map((field) => (
-            <motion.div key={field.name} whileHover={{ y: isEditing ? -2 : 0 }}>
-              <label className="block text-sm font-medium text-neutral-700 mb-2 flex items-center gap-2">
-                <field.icon className="text-neutral-600" size={16} />
-                {field.label} {field.required && <span className="text-red-500">*</span>}
-              </label>
+          <div className="space-y-4">
+            {/* Full Name */}
+            <div>
+              <label className="block text-xs font-medium text-neutral-600 mb-1.5">Full Name</label>
               <div className="relative">
+                <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" size={15} />
                 <input
-                  type={field.type}
-                  name={field.name}
-                  value={formData[field.name] || ''}
+                  type="text"
+                  name="name"
+                  value={formData.name || ''}
                   onChange={handleInputChange}
-                  disabled={!isEditing || field.disabled}
-                  placeholder={`Enter ${field.label.toLowerCase()}`}
-                  className={`w-full px-4 py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 font-medium text-neutral-900 ${
-                    isEditing && !field.disabled
-                      ? 'bg-white cursor-text'
-                      : 'bg-neutral-50 cursor-not-allowed text-neutral-600'
+                  disabled={!isEditing}
+                  className={`w-full pl-11 pr-4 py-3 bg-white border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium text-neutral-900 ${
+                    !isEditing ? 'bg-neutral-50 text-neutral-600 cursor-not-allowed' : ''
                   }`}
                 />
               </div>
-            </motion.div>
-          ))}
-
-          <motion.div whileHover={{ y: isEditing ? -2 : 0 }}>
-            <label className="block text-sm font-medium text-neutral-700 mb-2 flex items-center gap-2">
-              <FiGrid className="text-neutral-600" size={16} />
-              Project Type <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <select
-                name="userTypeId"
-                value={formData.userTypeId || ''}
-                onChange={handleUserTypeSelectChange}
-                disabled={!isEditing}
-                className={`w-full px-4 py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 font-medium appearance-none text-neutral-900 ${
-                  isEditing
-                    ? 'bg-white cursor-pointer'
-                    : 'bg-neutral-50 cursor-not-allowed text-neutral-600'
-                }`}
-              >
-                <option value="">Select Project Type</option>
-                {userTypeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
             </div>
-            {selectedUserTypeName && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-xs text-neutral-500 mt-2 font-medium"
-              >
-                Selected: <span className="text-primary font-semibold">{selectedUserTypeName}</span>
-              </motion.p>
-            )}
-          </motion.div>
-        </motion.div>
 
-        <motion.div whileHover={{ y: isEditing ? -2 : 0 }}>
-          <label className="block text-sm font-medium text-neutral-700 mb-2 flex items-center gap-2">
-            <FaMapMarkerAlt className="text-neutral-600" size={16} />
-            Address
-          </label>
-          <div className="relative">
-            <textarea
-              name="address"
-              value={formData.address || ''}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              rows={3}
-              placeholder="Enter your full address"
-              className={`w-full px-4 py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 font-medium text-neutral-900 resize-none ${
-                isEditing
-                  ? 'bg-white cursor-text'
-                  : 'bg-neutral-50 cursor-not-allowed text-neutral-600'
-              }`}
-            />
+            {/* Email */}
+            <div>
+              <label className="block text-xs font-medium text-neutral-600 mb-1.5">Email Address</label>
+              <div className="relative">
+                <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" size={15} />
+                <input
+                  type="email"
+                  value={formData.email || ''}
+                  disabled
+                  className="w-full pl-11 pr-4 py-3 bg-neutral-50 border border-neutral-200 rounded-lg text-sm font-medium text-neutral-600 cursor-not-allowed"
+                />
+              </div>
+            </div>
+
+            {/* Mobile */}
+            <div>
+              <label className="block text-xs font-medium text-neutral-600 mb-1.5">Mobile Number</label>
+              <div className="relative">
+                <FaPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" size={15} />
+                <input
+                  type="tel"
+                  name="mobile"
+                  value={formData.mobile || ''}
+                  onChange={handleInputChange}
+                  disabled={!isEditing}
+                  className={`w-full pl-11 pr-4 py-3 bg-white border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium text-neutral-900 ${
+                    !isEditing ? 'bg-neutral-50 text-neutral-600 cursor-not-allowed' : ''
+                  }`}
+                />
+              </div>
+            </div>
+
+            {/* Role / User Type */}
+            <div>
+              <label className="block text-xs font-medium text-neutral-600 mb-1.5">User Role</label>
+              <div className="relative">
+                <FaUserShield className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" size={15} />
+                <input
+                  type="text"
+                  value={formData.role || 'Customer'}
+                  disabled
+                  className="w-full pl-11 pr-4 py-3 bg-neutral-50 border border-neutral-200 rounded-lg text-sm font-medium text-neutral-700"
+                />
+              </div>
+            </div>
           </div>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
-          {locationFields.map((field) => (
-            <motion.div key={field.name} whileHover={{ y: isEditing ? -2 : 0 }}>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">{field.label}</label>
-              <input
-                type="text"
-                name={field.name}
-                value={formData[field.name] || ''}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                placeholder={field.label}
-                className={`w-full px-4 py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 font-medium text-neutral-900 ${
-                  isEditing
-                    ? 'bg-white cursor-text'
-                    : 'bg-neutral-50 cursor-not-allowed text-neutral-600'
-                }`}
-              />
-            </motion.div>
-          ))}
         </div>
 
-        {isEditing && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex gap-3 pt-6 border-t border-neutral-200"
-          >
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleCancel}
-              className="flex-1 px-4 py-3 bg-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-300 transition-colors duration-200 font-semibold"
-            >
-              Cancel
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleUpdateProfile}
-              disabled={isLoading}
-              className="flex-1 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <>
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity }}
-                    className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+        {/* Address & Professional Info */}
+        <div className="space-y-6">
+          <h3 className="text-base font-semibold text-neutral-900 border-b border-neutral-200 pb-3">
+            Address & Professional Info
+          </h3>
+
+          <div className="space-y-4">
+            {/* Company Name */}
+            <div>
+              <label className="block text-xs font-medium text-neutral-600 mb-1.5">
+                Company Name <span className="font-normal text-neutral-500">(Optional)</span>
+              </label>
+              <div className="relative">
+                <FaBuilding className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" size={15} />
+                <input
+                  type="text"
+                  name="company"
+                  value={formData.company || ''}
+                  onChange={handleInputChange}
+                  disabled={!isEditing}
+                  placeholder="Enter company name"
+                  className={`w-full pl-11 pr-4 py-3 bg-white border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium text-neutral-900 ${
+                    !isEditing ? 'bg-neutral-50 text-neutral-600 cursor-not-allowed' : ''
+                  }`}
+                />
+              </div>
+            </div>
+
+            {/* Pincode & Village */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-neutral-600 mb-1.5">Pincode</label>
+                <input
+                  type="text"
+                  name="pincode"
+                  value={formData.pincode || ''}
+                  onChange={handlePincodeChange}
+                  disabled={!isEditing}
+                  maxLength={6}
+                  placeholder="123456"
+                  className={`w-full px-4 py-3 bg-white border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium text-neutral-900 tracking-wider ${
+                    !isEditing ? 'bg-neutral-50 cursor-not-allowed text-neutral-600' : ''
+                  }`}
+                />
+                {isPincodeLoading && <p className="text-xs text-primary mt-1">Fetching details...</p>}
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-neutral-600 mb-1.5">Village / Area</label>
+                <select
+                  name="village"
+                  value={formData.village || ''}
+                  onChange={handleInputChange}
+                  disabled={!isEditing || villageOptions.length === 0}
+                  className={`w-full px-4 py-3 bg-white border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium text-neutral-900 ${
+                    !isEditing || villageOptions.length === 0 ? 'bg-neutral-50 text-neutral-600 cursor-not-allowed' : ''
+                  }`}
+                >
+                  <option value="">{villageOptions.length > 0 ? 'Select village' : 'Enter pincode first'}</option>
+                  {villageOptions.map(v => (
+                    <option key={v} value={v}>{v}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Full Address */}
+            <div>
+              <label className="block text-xs font-medium text-neutral-600 mb-1.5">Full Address</label>
+              <div className="relative">
+                <FaMapMarkerAlt className="absolute left-4 top-4 text-neutral-400" size={15} />
+                <textarea
+                  name="address"
+                  value={formData.address || ''}
+                  onChange={handleInputChange}
+                  disabled={!isEditing}
+                  rows={3}
+                  placeholder="House no., street, landmark..."
+                  className={`w-full pl-11 pr-4 py-3 bg-white border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium text-neutral-900 resize-none ${
+                    !isEditing ? 'bg-neutral-50 text-neutral-600 cursor-not-allowed' : ''
+                  }`}
+                />
+              </div>
+            </div>
+
+            {/* City, State, Country */}
+            <div className="grid grid-cols-3 gap-4">
+              {['city', 'state', 'country'].map((field) => (
+                <div key={field}>
+                  <label className="block text-xs font-medium text-neutral-600 mb-1.5 text-center capitalize">
+                    {field}
+                  </label>
+                  <input
+                    type="text"
+                    name={field}
+                    value={formData[field] || ''}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    className={`w-full px-3 py-2.5 bg-white border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium text-neutral-900 text-center ${
+                      !isEditing ? 'bg-neutral-50 text-neutral-600 cursor-not-allowed' : ''
+                    }`}
                   />
-                  <span>Saving...</span>
-                </>
-              ) : (
-                <>
-                  <FaSave size={18} />
-                  <span>Save Changes</span>
-                </>
-              )}
-            </motion.button>
-          </motion.div>
-        )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
-    </motion.div>
+
+      {/* Action Buttons */}
+      {isEditing && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-end gap-4 pt-8 border-t border-neutral-200"
+        >
+          <button
+            onClick={handleCancel}
+            className="px-6 py-2.5 text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors"
+          >
+            Discard Changes
+          </button>
+          <button
+            onClick={handleUpdateProfile}
+            disabled={isLoading}
+            className="px-7 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {isLoading ? (
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <FaSave size={16} />
+            )}
+            <span>Save Changes</span>
+          </button>
+        </motion.div>
+      )}
+    </div>
   );
 };
 
