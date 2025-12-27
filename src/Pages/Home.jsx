@@ -166,7 +166,7 @@ function Home() {
               <VideoContentSection onOpenVideoCallPopup={() => setIsVideoCallPopupOpen(true)} />
             </section>
              <section>
-              <Contact />
+              <Contact isHome />
             </section>
           </main>
         </div>
