@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
+import { CatalogService } from "../services/apiServices";
+import { useState, useEffect } from "react";
 
 // Animation variants
 const containerVariants = {
@@ -94,6 +96,18 @@ const workProcess = [
 ];
 
 const About = () => {
+  const [catalogUrl, setCatalogUrl] = useState(null);
+
+  useEffect(() => {
+    const fetchCatalog = async () => {
+      const catalog = await CatalogService.getCatalog();
+      if (catalog && catalog.url) {
+        setCatalogUrl(catalog.url);
+      }
+    };
+    fetchCatalog();
+  }, []);
+
   return (
     <div className="bg-white min-h-screen font-roboto">
       <Navbar />
@@ -161,17 +175,19 @@ const About = () => {
 
               <motion.button
                 type="button"
-                className="border-2 border-gray-300 text-gray-700 px-6 sm:px-8
+                className={`border-2 border-gray-300 text-gray-700 px-6 sm:px-8
              py-3 sm:py-4 rounded-xl font-semibold hover:border-primary
              hover:text-primary transition-all w-full sm:w-auto
-             text-sm sm:text-base"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() =>
-                  alert(
-                    "Our catalog will be available soon. Please contact us for details."
-                  )
-                }
+             text-sm sm:text-base ${!catalogUrl ? 'opacity-50 cursor-not-allowed' : ''}`}
+                whileHover={catalogUrl ? { scale: 1.05 } : {}}
+                whileTap={catalogUrl ? { scale: 0.95 } : {}}
+                onClick={() => {
+                  if (catalogUrl) {
+                    window.open(catalogUrl, "_blank");
+                  } else {
+                    alert("Our catalog will be available soon. Please contact us for details.");
+                  }
+                }}
               >
                 Download Catalog
               </motion.button>

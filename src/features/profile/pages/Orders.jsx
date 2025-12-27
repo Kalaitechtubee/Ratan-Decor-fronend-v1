@@ -214,71 +214,84 @@ const Orders = ({ navigate }) => {
                   whileHover={{ translateY: -2 }}
                   className="bg-white p-4 sm:p-6 rounded-lg border border-neutral-100 shadow-card hover:shadow-card-hover transition-all duration-200"
                 >
-                  <div className="flex flex-col gap-3 sm:gap-4">
-                    <div className="flex items-center gap-2">
-                      <FaBoxOpen className="text-primary text-sm sm:text-base flex-shrink-0" />
-                      <h4 className="text-sm sm:text-base font-semibold text-neutral-900 truncate">Order #{order.id}</h4>
-                    </div>
-
-                    <div className="space-y-2 text-xs sm:text-sm">
-                      <p className="text-neutral-600 flex items-center gap-2">
-                        <FaCalendarAlt className="text-neutral-400 flex-shrink-0" />
-                        <span className="truncate">{formatDate(order.createdAt)}</span>
-                      </p>
-                      <p className="text-neutral-600 flex items-center gap-2">
-                        <FaMoneyBillWave className="text-neutral-400 flex-shrink-0" />
-                        <span className="truncate">{formatPrice(order.totalAmount)}</span>
-                      </p>
-                      <p className="text-neutral-600 flex items-start gap-2">
-                        <FaMapMarkerAlt className="text-neutral-400 flex-shrink-0 mt-0.5" />
-                        <span className="break-words">{order.deliveryAddress.address || 'N/A'}, {order.deliveryAddress.city || ''}, {order.deliveryAddress.state || ''}, {order.deliveryAddress.country || ''} - {order.deliveryAddress.pincode || ''}</span>
-                      </p>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      <span className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getStatusColor(order.status)}`}>
-                        {getStatusIcon(order.status)}
-                        <span className="ml-1 sm:ml-2 capitalize truncate">{order.status || 'N/A'}</span>
-                      </span>
-                      <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-gray-100 text-gray-800">
-                        <FaMoneyBillWave className="text-gray-500 mr-1 flex-shrink-0" />
-                        <span className="truncate">{order.paymentStatus || 'N/A'}</span>
-                      </span>
-                    </div>
-
-                    {order.orderItems.length > 0 && (
-                      <div className="mt-2 pt-2 border-t border-neutral-100">
-                        <h5 className="text-xs sm:text-sm font-medium text-neutral-900 mb-1">Items:</h5>
-                        <ul className="text-xs sm:text-sm text-neutral-600 space-y-1">
-                          {order.orderItems.map((item, idx) => (
-                            <li key={idx} className="break-words">{item.product.name} (Qty: {item.quantity}, ₹{item.price})</li>
-                          ))}
-                        </ul>
+                  <div className="flex flex-col gap-4">
+                    {/* Header: Order ID & Date */}
+                    <div className="flex flex-wrap justify-between items-start gap-2 border-b border-neutral-100 pb-3">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <FaBoxOpen className="text-primary text-sm" />
+                          <h4 className="text-base font-semibold text-neutral-900">Order #{order.id}</h4>
+                        </div>
+                        <p className="text-xs text-neutral-500 flex items-center gap-1.5 ml-0.5">
+                          <FaCalendarAlt className="text-neutral-400" />
+                          {formatDate(order.createdAt)}
+                        </p>
                       </div>
-                    )}
+                      <div className="text-right">
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => navigate(`/orders/${order.id}`)}
+                          className="px-4 py-1.5 bg-white border border-neutral-200 text-primary hover:bg-neutral-50 hover:border-neutral-200 rounded-lg text-sm font-medium transition-colors shadow-sm"
+                        >
+                          View Details
+                        </motion.button>
+                      </div>
+                    </div>
 
-                    {order.notes !== 'N/A' && (
-                      <p className="text-xs sm:text-sm text-neutral-600 flex items-start gap-2 pt-2">
-                        <FaInfoCircle className="text-neutral-400 flex-shrink-0 mt-0.5" />
-                        <span className="break-words">Notes: {order.notes}</span>
-                      </p>
-                    )}
+                    {/* Body: Info Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between sm:justify-start sm:gap-6">
+                          <span className="text-neutral-500 w-24">Order Total:</span>
+                          <span className="font-semibold text-neutral-900 flex items-center gap-1">
+                            <FaMoneyBillWave className="text-neutral-400" /> {formatPrice(order.totalAmount)}
+                          </span>
+                        </div>
+                        {order.expectedDeliveryDate && (
+                          <div className="flex items-center justify-between sm:justify-start sm:gap-6">
+                            <span className="text-neutral-500 w-24">Expected:</span>
+                            <span className="text-neutral-800 flex items-center gap-1">
+                              <FaCalendarAlt className="text-neutral-400" /> {formatDate(order.expectedDeliveryDate)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
 
-                    {order.expectedDeliveryDate && (
-                      <p className="text-xs sm:text-sm text-neutral-600 flex items-center gap-2 pt-2">
-                        <FaCalendarAlt className="text-neutral-400 flex-shrink-0" />
-                        <span className="truncate">Expected: {formatDate(order.expectedDeliveryDate)}</span>
-                      </p>
-                    )}
+                      <div className="space-y-1">
+                        <div className="flex items-start gap-2">
+                          <FaMapMarkerAlt className="text-neutral-400 mt-1 flex-shrink-0" />
+                          <span className="text-neutral-600 text-xs leading-relaxed max-w-xs">
+                            {order.deliveryAddress.city || 'N/A'}, {order.deliveryAddress.state || ''}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
 
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => navigate(`/orders/${order.id}`)}
-                      className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-200 font-medium text-xs sm:text-sm mt-3"
-                    >
-                      View Details
-                    </motion.button>
+                    {/* Footer: Statuses */}
+                    <div className="bg-neutral-50 rounded-lg p-3 flex flex-wrap gap-4 items-center justify-between border border-neutral-100">
+                      <div className="flex flex-wrap gap-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Status:</span>
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border ${getStatusColor(order.status).replace('bg-', 'bg-opacity-100 bg-').replace('text-', 'text-opacity-100 text-')} border-opacity-20`}>
+                            {getStatusIcon(order.status)}
+                            <span className="ml-1.5 capitalize">{order.status || 'N/A'}</span>
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Payment:</span>
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border ${order.paymentStatus === 'Paid' || order.paymentStatus === 'Received'
+                              ? 'bg-green-100 text-green-800 border-green-200'
+                              : order.paymentStatus === 'Awaiting' || order.paymentStatus === 'Pending'
+                                ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                                : 'bg-red-100 text-red-800 border-red-200'
+                            }`}>
+                            <span className="capitalize">{order.paymentStatus || 'N/A'}</span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </motion.div>
               ))}
@@ -308,10 +321,10 @@ const Orders = ({ navigate }) => {
                     onClick={() => page !== '...' && handlePageChange(page)}
                     disabled={page === '...'}
                     className={`px-2 sm:px-3 py-1 rounded-lg font-medium text-xs sm:text-sm transition-all ${currentPage === page
-                        ? 'bg-primary text-white shadow-md'
-                        : page === '...'
-                          ? 'bg-transparent text-neutral-400 cursor-default'
-                          : 'bg-gray-100 text-neutral-800 hover:bg-gray-200 border border-neutral-200'
+                      ? 'bg-primary text-white shadow-md'
+                      : page === '...'
+                        ? 'bg-transparent text-neutral-400 cursor-default'
+                        : 'bg-gray-100 text-neutral-800 hover:bg-gray-200 border border-neutral-200'
                       }`}
                   >
                     {page}
