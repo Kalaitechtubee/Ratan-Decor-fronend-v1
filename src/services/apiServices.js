@@ -23,9 +23,9 @@ export const CategoryService = {
         sortOrder = 'ASC',
         includeSubcategories = true
       } = filters;
-      
+
       let response;
-      
+
       // If parentId provided, use subcategories endpoint
       if (parentId !== null && parentId !== undefined) {
         const parentPath = parentId === null ? 'null' : parentId;
@@ -33,7 +33,7 @@ export const CategoryService = {
         if (sortBy) params.sortBy = sortBy;
         if (sortOrder) params.sortOrder = sortOrder;
         response = await apiClient.get(`/categories/subcategories/${parentPath}`, { params });
-        
+
         if (!response.data.success) {
           throw new Error(response.data.message || 'Failed to fetch subcategories');
         }
@@ -125,7 +125,7 @@ export const CategoryService = {
       throw new Error(error.response?.data?.message || 'Failed to fetch categories. Please check your network or try again.');
     }
   },
-  
+
   searchCategories: async (query) => {
     try {
       const response = await apiClient.get('/categories/search', { params: { q: query.trim() } });
@@ -158,7 +158,7 @@ export const CategoryService = {
       if (sortOrder) params.sortOrder = sortOrder;
 
       const response = await apiClient.get(`/categories/subcategories/${parentPath}`, { params });
-      
+
       if (!response.data.success) {
         throw new Error(response.data.message || 'Failed to fetch subcategories');
       }
@@ -173,7 +173,7 @@ export const CategoryService = {
       throw new Error(error.response?.data?.message || 'Failed to fetch subcategories. Please check your network or try again.');
     }
   },
-  
+
   getSubcategoryProducts: async (subcategoryId) => {
     try {
       const response = await apiClient.get(`/categories/${subcategoryId}`);
@@ -185,16 +185,16 @@ export const CategoryService = {
       throw new Error(error.response?.data?.message || 'Failed to fetch subcategory products. Please check your network or try again.');
     }
   },
-  
+
   getFeaturedProducts: async () => {
     try {
-      const response = await apiClient.get('/products', { 
-        params: { 
-          featured: true, 
-          limit: 3, 
+      const response = await apiClient.get('/products', {
+        params: {
+          featured: true,
+          limit: 3,
           page: 1,
-          isActive: true 
-        } 
+          isActive: true
+        }
       });
       if (response.data && response.data.products) {
         return response.data.products.map(product => ({
@@ -263,7 +263,7 @@ export const ProductSearchService = {
       const filteredSearches = searches.filter(s => s.toLowerCase() !== query.toLowerCase().trim());
       const newSearches = [query.trim(), ...filteredSearches].slice(0, 5);
       localStorage.setItem('recentSearches', JSON.stringify(newSearches));
-    } catch {}
+    } catch { }
   },
 
   getTrendingSearches: async () => {
@@ -287,6 +287,22 @@ export const ContactService = {
       return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Failed to submit contact form. Please try again.');
+    }
+  }
+};
+
+// Catalog Service
+export const CatalogService = {
+  getCatalog: async () => {
+    try {
+      const response = await apiClient.get('/catalog');
+      if (response.data.success) {
+        return response.data.catalog;
+      }
+      return null;
+    } catch (error) {
+      // Silent fail during search/browse
+      return null;
     }
   }
 };
