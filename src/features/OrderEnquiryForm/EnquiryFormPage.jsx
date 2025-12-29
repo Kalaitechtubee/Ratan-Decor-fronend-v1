@@ -439,6 +439,7 @@ const EnquiryFormPage = ({ product, user: propUser }) => {
         userType: formData.userType,
         role: formData.role,
         pincode: formData.pincode || null,
+        source: 'Website',
         productId: product?.id || null,
       };
       await createEnquiry(formattedEnquiry);
