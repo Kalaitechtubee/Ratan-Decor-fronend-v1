@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaPhone, FaEnvelope, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaYoutube } from 'react-icons/fa';
+import berryBeansLogo from '../assets/images/BerryBeans.png';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -190,13 +191,38 @@ const Footer = () => {
       </div>
 
       {/* Copyright Section */}
-      <div className=" pt-6 pb-2 border-t border-gray-800 bg-neutral-950/50">
-        <div className="px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20">
-          <p className="text-[13px] text-gray-400 text-left">
-            Copyright © {currentYear} Ratan Decor. All rights reserved.
-          </p>
-        </div>
-      </div>
+<div className="border-t border-gray-800 bg-neutral-950/70">
+  <div className="px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 py-3">
+    
+    <div className="flex flex-wrap items-center gap-2 text-[13px] text-gray-400">
+      
+      <span>
+        Copyright © {currentYear} Ratan Decor. All rights reserved
+      </span>
+
+      <span className="text-gray-500">|</span>
+
+      <span>Developed by</span>
+
+      <a
+        href="https://www.berrybeans.co/"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="BerryBeans website"
+        className="inline-flex items-center gap-2 group"
+      >
+        <img
+          src={berryBeansLogo}
+          alt="BerryBeans"
+          className="h-6 sm:h-7 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+        />
+      </a>
+
+    </div>
+
+  </div>
+</div>
+
     </footer>
   );
 };
