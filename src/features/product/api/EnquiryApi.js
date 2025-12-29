@@ -60,7 +60,7 @@ apiClient.interceptors.response.use(
       url: error.config?.url,
     };
     console.error('API Error:', errorDetails);
-    
+
     return Promise.reject(new Error(errorDetails.message));
   }
 );
@@ -160,7 +160,7 @@ export const createEnquiry = async (enquiryData) => {
         state: enquiryData.state?.trim(),
         city: enquiryData.city?.trim(),
         userType: enquiryData.userType || 'General',
-        source: enquiryData.source || 'Email',
+        source: enquiryData.source || 'Website',
         notes: enquiryData.notes?.trim() || null,
         videoCallDate: enquiryData.videoCallDate || null,
         videoCallTime: enquiryData.videoCallTime || null,
@@ -256,7 +256,7 @@ export const updateEnquiry = async (id, enquiryData) => {
         state: enquiryData.state?.trim(),
         city: enquiryData.city?.trim(),
         userType: enquiryData.userType || 'General',
-        source: enquiryData.source || 'Email',
+        source: enquiryData.source || 'Website',
         notes: enquiryData.notes?.trim() || null,
         videoCallDate: enquiryData.videoCallDate || null,
         videoCallTime: enquiryData.videoCallTime || null,
