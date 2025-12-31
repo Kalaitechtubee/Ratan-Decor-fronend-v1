@@ -178,7 +178,7 @@ function ProductDetail() {
   const error = useSelector((state) => state.products.error);
 
   const { isAuthenticated, userRole, user } = useAuth();
-  const { cart, addToCart, updateCartItem } = useCart();
+  const { cart, addToCart, updateCartItem, isPendingAccount, getUserRoleDisplay } = useCart();
 
   const cartItem = cart.find((item) => item.product?.id === parseInt(id));
   const isInCart = !!cartItem;
@@ -188,6 +188,7 @@ function ProductDetail() {
     return cartItem ? cartItem.quantity : 1;
   });
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
+  const [showPendingMessage, setShowPendingMessage] = useState(false);
 
   const userType = user?.userType || localStorage.getItem('userType') || 'General';
 
@@ -217,26 +218,37 @@ function ProductDetail() {
     }
   }, [error]);
 
+  // Scroll to pending message when it appears
+  useEffect(() => {
+    if (showPendingMessage) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById('pending-account-notice');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [showPendingMessage]);
+
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
       navigate('/register');
       return;
     }
 
+    if (isPendingAccount()) {
+      setShowPendingMessage(true);
+      return;
+    }
+
+    const currentPrice = getPrice();
+    const productWithPrice = { ...product, price: currentPrice };
+
     if (isInCart) {
-      const success = await updateCartItem(cartItem.id, quantity);
-      if (success) {
-        toast.success('Cart updated successfully!', { duration: 3000 });
-      } else {
-        toast.error('Failed to update cart. Please try again.', { duration: 3000 });
-      }
+      await updateCartItem(cartItem.id, quantity);
     } else {
-      const success = await addToCart(product, quantity);
-      if (success) {
-        toast.success('Added to cart successfully!', { duration: 3000 });
-      } else {
-        toast.error('Failed to add to cart. Please try again.', { duration: 3000 });
-      }
+      await addToCart(productWithPrice, quantity);
     }
   };
 
@@ -246,21 +258,23 @@ function ProductDetail() {
       return;
     }
 
+    if (isPendingAccount()) {
+      setShowPendingMessage(true);
+      return;
+    }
+
+    const currentPrice = getPrice();
+    const productWithPrice = { ...product, price: currentPrice };
+
     if (isInCart) {
       const success = await updateCartItem(cartItem.id, quantity);
       if (success) {
-        toast.success('Cart updated! Proceeding to checkout...', { duration: 3000 });
         navigate('/checkout');
-      } else {
-        toast.error('Failed to update cart. Please try again.', { duration: 3000 });
       }
     } else {
-      const success = await addToCart(product, quantity);
+      const success = await addToCart(productWithPrice, quantity);
       if (success) {
-        toast.success('Added to cart successfully! Proceeding to checkout...', { duration: 3000 });
         navigate('/checkout');
-      } else {
-        toast.error('Failed to add to cart. Please try again.', { duration: 3000 });
       }
     }
   };
@@ -293,16 +307,25 @@ function ProductDetail() {
   };
 
   const getPrice = () => {
-    switch (userType.toLowerCase()) {
-      case 'architect':
-        return product.architectPrice || product.price;
-      case 'dealer':
-        return product.dealerPrice || product.price;
-      case 'commercial':
-        return product.generalPrice || product.price;
-      default:
-        return product.price;
+    if (!product) return 0;
+
+    const userRoleLower = user?.role?.toLowerCase();
+    const isApproved = user?.status?.toLowerCase() === 'approved';
+
+    // 1. If approved Architect/Dealer, use their trade pricing
+    if (isApproved) {
+      if (userRoleLower === 'architect') return product.architectPrice || product.price;
+      if (userRoleLower === 'dealer') return product.dealerPrice || product.price;
     }
+
+    // 2. Otherwise, check for project-based pricing (Commercial)
+    const type = (user?.userType || user?.userTypeName || localStorage.getItem('userType') || 'General').toLowerCase();
+    if (type === 'commercial' || type === 'developer') {
+      return product.generalPrice || product.price;
+    }
+
+    // 3. Default to public price
+    return product.price;
   };
 
   if (status === 'loading') {
@@ -452,6 +475,54 @@ function ProductDetail() {
                   )}
                 </div>
                 {/* Category and Color tags removed */}
+                <AnimatePresence>
+                  {showPendingMessage && (
+                    <motion.div
+                      id="pending-account-notice"
+                      initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                      animate={{
+                        opacity: 1,
+                        scale: 1,
+                        y: 0,
+                        x: [0, -4, 4, -4, 4, 0] // Subtle shake to draw attention
+                      }}
+                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 20,
+                        x: { duration: 0.4 }
+                      }}
+                      className="flex flex-col mb-6 p-5 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl shadow-sm relative overflow-hidden"
+                    >
+                      <div className="absolute top-0 left-0 w-1 h-full bg-amber-400"></div>
+                      <button
+                        onClick={() => setShowPendingMessage(false)}
+                        className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-amber-100 text-amber-500 hover:text-amber-700 transition-all"
+                        aria-label="Close notice"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                      <div className="flex items-start gap-4">
+                        <div className="flex-shrink-0 w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-xl">
+                          🛒
+                        </div>
+                        <div className="flex-1 pr-6">
+                          <h3 className="text-amber-900 font-bold text-base flex items-center gap-2">
+                            Cart Not Available Yet
+                            <span className="bg-amber-100 text-amber-700 text-[10px] uppercase px-1.5 py-0.5 rounded-md font-bold tracking-wider">Verification Required</span>
+                          </h3>
+                          <p className="text-amber-800 text-sm mt-1 leading-relaxed font-medium">
+                            Hi {getUserRoleDisplay()}! Your account is currently pending approval.
+                            You can submit an enquiry for this product instead while we verify your business details.
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
               <div className="flex items-center gap-4 pt-4 border-t border-gray-200">
                 <span className="text-sm font-medium text-gray-700 font-title">Quantity:</span>

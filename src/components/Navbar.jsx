@@ -41,6 +41,18 @@ export default function Navbar() {
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isVideoCallPopupOpen, setIsVideoCallPopupOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
+  const hoverTimeoutRef = useRef(null);
+
+  const handleProductsMouseEnter = () => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    setIsCategoryDropdownOpen(true);
+  };
+
+  const handleProductsMouseLeave = () => {
+    hoverTimeoutRef.current = setTimeout(() => {
+      setIsCategoryDropdownOpen(false);
+    }, 200);
+  };
 
   // User Type State
   const [currentUserType, setCurrentUserType] = useState(() => {
@@ -210,7 +222,9 @@ export default function Navbar() {
     handleCategoryClick,
     handleProductClick,
     activeCategory,
-    onOpenVideoCallPopup: () => setIsVideoCallPopupOpen(true)
+    onOpenVideoCallPopup: () => setIsVideoCallPopupOpen(true),
+    onProductsMouseEnter: handleProductsMouseEnter,
+    onProductsMouseLeave: handleProductsMouseLeave
   };
 
   const stateProps = {
@@ -392,6 +406,8 @@ export default function Navbar() {
       <CategoryDropdown
         isOpen={isCategoryDropdownOpen}
         onClose={() => setIsCategoryDropdownOpen(false)}
+        onMouseEnter={handleProductsMouseEnter}
+        onMouseLeave={handleProductsMouseLeave}
         onCategoryClick={handleCategoryClick}
         onProductClick={handleProductClick}
         activeCategory={activeCategory}

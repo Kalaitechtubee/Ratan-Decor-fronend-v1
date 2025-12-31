@@ -16,10 +16,10 @@ const normalizeCartItem = (item) => {
 
   // Normalize product field - convert Product to product
   const product = item.product || item.Product || null;
-  
+
   // Build normalized item structure
   const normalized = {
-    id: item.id,
+    id: item.id || item._id,
     productId: item.productId,
     quantity: item.quantity,
     userId: item.userId,
@@ -103,7 +103,7 @@ export const getCart = async () => {
     return data;
   } catch (error) {
     console.error('CartApi: Get cart error:', error);
-    
+
     // Handle 401 errors gracefully - fallback to guest cart
     if (error.status === 401 || error.message?.includes('401') || error.message?.includes('unauthorized') || error.message?.includes('Access denied')) {
       console.log('CartApi: 401 Unauthorized - falling back to guest cart');
@@ -115,14 +115,14 @@ export const getCart = async () => {
       }
       return { cartItems: [] };
     }
-    
+
     // For other errors, try to fallback to guest cart
     const savedCart = localStorage.getItem('guestCart');
     if (savedCart) {
       console.log('CartApi: Falling back to guest cart due to error:', error.message);
       return { cartItems: normalizeCartItems(JSON.parse(savedCart)) };
     }
-    
+
     throw new Error(`Failed to fetch cart: ${error.message}`);
   }
 };
@@ -170,8 +170,8 @@ export const addToCart = async (productId, quantity = 1, options = {}) => {
         console.log('CartApi: User not authenticated, using guest cart');
         // Guest cart addition - fix to increase quantity if product exists
         const savedCart = localStorage.getItem('guestCart') ? JSON.parse(localStorage.getItem('guestCart')) : [];
-        const existingIndex = savedCart.findIndex(item => 
-          (item.id === productId || item.productId === productId)
+        const existingIndex = savedCart.findIndex(item =>
+          item.productId === productId && JSON.stringify(item.specifications || {}) === JSON.stringify(options)
         );
         let updatedCart;
         if (existingIndex !== -1) {
@@ -182,12 +182,12 @@ export const addToCart = async (productId, quantity = 1, options = {}) => {
             return item;
           });
         } else {
-          const newItem = { 
-            id: productId, 
+          const newItem = {
+            id: productId,
             productId,
-            quantity, 
-            product: { id: productId, ...options }, 
-            specifications: options 
+            quantity,
+            product: { id: productId, ...options },
+            specifications: options
           };
           updatedCart = [...savedCart, newItem];
         }
@@ -244,7 +244,7 @@ export const updateCartItem = async (cartItemId, quantity) => {
         const savedCart = localStorage.getItem('guestCart') ? JSON.parse(localStorage.getItem('guestCart')) : [];
         const updatedCart = normalizeCartItems(
           savedCart.map(item =>
-            (item.id === cartItemId || item.productId === cartItemId) ? { ...item, quantity } : item
+            item.id === cartItemId ? { ...item, quantity } : item
           ).filter(item => validateCartItem(item))
         );
         localStorage.setItem('guestCart', JSON.stringify(updatedCart));
@@ -286,7 +286,7 @@ export const removeFromCart = async (cartItemId) => {
       console.log('CartApi: User not authenticated, removing from guest cart');
       const savedCart = localStorage.getItem('guestCart') ? JSON.parse(localStorage.getItem('guestCart')) : [];
       const updatedCart = normalizeCartItems(
-        savedCart.filter(item => item.id !== cartItemId && item.productId !== cartItemId)
+        savedCart.filter(item => item.id !== cartItemId)
       );
       localStorage.setItem('guestCart', JSON.stringify(updatedCart));
       return { success: true };
@@ -376,9 +376,9 @@ export const validateCartItem = (item) => {
   // After normalization, items should have consistent structure
   // Require quantity and at least one ID field
   const hasQuantity = item.quantity != null && item.quantity > 0;
-  const hasId = item.id != null || item.productId != null || 
-                (item.product && item.product.id != null);
-  
+  const hasId = item.id != null || item.productId != null ||
+    (item.product && item.product.id != null);
+
   return hasQuantity && hasId;
 };
 
@@ -389,9 +389,9 @@ export const calculateCartTotal = (cartItems) => {
     if (!validateCartItem(item)) return total;
 
     // After normalization, always use item.product (not item.Product)
-    const unitPrice = item.itemCalculations?.unitPrice || 
-                     item.product?.price || 
-                     0;
+    const unitPrice = item.itemCalculations?.unitPrice ||
+      item.product?.price ||
+      0;
 
     return total + (parseFloat(unitPrice) * parseInt(item.quantity));
   }, 0);

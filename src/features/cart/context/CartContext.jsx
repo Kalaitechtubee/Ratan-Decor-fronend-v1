@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/hooks/useAuth.js';
 import { CartAPI } from '../api/cartApi.js';
 import toast from 'react-hot-toast';
@@ -7,6 +8,7 @@ const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem('guestCart');
     if (savedCart) {
@@ -20,7 +22,61 @@ export const CartProvider = ({ children }) => {
   const updateInProgress = useRef(false);
   const prevAuthStatus = useRef(isAuthenticated);
 
+  const isPendingAccount = useCallback(() => {
+    if (!user) return false;
+
+    // Handle status and role defensively
+    const status = (user.status || '').toString().toUpperCase();
+    const role = (user.role || '').toString().toLowerCase();
+
+    // This logic MUST only apply to trade roles (Architect/Dealer)
+    const isTradeRole = role === 'architect' || role === 'dealer';
+    if (!isTradeRole) return false;
+
+    // For trade roles, any status other than 'APPROVED' is considered pending/restricted
+    const isNotApproved = status !== 'APPROVED';
+
+    // Check for explicit pending indicators
+    const isPendingStatus = status === 'PENDING' || status === 'AWAITING' || status === '' || !user.status;
+
+    return isNotApproved && isPendingStatus;
+  }, [user]);
+
+  // Helper to get user role for display
+  const getUserRoleDisplay = useCallback(() => {
+    const role = user?.role?.toLowerCase();
+    if (role === 'architect') return 'Architect';
+    if (role === 'dealer') return 'Dealer';
+    return 'User';
+  }, [user]);
+
+  // Helper to redirect pending users to enquiry form with friendly message
+  const redirectToEnquiryForm = useCallback((productInfo = null) => {
+    // Only redirect if it's a pending trade account (Architect/Dealer)
+    if (isPendingAccount()) {
+      if (productInfo) {
+        navigate('/enquiry-form', {
+          state: { product: productInfo },
+          replace: false
+        });
+      } else {
+        navigate('/enquiry-form', { replace: false });
+      }
+      return true;
+    }
+    return false;
+  }, [isPendingAccount, navigate]);
+
   // When a user logs out, immediately reset cart to guest cart (should be empty after logout)
+  const guardRestrictedAction = useCallback((actionName = 'this action') => {
+    if (isPendingAccount()) {
+      redirectToEnquiryForm();
+      console.log(`CartContext: ${actionName} blocked for pending account`);
+      return false; // Action restricted
+    }
+    return true; // Action allowed
+  }, [isPendingAccount, redirectToEnquiryForm]);
+
   useEffect(() => {
     if (prevAuthStatus.current && !isAuthenticated) {
       const savedCart = localStorage.getItem('guestCart');
@@ -50,7 +106,7 @@ export const CartProvider = ({ children }) => {
     try {
       setCartLoading(true);
       setCartError(null);
-      
+
       // Wait for user to be available if authenticated
       if (isAuthenticated && !user) {
         console.log('CartContext: Waiting for user to be loaded...');
@@ -58,20 +114,20 @@ export const CartProvider = ({ children }) => {
         setCartLoading(false);
         return;
       }
-      
+
       // Debug authentication state
       console.log('CartContext: Fetch cart - Auth check:', {
         isAuthenticated,
         hasUser: !!user,
         userId: user?.id
       });
-      
+
       let cartItems = [];
-      
+
       if (isAuthenticated && user) {
         console.log('CartContext: Fetching cart from API for authenticated user');
         const response = await CartAPI.getCart();
-        
+
         // API returns normalized structure: { success: true, cartItems: [...] }
         if (response?.success && Array.isArray(response.cartItems)) {
           cartItems = response.cartItems;
@@ -86,15 +142,15 @@ export const CartProvider = ({ children }) => {
           cartItems = CartAPI.normalizeCartItems(JSON.parse(savedCart));
         }
       }
-      
+
       // Ensure all items are normalized
       cartItems = CartAPI.normalizeCartItems(cartItems);
       setCart(cartItems);
-      
+
       if (!isAuthenticated) {
         localStorage.setItem('guestCart', JSON.stringify(cartItems));
       }
-      
+
       console.log('CartContext: Cart fetched successfully', {
         itemCount: cartItems.length,
         items: cartItems
@@ -117,6 +173,11 @@ export const CartProvider = ({ children }) => {
   }, [isAuthenticated, user]);
 
   const addToCart = async (product, quantity = 1) => {
+    // Check if user has pending account - redirect to enquiry form instead
+    if (redirectToEnquiryForm(product)) {
+      return false;
+    }
+
     // Reset updateInProgress if it's been stuck for too long (safety mechanism)
     if (updateInProgress.current) {
       console.warn('CartContext: Previous operation may be stuck, resetting...');
@@ -127,7 +188,7 @@ export const CartProvider = ({ children }) => {
       updateInProgress.current = true;
       setCartLoading(true);
       setCartError(null);
-      
+
       const productId = product.id || product._id;
       if (!productId) throw new Error('Product ID is missing');
       const options = product.specifications || {};
@@ -146,16 +207,14 @@ export const CartProvider = ({ children }) => {
 
           // After successful API call, fetch the updated cart from server (already normalized)
           updateInProgress.current = false;
+          // fetchSeoData logic removed if any, just staying on cart
           await fetchCart(true);
 
-          // Show success feedback
-          toast.success(`${product.name} added to cart!`, { duration: 3000 });
           return true;
         } catch (apiError) {
           console.error('CartContext: API call failed:', apiError);
           updateInProgress.current = false;
           setCartLoading(false);
-          toast.error(apiError.message || 'Failed to add to cart', { duration: 3000 });
           throw apiError;
         }
       } else {
@@ -163,7 +222,7 @@ export const CartProvider = ({ children }) => {
         const previousCart = [...cart];
         const existingIndex = cart.findIndex(
           (item) =>
-            (item.id === productId || item.productId === productId) &&
+            item.productId === productId &&
             JSON.stringify(item.specifications || {}) === JSON.stringify(options)
         );
         let updatedCart;
@@ -189,18 +248,12 @@ export const CartProvider = ({ children }) => {
         localStorage.setItem('guestCart', JSON.stringify(updatedCart));
 
         console.log(`CartContext: ${product.name} added to guest cart`, { productId, quantity });
-        toast.success(`${product.name} ${existingIndex !== -1 ? 'updated in' : 'added to'} cart!`, {
-          duration: 3000,
-        });
         return true;
       }
-    } catch (error) {
-      setCartError(error.message || 'Failed to add to cart');
       console.error('CartContext: Failed to add to cart', {
         product,
         error: error.message || 'Unknown error',
       });
-      toast.error(error.message || 'Failed to add to cart', { duration: 3000 });
       return false;
     } finally {
       updateInProgress.current = false;
@@ -209,6 +262,11 @@ export const CartProvider = ({ children }) => {
   };
 
   const removeFromCart = async (cartItemId) => {
+    // Check if user has pending account - restrict cart operations
+    if (!guardRestrictedAction('Removing from cart')) {
+      return false;
+    }
+
     if (updateInProgress.current) {
       console.log('CartContext: Remove skipped - update in progress');
       return false;
@@ -223,8 +281,8 @@ export const CartProvider = ({ children }) => {
         await CartAPI.removeFromCart(cartItemId);
       }
 
-      // After normalization, items always have item.id and item.productId
-      const updatedCart = cart.filter((item) => item.id !== cartItemId && item.productId !== cartItemId);
+      // Use loose equality or String comparison to match IDs correctly regardless of type
+      const updatedCart = cart.filter((item) => String(item.id) !== String(cartItemId));
       // Normalize to ensure consistency
       const normalizedCart = CartAPI.normalizeCartItems(updatedCart);
       setCart(normalizedCart);
@@ -233,16 +291,13 @@ export const CartProvider = ({ children }) => {
         localStorage.setItem('guestCart', JSON.stringify(normalizedCart));
       }
 
-      toast.success('Item removed from cart', { duration: 3000 });
       console.log('CartContext: Item removed from cart', { cartItemId });
       return true;
     } catch (apiError) {
-      // Restore previous cart state on error
       setCart(previousCart);
       if (!isAuthenticated) {
         localStorage.setItem('guestCart', JSON.stringify(previousCart));
       }
-      toast.error(apiError.message || 'Failed to remove from cart', { duration: 3000 });
       throw apiError;
     } finally {
       updateInProgress.current = false;
@@ -250,6 +305,11 @@ export const CartProvider = ({ children }) => {
   };
 
   const updateCartItem = async (cartItemId, quantity) => {
+    // Check if user has pending account - restrict cart operations
+    if (!guardRestrictedAction('Updating cart')) {
+      return false;
+    }
+
     if (quantity < 1) {
       console.log('CartContext: Update skipped - quantity less than 1', { cartItemId, quantity });
       return false;
@@ -288,8 +348,8 @@ export const CartProvider = ({ children }) => {
       // Update cart items - use normalized structure (always item.id and item.productId)
       const updatedCart = cart.map((item) => {
         // Check if this is the item we want to update (simplified after normalization)
-        const isTargetItem = item.id === cartItemId || item.productId === cartItemId;
-        
+        const isTargetItem = String(item.id) === String(cartItemId);
+
         if (isTargetItem) {
           if (isAuthenticated && serverUpdatedItem) {
             // Normalize server response and use it
@@ -303,8 +363,8 @@ export const CartProvider = ({ children }) => {
             if (item.itemCalculations || item.product) {
               const unitPrice = parseFloat(
                 item.itemCalculations?.unitPrice ||
-                  item.product?.price ||
-                  0
+                item.product?.price ||
+                0
               );
               const gstRate = parseFloat(item.product?.gst || 0);
               const subtotal = unitPrice * quantity;
@@ -324,7 +384,7 @@ export const CartProvider = ({ children }) => {
         }
         return item;
       });
-      
+
       // Normalize and filter cart items
       const normalizedCart = CartAPI.normalizeCartItems(updatedCart);
       const filteredCart = normalizedCart.filter((item) => {
@@ -334,7 +394,7 @@ export const CartProvider = ({ children }) => {
         }
         return isValid;
       });
-      
+
       console.log('CartContext: Cart after update', {
         originalCount: cart.length,
         updatedCount: updatedCart.length,
@@ -361,7 +421,6 @@ export const CartProvider = ({ children }) => {
         }
       }
 
-      toast.success('Cart item updated', { duration: 3000 });
       console.log('CartContext: Cart item updated', { cartItemId, quantity });
       return true;
     } catch (apiError) {
@@ -369,7 +428,6 @@ export const CartProvider = ({ children }) => {
       if (!isAuthenticated) {
         localStorage.setItem('guestCart', JSON.stringify(previousCart));
       }
-      toast.error(apiError.message || 'Failed to update cart item', { duration: 3000 });
       throw apiError;
     } finally {
       updateInProgress.current = false;
@@ -377,6 +435,11 @@ export const CartProvider = ({ children }) => {
   };
 
   const clearCart = async () => {
+    // Check if user has pending account - restrict cart operations
+    if (!guardRestrictedAction('Clearing cart')) {
+      return false;
+    }
+
     if (updateInProgress.current) {
       console.log('CartContext: Clear skipped - update in progress');
       return false;
@@ -395,7 +458,6 @@ export const CartProvider = ({ children }) => {
         } else {
           localStorage.removeItem('guestCart');
         }
-        toast.success('Cart cleared successfully', { duration: 3000 });
         console.log('CartContext: Cart cleared successfully');
         return true;
       } catch (apiError) {
@@ -403,11 +465,9 @@ export const CartProvider = ({ children }) => {
         return true;
       }
     } catch (error) {
-      setCartError(error.message || 'Failed to clear cart');
       console.error('CartContext: Failed to clear cart', {
         error: error.message || 'Unknown error',
       });
-      toast.error(error.message || 'Failed to clear cart', { duration: 3000 });
       return false;
     } finally {
       updateInProgress.current = false;
@@ -490,6 +550,9 @@ export const CartProvider = ({ children }) => {
     getCartCount,
     getCartSummary,
     isAuthenticated,
+    isPendingAccount,
+    getUserRoleDisplay,
+    redirectToEnquiryForm,
   };
 
   return <CartContext.Provider value={contextValue}>{children}</CartContext.Provider>;

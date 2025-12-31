@@ -20,6 +20,32 @@ const getErrorMessage = (error, defaultMessage) =>
 // Utility to check if user is approved
 const isUserApproved = (status) => status?.toUpperCase() === 'APPROVED';
 
+// Utility to check if user requires approval (Architect/Dealer)
+const requiresApproval = (role) => {
+  const lowerRole = role?.toLowerCase();
+  return lowerRole === 'architect' || lowerRole === 'dealer';
+};
+
+// Utility to check if user should be logged in (approved or pending architect/dealer)
+const shouldBeLoggedIn = (user) => {
+  if (!user) return false;
+  const status = user.status?.toUpperCase();
+  const role = user.role?.toLowerCase();
+
+  // Approved users are always logged in
+  if (status === 'APPROVED') return true;
+
+  // Pending Architect/Dealer users are logged in but with limited access
+  if ((role === 'architect' || role === 'dealer') && (status === 'PENDING' || !status)) {
+    return true;
+  }
+
+  // Customers are logged in regardless of status
+  if (role === 'customer') return true;
+
+  return false;
+};
+
 // Login thunk with status check
 export const login = createAsyncThunk('auth/login', async (credentials, { dispatch, rejectWithValue }) => {
   try {
@@ -27,10 +53,17 @@ export const login = createAsyncThunk('auth/login', async (credentials, { dispat
     // Tokens are now in secure httpOnly cookies - no need to store them
     const { user } = loginResponse;
 
+    // Check status using ID
+    const statusResponse = await checkStatusApi(user.id);
+    const updatedUser = { ...user, status: statusResponse.status };
+
+    // Determine if user should be logged in (includes pending Architect/Dealer)
+    const shouldLogin = shouldBeLoggedIn(updatedUser);
+
     // Store user details in localStorage (tokens are in secure httpOnly cookies)
     localStorage.setItem('userId', user.id.toString());
     localStorage.setItem('userType', user.userTypeName || '');
-    localStorage.setItem('isLoggedIn', isUserApproved(user.status) ? 'true' : 'false');
+    localStorage.setItem('isLoggedIn', shouldLogin ? 'true' : 'false');
     localStorage.setItem('name', user.name || '');
     localStorage.setItem('email', user.email || '');
     localStorage.setItem('role', user.role || '');
@@ -43,26 +76,24 @@ export const login = createAsyncThunk('auth/login', async (credentials, { dispat
     localStorage.setItem('state', user.state || '');
     localStorage.setItem('country', user.country || '');
     localStorage.setItem('pincode', user.pincode || '');
+    localStorage.setItem('userStatus', statusResponse.status || 'PENDING');
 
-    // Check status using ID
-    const statusResponse = await checkStatusApi(user.id);
     const isApproved = isUserApproved(statusResponse.status);
-
-    // Update isLoggedIn based on status
-    localStorage.setItem('isLoggedIn', isApproved ? 'true' : 'false');
-
     if (!isApproved) {
       localStorage.setItem('statusId', user.id.toString());
     } else {
       localStorage.removeItem('statusId');
     }
 
-    // Open popup
-    dispatch(openPopup());
-    localStorage.removeItem('userTypeConfirmed');
+    // Only open popup for approved users or customers
+    if (isApproved || user.role?.toLowerCase() === 'customer') {
+      dispatch(openPopup());
+      localStorage.removeItem('userTypeConfirmed');
+    }
 
     return {
       ...loginResponse,
+      user: updatedUser,
       status: statusResponse.status,
     };
   } catch (error) {
@@ -164,12 +195,14 @@ const authSlice = createSlice({
   reducers: {
     setUser: (state, action) => {
       state.user = action.payload;
-      state.isAuthenticated = isUserApproved(action.payload.status);
+      // Use shouldBeLoggedIn to keep pending Architect/Dealer users logged in
+      const shouldLogin = shouldBeLoggedIn(action.payload);
+      state.isAuthenticated = shouldLogin;
       // Tokens are now in secure httpOnly cookies - no localStorage storage needed
       state.userType = action.payload.userTypeName || state.userType;
       state.userRole = action.payload.role || state.userRole;
       // Store user details in localStorage
-      localStorage.setItem('isLoggedIn', state.isAuthenticated ? 'true' : 'false');
+      localStorage.setItem('isLoggedIn', shouldLogin ? 'true' : 'false');
       localStorage.setItem('userType', action.payload.userTypeName || '');
       localStorage.setItem('userId', action.payload.id?.toString() || '');
       localStorage.setItem('name', action.payload.name || '');
@@ -184,6 +217,7 @@ const authSlice = createSlice({
       localStorage.setItem('state', action.payload.state || '');
       localStorage.setItem('country', action.payload.country || '');
       localStorage.setItem('pincode', action.payload.pincode || '');
+      localStorage.setItem('userStatus', action.payload.status || 'PENDING');
       saveAuthState(state);
     },
     logout: (state) => {
@@ -236,12 +270,14 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.user = action.payload.user;
-        state.isAuthenticated = isUserApproved(action.payload.status);
+        // Use shouldBeLoggedIn to keep pending Architect/Dealer users authenticated
+        const shouldLogin = shouldBeLoggedIn(action.payload.user);
+        state.isAuthenticated = shouldLogin;
         // Tokens are now in secure httpOnly cookies - no localStorage storage needed
         state.userType = action.payload.user.userTypeName;
         state.userRole = action.payload.user.role;
         // Store user details in localStorage
-        localStorage.setItem('isLoggedIn', state.isAuthenticated ? 'true' : 'false');
+        localStorage.setItem('isLoggedIn', shouldLogin ? 'true' : 'false');
         localStorage.setItem('userType', action.payload.user.userTypeName || '');
         localStorage.setItem('userId', action.payload.user.id.toString());
         localStorage.setItem('name', action.payload.user.name || '');
@@ -256,6 +292,7 @@ const authSlice = createSlice({
         localStorage.setItem('state', action.payload.user.state || '');
         localStorage.setItem('country', action.payload.user.country || '');
         localStorage.setItem('pincode', action.payload.user.pincode || '');
+        localStorage.setItem('userStatus', action.payload.status || 'PENDING');
         saveAuthState(state);
       })
       .addCase(login.rejected, (state, action) => {
@@ -304,12 +341,16 @@ const authSlice = createSlice({
       })
       .addCase(checkStatus.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.user = { ...state.user, status: action.payload.status.toUpperCase() };
-        state.isAuthenticated = isUserApproved(action.payload.status);
-        localStorage.setItem('isLoggedIn', state.isAuthenticated ? 'true' : 'false');
-        if (state.isAuthenticated) {
+        const updatedUser = { ...state.user, status: action.payload.status };
+        state.user = updatedUser;
+        const shouldLogin = shouldBeLoggedIn(updatedUser);
+        state.isAuthenticated = shouldLogin;
+        localStorage.setItem('isLoggedIn', shouldLogin ? 'true' : 'false');
+        localStorage.setItem('userStatus', action.payload.status || 'PENDING');
+        if (isUserApproved(action.payload.status)) {
           localStorage.removeItem('statusId');
         }
+        saveAuthState(state);
       })
       .addCase(checkStatus.rejected, (state, action) => {
         state.status = 'failed';

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Loader2, MapPin, CheckCircle, X } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Loader2, MapPin, CheckCircle, X, Check } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { createEnquiry, getUserTypes } from '../product/api/EnquiryApi';
 import { useAuth } from '../auth/hooks/useAuth';
@@ -237,9 +238,13 @@ const LocationSelector = ({
 };
 
 // EnquiryForm component (renamed to EnquiryFormPage for page usage)
-const EnquiryFormPage = ({ product, user: propUser }) => {
+const EnquiryFormPage = ({ product: propProduct, user: propUser }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user: authUser, isAuthenticated } = useAuth();
+
+  // Prioritize product from prop, then from location state
+  const product = propProduct || location.state?.product;
   const user = propUser || authUser;
   const isLoggedIn = isAuthenticated && !!user;
   const [isOpen, setIsOpen] = useState(true); // Always open for page context
@@ -263,8 +268,14 @@ const EnquiryFormPage = ({ product, user: propUser }) => {
     role: user?.userRole || user?.role || 'Customer',
   });
 
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
   // Pre-fill form data when component mounts or user/product changes
   useEffect(() => {
+    // Determine the best initial userType
+    const initialUserType = user?.userTypeName || user?.userType || user?.userTypeId || '';
+
     setFormData((prev) => ({
       ...prev,
       name: user?.name || '',
@@ -274,7 +285,7 @@ const EnquiryFormPage = ({ product, user: propUser }) => {
       state: user?.state || '',
       city: user?.city || '',
       pincode: user?.pincode || '',
-      userType: user?.userTypeName || user?.userType || user?.userTypeId || '',
+      userType: initialUserType,
       role: user?.userRole || user?.role || 'Customer',
       productDesignNumber: product?.designNumber || (product?.id ? String(product.id) : ''),
       productName: product?.name || '',
@@ -358,10 +369,11 @@ const EnquiryFormPage = ({ product, user: propUser }) => {
     const errors = {};
     const requiredFields = ['name', 'email', 'phoneNo', 'state', 'city'];
     requiredFields.forEach((field) => {
-      if (!data[field]?.trim()) {
+      if (!data[field] || (typeof data[field] === 'string' && !data[field].trim())) {
         errors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
       }
     });
+
     if (data.email && !validateEmail(data.email)) {
       errors.email = 'Please enter a valid email address';
     }
@@ -371,9 +383,18 @@ const EnquiryFormPage = ({ product, user: propUser }) => {
     if (data.pincode && !validatePincode(data.pincode)) {
       errors.pincode = 'Please enter a valid 6-digit pincode';
     }
-    if (userTypes.length > 0 && !data.userType) {
-      errors.userType = 'Please select a user type';
+
+    // Role-based automatic userType handling if missing (background only)
+    if (!data.userType && data.role) {
+      const role = data.role.toLowerCase();
+      if (role === 'architect' || role === 'dealer') {
+        const match = userTypes.find(t => t.name.toLowerCase() === role);
+        if (match) {
+          data.userType = match.id || match.name;
+        }
+      }
     }
+
     return errors;
   };
 
@@ -442,12 +463,13 @@ const EnquiryFormPage = ({ product, user: propUser }) => {
         source: 'Website',
         productId: product?.id || null,
       };
-      await createEnquiry(formattedEnquiry);
-      toast.success('Enquiry submitted successfully!');
+      const response = await createEnquiry(formattedEnquiry);
+      setSuccessMessage(response.message || 'Enquiry submitted successfully!');
+      setShowSuccessPopup(true);
       resetForm();
-      // Navigate to home after successful submission
-      navigate('/');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // We don't navigate immediately anymore, we allow the popup to do it
+      // or wait for user to click "Home"
     } catch (err) {
       console.error('Error submitting enquiry:', err);
       toast.error(err.message || 'Failed to submit enquiry. Please try again.');
@@ -537,6 +559,7 @@ const EnquiryFormPage = ({ product, user: propUser }) => {
                         value={formData.role}
                         onChange={(e) => handleInputChange('role', e.target.value)}
                         placeholder="Enter your role"
+                        readOnly
                       />
                     ) : (
                       <div>
@@ -622,6 +645,58 @@ const EnquiryFormPage = ({ product, user: propUser }) => {
         </div>
       </main>
       <Footer />
+
+      {/* Success Popup */}
+      <AnimatePresence>
+        {showSuccessPopup && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center relative overflow-hidden"
+            >
+              {/* Decorative background element */}
+              <div className="absolute top-0 left-0 w-full h-2 bg-primary"></div>
+
+              <div className="flex justify-center mb-6">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                  <Check size={32} strokeWidth={3} />
+                </div>
+              </div>
+
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">Thank You!</h2>
+              <p className="text-gray-600 mb-8">
+                {successMessage || "Your enquiry has been received. Our team will get back to you shortly."}
+              </p>
+
+              <div className="space-y-3">
+                <button
+                  onClick={() => {
+                    setShowSuccessPopup(false);
+                    navigate('/');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="w-full bg-primary text-white font-semibold py-3 rounded-xl hover:bg-opacity-90 transition-all shadow-lg hover:shadow-primary/30"
+                >
+                  Go to Home Page
+                </button>
+                <button
+                  onClick={() => setShowSuccessPopup(false)}
+                  className="w-full text-gray-500 font-medium py-2 hover:text-gray-700 transition-colors"
+                >
+                  Stay on this page
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
