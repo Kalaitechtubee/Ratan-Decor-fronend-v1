@@ -202,15 +202,21 @@ function DetailsForm() {
       const response = await registerApi(payload);
       if (response.success) {
         const { userId, name, email, role, status, accessToken } = response.data;
+
+        // Determine if user should be logged in (includes pending Architect/Dealer)
+        const lowerRole = role?.toLowerCase();
+        const isApproved = status.toUpperCase() === 'APPROVED';
+        const requiresApproval = lowerRole === 'architect' || lowerRole === 'dealer';
+        const shouldBeLoggedIn = isApproved || (requiresApproval && status.toUpperCase() === 'PENDING') || lowerRole === 'customer';
+
         localStorage.setItem('userId', userId.toString());
         localStorage.setItem('name', name || '');
         localStorage.setItem('email', email || '');
         localStorage.setItem('role', role || '');
         localStorage.setItem('status', status || 'Pending');
-        localStorage.setItem(
-          'isLoggedIn',
-          status.toUpperCase() === 'APPROVED' ? 'true' : 'false'
-        );
+        localStorage.setItem('userStatus', status.toUpperCase() || 'PENDING');
+        // Keep pending Architect/Dealer users logged in with view-only access
+        localStorage.setItem('isLoggedIn', shouldBeLoggedIn ? 'true' : 'false');
         // Persist token as a fallback when cookies are blocked on localhost
         localStorage.setItem('accessToken', accessToken || '');
         localStorage.setItem('token', accessToken || '');
@@ -555,11 +561,10 @@ function DetailsForm() {
             whileHover="hover"
             whileTap="tap"
             disabled={loading}
-            className={`w-full md:w-auto px-8 py-2.5 rounded-none font-medium text-white transition-all duration-300 ${
-              loading
+            className={`w-full md:w-auto px-8 py-2.5 rounded-none font-medium text-white transition-all duration-300 ${loading
                 ? 'bg-gray-400 cursor-not-allowed'
                 : 'bg-[#e2202b] hover:bg-[#c41d26]'
-            }`}
+              }`}
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">

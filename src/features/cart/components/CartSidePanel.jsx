@@ -18,14 +18,30 @@ export default function CartSidePanel({ isOpen, onClose }) {
         cart,
         updateCartItem,
         removeFromCart,
+        clearCart,
         cartLoading,
         getCartSummary
     } = useCart();
 
     const [updatingItems, setUpdatingItems] = useState(new Set());
     const [removingItems, setRemovingItems] = useState(new Set());
+    const [isClearing, setIsClearing] = useState(false);
 
     const cartSummary = getCartSummary();
+
+    const handleClearCart = async () => {
+        if (cart.length === 0 || isClearing) return;
+        if (!window.confirm('Are you sure you want to clear your entire cart?')) return;
+
+        setIsClearing(true);
+        try {
+            await clearCart();
+        } catch (error) {
+            console.error('Failed to clear cart:', error);
+        } finally {
+            setIsClearing(false);
+        }
+    };
 
     // Animation variants
     const overlayVariants = {
@@ -137,12 +153,23 @@ export default function CartSidePanel({ isOpen, onClose }) {
                                     {cartSummary.itemCount}
                                 </span>
                             </div>
-                            <button
-                                onClick={onClose}
-                                className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500 hover:text-gray-900"
-                            >
-                                <XMarkIcon className="w-6 h-6" />
-                            </button>
+                            <div className="flex items-center gap-3">
+                                {cart.length > 0 && (
+                                    <button
+                                        onClick={handleClearCart}
+                                        disabled={isClearing}
+                                        className="text-xs font-bold text-red-500 hover:text-red-700 transition-colors disabled:opacity-50 py-1"
+                                    >
+                                        {isClearing ? 'Clearing...' : 'Clear All'}
+                                    </button>
+                                )}
+                                <button
+                                    onClick={onClose}
+                                    className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500 hover:text-gray-900"
+                                >
+                                    <XMarkIcon className="w-6 h-6" />
+                                </button>
+                            </div>
                         </div>
 
                         {/* Cart Items */}
@@ -203,11 +230,15 @@ export default function CartSidePanel({ isOpen, onClose }) {
                                                             {product.name}
                                                         </h3>
                                                         <button
-                                                            onClick={() => handleRemoveItem(item.id)}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleRemoveItem(item.id);
+                                                            }}
                                                             disabled={isRemoving}
-                                                            className="text-gray-400 hover:text-red-500 p-1 -mr-1 transition-colors flex-shrink-0"
+                                                            className="text-gray-400 hover:text-red-500 p-2 -mr-2 transition-all hover:scale-110 active:scale-95 disabled:opacity-50 flex-shrink-0"
+                                                            title="Remove item"
                                                         >
-                                                            <TrashIcon className="w-4 h-4" />
+                                                            <TrashIcon className="w-5 h-5" />
                                                         </button>
                                                     </div>
                                                     {product.category && (

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ShoppingBag, Video, Phone, MessageCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShoppingBag, Video, Phone, MessageCircle, X, ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../cart/context/CartContext';
 import { useAuth } from '../../auth';
@@ -10,56 +10,64 @@ import VideoCallPopup from '../../../components/Home/VideoCallPopup';
 
 export default function EnhancedProductCard({ product, viewMode = 'grid' }) {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-  const { cart, addToCart: addToCartContext, cartLoading } = useCart();
+  const { isAuthenticated, user } = useAuth();
+  const { cart, addToCart: addToCartContext, cartLoading, isPendingAccount, redirectToEnquiryForm, getUserRoleDisplay } = useCart();
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [showPendingMessage, setShowPendingMessage] = useState(false);
 
   const isInCart = cart.some(
     (item) =>
-      (item.id === product.id ||
-        item.productId === product.id ||
+      (item.productId === product.id ||
         item.product?.id === product.id ||
         item.Product?.id === product.id) &&
       JSON.stringify(item.specifications || {}) ===
       JSON.stringify(product.specifications || {})
   );
 
-  const { user } = useAuth();
   const userType = user?.userType || localStorage.getItem('userType') || 'General';
 
   const getPrice = () => {
-    switch (userType?.toLowerCase()) {
-      case 'architect':
-        return product.architectPrice || product.price;
-      case 'dealer':
-        return product.dealerPrice || product.price;
-      case 'commercial':
-        return product.generalPrice || product.price;
-      default:
-        return product.price;
+    if (!product) return 0;
+    const userRoleLower = user?.role?.toLowerCase();
+    const isApproved = user?.status?.toLowerCase() === 'approved';
+
+    // 1. If approved Architect/Dealer, use their trade pricing
+    if (isApproved) {
+      if (userRoleLower === 'architect') return product.architectPrice || product.price;
+      if (userRoleLower === 'dealer') return product.dealerPrice || product.price;
     }
+
+    // 2. Otherwise, check for project-based pricing (Commercial)
+    const type = (user?.userType || user?.userTypeName || localStorage.getItem('userType') || 'General').toLowerCase();
+    if (type === 'commercial' || type === 'developer') {
+      return product.generalPrice || product.price;
+    }
+
+    // 3. Default to public price
+    return product.price;
   };
 
   const currentPrice = getPrice();
   const imageUrls = product.imageUrls || [];
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = async (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+
     if (!isAuthenticated) {
-      toast.error("Please create an account before adding items to cart", {
-        duration: 2500,
-      });
-      setTimeout(() => {
-        navigate("/register");
-      }, 1000);
+      navigate("/register");
       return;
     }
+
+    if (isPendingAccount()) {
+      setShowPendingMessage(true);
+      return;
+    }
+
     try {
-      const success = await addToCartContext(product);
-      if (!success) {
-        toast.error('Failed to add to cart. Please try again.', { duration: 3000 });
-      }
+      await addToCartContext({ ...product, price: currentPrice });
     } catch (error) {
-      toast.error(error.message || 'An error occurred. Please try again.', { duration: 3000 });
+      console.error('Failed to add to cart:', error);
     }
   };
 
@@ -158,6 +166,53 @@ export default function EnhancedProductCard({ product, viewMode = 'grid' }) {
                   <span>{cartLoading ? 'Adding...' : isInCart ? 'Added' : 'Add to Cart'}</span>
                 </button>
               </div>
+
+              {/* PENDING ACCOUNT OVERLAY */}
+              <AnimatePresence>
+                {showPendingMessage && (
+                  <motion.div
+                    initial={{ opacity: 0, y: '100%' }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: '100%' }}
+                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                    className="absolute inset-0 z-30 flex items-center justify-center p-4 bg-white/95 backdrop-blur-sm"
+                  >
+                    <div className="absolute top-0 left-0 w-full h-1 bg-amber-400"></div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowPendingMessage(false);
+                      }}
+                      className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+
+                    <div className="flex flex-col items-center text-center p-2">
+                      <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-2xl mb-3 shadow-sm border border-amber-100">
+                        🔒
+                      </div>
+                      <h4 className="text-amber-900 font-bold text-sm mb-1 uppercase tracking-wider">Account Pending</h4>
+                      <span className="bg-amber-100 text-amber-700 text-[9px] uppercase px-2 py-0.5 rounded-full font-bold mb-3 tracking-widest border border-amber-200/50">Verification Required</span>
+
+                      <p className="text-gray-600 text-xs leading-relaxed max-w-[200px] mb-4 font-medium italic">
+                        "Hi {getUserRoleDisplay()}! Submit an enquiry for prices and ordering while we verify your account."
+                      </p>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          redirectToEnquiryForm(product);
+                        }}
+                        className="flex items-center justify-center gap-2 w-full bg-primary text-white py-2.5 rounded-xl font-bold text-xs hover:bg-red-600 transition-all shadow-md hover:shadow-lg active:scale-95 px-6"
+                      >
+                        Submit Enquiry
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
         </div>

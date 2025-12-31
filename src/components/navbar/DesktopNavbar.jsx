@@ -13,8 +13,7 @@ import {
 import { MdDashboard } from "react-icons/md";
 import logo from "../../assets/images/ratan-decor.png";
 import SearchBar from "../SearchBar";
-import CategoryDropdown from "../CategoryDropdown";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export default function DesktopNavbar({
   user,
@@ -36,6 +35,8 @@ export default function DesktopNavbar({
   onOpenCart,
   isCartOpen,
   cartCount = 0,
+  onProductsMouseEnter,
+  onProductsMouseLeave
 }) {
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
@@ -61,48 +62,48 @@ export default function DesktopNavbar({
 
   // Compact Logout Confirmation Modal (same size as mobile/profile popup)
   const LogoutConfirmModal = ({ isOpen, onClose, onConfirm }) => (
-  <AnimatePresence>
-    {isOpen && (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-          className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm"
-        />
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
-        >
-          <div className="p-8 text-center">
-            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FaSignOutAlt className="text-2xl" />
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
+          >
+            <div className="p-8 text-center">
+              <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FaSignOutAlt className="text-2xl" />
+              </div>
+              <h3 className="text-xl font-bold text-neutral-900 mb-2">Ready to Leave?</h3>
+              <p className="text-sm text-neutral-500">Are you sure you want to log out of your account? You will need to sign in again to access your profile.</p>
             </div>
-            <h3 className="text-xl font-bold text-neutral-900 mb-2">Ready to Leave?</h3>
-            <p className="text-sm text-neutral-500">Are you sure you want to log out of your account? You will need to sign in again to access your profile.</p>
-          </div>
-          <div className="flex border-t border-neutral-100">
-            <button
-              onClick={onClose}
-              className="flex-1 px-6 py-4 text-sm font-bold text-neutral-600 hover:bg-neutral-50 transition-colors"
-            >
-              Stay Logged In
-            </button>
-            <button
-              onClick={onConfirm}
-              className="flex-1 px-6 py-4 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors border-l border-neutral-100"
-            >
-              Logout Now
-            </button>
-          </div>
-        </motion.div>
-      </div>
-    )}
-  </AnimatePresence>
-);
+            <div className="flex border-t border-neutral-100">
+              <button
+                onClick={onClose}
+                className="flex-1 px-6 py-4 text-sm font-bold text-neutral-600 hover:bg-neutral-50 transition-colors"
+              >
+                Stay Logged In
+              </button>
+              <button
+                onClick={onConfirm}
+                className="flex-1 px-6 py-4 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors border-l border-neutral-100"
+              >
+                Logout Now
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
 
   return (
     <>
@@ -153,34 +154,38 @@ export default function DesktopNavbar({
               <div className="flex items-center space-x-1">
                 <Link
                   to="/"
-                  className={`px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${
-                    isActiveRoute("/") ? "text-[#ff4747]" : "text-gray-700 hover:text-[#ff4747]"
-                  }`}
+                  className={`px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${isActiveRoute("/") ? "text-[#ff4747]" : "text-gray-700 hover:text-[#ff4747]"
+                    }`}
                   aria-label="Go to home page"
                 >
                   Home
                 </Link>
-                <div ref={categoryRef} className="relative">
+                <div
+                  ref={categoryRef}
+                  className="relative"
+                  onMouseEnter={onProductsMouseEnter}
+                  onMouseLeave={onProductsMouseLeave}
+                >
                   <button
-                    onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
-                    className={`flex items-center gap-1 px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${
-                      isCategoryDropdownOpen ? "text-[#ff4747]" : "text-gray-700 hover:text-[#ff4747]"
-                    }`}
-                    aria-label="Toggle product categories dropdown"
+                    onClick={() => {
+                      navigate("/products");
+                      setIsCategoryDropdownOpen(false);
+                    }}
+                    className={`flex items-center gap-1 px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${isCategoryDropdownOpen ? "text-[#ff4747]" : "text-gray-700 hover:text-[#ff4747]"
+                      }`}
+                    aria-label="Product categories"
                   >
                     <span>Products</span>
                     <FaChevronDown
-                      className={`text-[#ff4747] text-sm transition-transform duration-300 ${
-                        isCategoryDropdownOpen ? "rotate-180" : ""
-                      }`}
+                      className={`text-[#ff4747] text-sm transition-transform duration-300 ${isCategoryDropdownOpen ? "rotate-180" : ""
+                        }`}
                     />
                   </button>
                 </div>
                 <Link
                   to="/about"
-                  className={`px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-colors duration-200 ${
-                    isActiveRoute("/about") ? "text-[#ff4747]" : "text-gray-700 hover:text-[#ff4747]"
-                  }`}
+                  className={`px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-colors duration-200 ${isActiveRoute("/about") ? "text-[#ff4747]" : "text-gray-700 hover:text-[#ff4747]"
+                    }`}
                   aria-label="Go to about page"
                 >
                   Company
@@ -188,11 +193,10 @@ export default function DesktopNavbar({
 
                 <button
                   onClick={onOpenVideoCallPopup}
-                  className={`flex items-center gap-2 px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${
-                    isActiveRoute("/video-call")
-                      ? "text-[#ff4747] bg-[#ff4747]/10"
-                      : "text-gray-700 hover:text-[#ff4747]"
-                  }`}
+                  className={`flex items-center gap-2 px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${isActiveRoute("/video-call")
+                    ? "text-[#ff4747] bg-[#ff4747]/10"
+                    : "text-gray-700 hover:text-[#ff4747]"
+                    }`}
                   aria-label="Open video call scheduler popup"
                 >
                   <FaVideo className="text-[#ff4747] text-lg" />
@@ -201,17 +205,15 @@ export default function DesktopNavbar({
                 <button
                   onClick={onOpenCart}
                   aria-label="Open cart"
-                  className={`flex items-center gap-3 px-4 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${
-                    isCartOpen || isActiveRoute("/cart")
-                      ? "text-[#ff4747] bg-[#ff4747]/10"
-                      : "text-gray-700 hover:text-[#ff4747]"
-                  }`}
+                  className={`flex items-center gap-3 px-4 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${isCartOpen || isActiveRoute("/cart")
+                    ? "text-[#ff4747] bg-[#ff4747]/10"
+                    : "text-gray-700 hover:text-[#ff4747]"
+                    }`}
                 >
                   <div className="relative flex items-center justify-center">
                     <FaShoppingCart
-                      className={`text-lg transition-colors duration-200 ${
-                        isCartOpen || isActiveRoute("/cart") ? "text-[#ff4747]" : "text-gray-700"
-                      }`}
+                      className={`text-lg transition-colors duration-200 ${isCartOpen || isActiveRoute("/cart") ? "text-[#ff4747]" : "text-gray-700"
+                        }`}
                     />
                     {cartCount > 0 && (
                       <span className="absolute -top-2.5 -right-3 bg-[#ff4747] text-white text-[11px] font-bold h-5 min-w-[22px] px-1.5 rounded-full border-2 border-white flex items-center justify-center shadow-lg">
@@ -239,9 +241,8 @@ export default function DesktopNavbar({
                       {user?.name || "User"}
                     </span>
                     <FaChevronDown
-                      className={`text-white text-sm transition-transform duration-300 ${
-                        isProfileOpen ? "rotate-180" : ""
-                      }`}
+                      className={`text-white text-sm transition-transform duration-300 ${isProfileOpen ? "rotate-180" : ""
+                        }`}
                     />
                   </button>
                   <AnimatePresence>
@@ -303,14 +304,7 @@ export default function DesktopNavbar({
         </div>
       </nav>
 
-      {/* Category Dropdown */}
-      <CategoryDropdown
-        isOpen={isCategoryDropdownOpen}
-        onClose={handleCloseCategoryDropdown}
-        isMobileSidebar={false}
-        onCategoryClick={handleCategoryClick}
-        activeCategory={null}
-      />
+
 
       {/* Compact Logout Confirmation Modal */}
       <LogoutConfirmModal

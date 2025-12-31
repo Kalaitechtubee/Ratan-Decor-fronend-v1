@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
+import { Toaster } from 'react-hot-toast';
 import AppRoutes from './routes/AppRoutes';
 import { getSeoByPageName } from './features/seo/api/seoApi';
 import { useAuth } from './features/auth/hooks/useAuth';
@@ -51,6 +52,7 @@ function App() {
       '/reset-password': 'reset-password',
       '/details': 'details',
       '/orders': 'orders', // SEO for order listing page
+      '/enquiry-form': 'enquiry-form',
     };
 
     // Direct match
@@ -75,8 +77,8 @@ function App() {
   //  Restore session on app load
   useEffect(() => {
     const restoreSession = async () => {
-      // Check for isLoggedIn flag instead of token
-      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      // Check for isLoggedIn flag or userId as fallback
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || !!localStorage.getItem('userId');
       if (isLoggedIn) {
         try {
           const response = await api.get('/auth/profile');
@@ -156,18 +158,13 @@ function App() {
                 ' '
               )} page for premium decor solutions in Chennai.`,
           });
-        } else {
-          setSeoData({
-            title: `Ratan Decor - ${pageName.charAt(0).toUpperCase() +
-              pageName.slice(1).replace('-', ' ')}`,
-            description: `Explore Ratan Decor’s ${pageName.replace(
-              '-',
-              ' '
-            )} page for premium decor solutions in Chennai.`,
-          });
         }
       } catch (error) {
-        console.error(`Error fetching SEO data for ${pageName}:`, error);
+        // Silently handle 404s for SEO to avoid console noise, use defaults
+        if (error.response?.status !== 404) {
+          console.error(`Error fetching SEO data for ${pageName}:`, error);
+        }
+
         setSeoData({
           title: `Ratan Decor - ${pageName.charAt(0).toUpperCase() +
             pageName.slice(1).replace('-', ' ')}`,
@@ -210,6 +207,7 @@ function App() {
         ) : (
           <CartProvider>
             <AppRoutes />
+            <Toaster position="top-center" reverseOrder={false} />
           </CartProvider>
         )}
       </div>

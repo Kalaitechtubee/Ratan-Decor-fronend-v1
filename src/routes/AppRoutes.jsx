@@ -39,7 +39,10 @@ function PrivateRoute({ children, requiresUserType }) {
     return <Navigate to="/details" replace />;
   }
 
-  if (user?.status?.toUpperCase() !== 'APPROVED') {
+  const role = (user?.role || '').toString().toLowerCase();
+  const isTradeRole = role === 'architect' || role === 'dealer';
+
+  if (isTradeRole && user?.status?.toUpperCase() !== 'APPROVED') {
     return <Navigate to="/check-status" replace />;
   }
 

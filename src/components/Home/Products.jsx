@@ -6,24 +6,49 @@ import { motion } from 'framer-motion';
 import { ShoppingBag, Video } from 'lucide-react';
 import { fetchProduct } from '../../features/product/productSlice';
 import { useCart } from '../../features/cart/context/CartContext';
+import { useAuth } from '../../features/auth/hooks/useAuth';
 import { slugify } from '../../utils/utils';
 import { getProductImageUrl } from '../../utils/imageUtils';
 
 const Products = ({ product }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { addToCart, cart, cartLoading } = useCart();
 
-  const isInCart = cart.some((item) => item.id === product.id || item.product?.id === product.id);
+  const isInCart = cart.some((item) => item.productId === product.id || item.product?.id === product.id);
+
+  const getPrice = () => {
+    if (!product) return 0;
+    const userRoleLower = user?.role?.toLowerCase();
+    const isApproved = user?.status?.toLowerCase() === 'approved';
+
+    // 1. If approved Architect/Dealer, use their trade pricing
+    if (isApproved) {
+      if (userRoleLower === 'architect') return product.architectPrice || product.price;
+      if (userRoleLower === 'dealer') return product.dealerPrice || product.price;
+    }
+
+    // 2. Otherwise, check for project-based pricing (Commercial/Developer)
+    const type = (user?.userType || user?.userTypeName || localStorage.getItem('userType') || 'General').toLowerCase();
+    if (type === 'commercial' || type === 'developer') {
+      return product.generalPrice || product.price;
+    }
+
+    // 3. Default to public price
+    return product.price;
+  };
 
   const handleViewDetails = () => {
+    const currentPrice = getPrice();
     dispatch(fetchProduct({ id: product.id, userRole: null, userType: null }));
     navigate(`/products/${product.id}/${slugify(product.name)}`);
   };
 
   const handleAddToCart = () => {
     if (!isInCart && !cartLoading) {
-      addToCart({ id: product.id, name: product.name, price: product.price }, 1);
+      const currentPrice = getPrice();
+      addToCart({ ...product, price: currentPrice }, 1);
     }
   };
 
@@ -80,8 +105,8 @@ const Products = ({ product }) => {
             <button
               aria-label="Add to Cart"
               className={`transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 flex items-center space-x-2 px-4 py-2 rounded-full font-medium ${isInCart || product.stock <= 0
-                  ? 'bg-gray-500/90 cursor-not-allowed text-white'
-                  : 'bg-[#ff4747]/90 hover:bg-[#ff4747] text-white shadow-lg'
+                ? 'bg-gray-500/90 cursor-not-allowed text-white'
+                : 'bg-[#ff4747]/90 hover:bg-[#ff4747] text-white shadow-lg'
                 }`}
               onClick={isInCart || product.stock <= 0 ? null : handleAddToCart}
               disabled={isInCart || cartLoading || product.stock <= 0}
@@ -109,13 +134,13 @@ const Products = ({ product }) => {
         </p>
 
         <div className="flex flex-col items-center mt-auto">
-          <span className="text-lg font-bold text-gray-900">{formatPrice(product.price)}</span>
+          <span className="text-lg font-bold text-gray-900">{formatPrice(getPrice())}</span>
 
           <button
             aria-label="Add to Cart (Mobile)"
             className={`md:hidden flex items-center space-x-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors mt-2 ${isInCart || product.stock <= 0
-                ? 'bg-gray-400 cursor-not-allowed text-white'
-                : 'bg-[#ff4747] hover:bg-[#e63e3e] text-white'
+              ? 'bg-gray-400 cursor-not-allowed text-white'
+              : 'bg-[#ff4747] hover:bg-[#e63e3e] text-white'
               }`}
             onClick={isInCart || product.stock <= 0 ? null : handleAddToCart}
             disabled={isInCart || cartLoading || product.stock <= 0}

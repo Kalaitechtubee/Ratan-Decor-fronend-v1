@@ -2,18 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import Footer from '../../../components/Footer';
+import toast from 'react-hot-toast';
 
 const CheckStatus = () => {
-  const { user, status, error, checkStatus, isAuthenticated } = useAuth();
+  const { user, status, error, checkStatus, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Navigate if isAuthenticated changes to true
+  // Check if user is approved and redirect to home
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/home', { replace: true });
+    if (user?.status?.toLowerCase() === 'approved') {
+      toast.success('Your account has been approved! Welcome to Ratan Decor.', {
+        duration: 4000,
+        icon: '🎉',
+      });
+      navigate('/', { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [user, navigate]);
 
   // Handle refresh button click
   const handleRefresh = async () => {
@@ -21,12 +26,26 @@ const CheckStatus = () => {
       setIsRefreshing(true);
       try {
         await checkStatus(user.id);
+        toast.success('Status refreshed!', { duration: 2000 });
       } catch (err) {
         console.error('Status check failed:', err);
+        toast.error('Failed to refresh status. Please try again.');
       } finally {
         setIsRefreshing(false);
       }
     }
+  };
+
+  // Handle sign out
+  const handleSignOut = () => {
+    logout();
+    toast.success('Signed out successfully!', { duration: 2000 });
+    navigate('/login', { replace: true });
+  };
+
+  // Handle navigate to home
+  const handleGoToHome = () => {
+    navigate('/', { replace: false });
   };
 
   // Redirect to login if no user data
@@ -44,7 +63,7 @@ const CheckStatus = () => {
       {/* Main Content */}
       <div className="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8">
         <div className="w-full max-w-6xl mx-auto">
-          
+
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-semibold text-gray-900 mb-2">
@@ -56,7 +75,7 @@ const CheckStatus = () => {
           {/* Main Content Area */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="grid grid-cols-1 lg:grid-cols-4 min-h-96">
-              
+
               {/* Status Panel */}
               <div className="lg:col-span-1 bg-gray-900 p-8 flex flex-col items-center justify-center text-white">
                 <div className="w-16 h-16 bg-white bg-opacity-10 rounded-full flex items-center justify-center mb-4">
@@ -81,13 +100,12 @@ const CheckStatus = () => {
                   {isApproved ? 'Your account is ready to use' : isPending ? 'We are reviewing your profile' : 'Please resolve issues'}
                 </p>
                 <span
-                  className={`inline-flex px-3 py-1 text-xs font-medium rounded-full ${
-                    statusColor === 'green'
-                      ? 'bg-green-500 text-white'
-                      : statusColor === 'yellow'
+                  className={`inline-flex px-3 py-1 text-xs font-medium rounded-full ${statusColor === 'green'
+                    ? 'bg-green-500 text-white'
+                    : statusColor === 'yellow'
                       ? 'bg-yellow-500 text-white'
                       : 'bg-red-500 text-white'
-                  }`}
+                    }`}
                 >
                   {user.status || 'Pending'}
                 </span>
@@ -95,7 +113,7 @@ const CheckStatus = () => {
 
               {/* Content Panel */}
               <div className="lg:col-span-3 p-8">
-                
+
                 {/* Status Message */}
                 <div className="mb-8">
                   {isPending ? (
@@ -170,13 +188,12 @@ const CheckStatus = () => {
                     <div className="border border-gray-200 p-4 rounded-md">
                       <label className="block text-sm font-medium text-gray-500 mb-1">Status</label>
                       <span
-                        className={`inline-flex px-2 py-1 text-xs font-medium rounded ${
-                          statusColor === 'green'
-                            ? 'bg-green-100 text-green-800'
-                            : statusColor === 'yellow'
+                        className={`inline-flex px-2 py-1 text-xs font-medium rounded ${statusColor === 'green'
+                          ? 'bg-green-100 text-green-800'
+                          : statusColor === 'yellow'
                             ? 'bg-yellow-100 text-yellow-800'
                             : 'bg-red-100 text-red-800'
-                        }`}
+                          }`}
                       >
                         {user.status || 'Pending'}
                       </span>
@@ -201,11 +218,10 @@ const CheckStatus = () => {
                   <button
                     onClick={handleRefresh}
                     disabled={isRefreshing || status === 'loading'}
-                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-                      isRefreshing || status === 'loading'
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-gray-900 text-white hover:bg-gray-800'
-                    }`}
+                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${isRefreshing || status === 'loading'
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-gray-900 text-white hover:bg-gray-800'
+                      }`}
                   >
                     {isRefreshing || status === 'loading' ? (
                       <span className="flex items-center justify-center">
@@ -224,7 +240,7 @@ const CheckStatus = () => {
                     )}
                   </button>
                   <button
-                    onClick={() => navigate('/login')}
+                    onClick={handleSignOut}
                     className="flex-1 py-2 px-4 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
                   >
                     Sign Out
@@ -234,6 +250,12 @@ const CheckStatus = () => {
                     className="flex-1 py-2 px-4 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
                   >
                     Contact Support
+                  </button>
+                  <button
+                    onClick={handleGoToHome}
+                    className="flex-1 py-2 px-4 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    Go to Home
                   </button>
                 </div>
               </div>

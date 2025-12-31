@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  FaChevronRight, FaSpinner, FaExclamationTriangle, FaCouch, FaChair, 
-  FaBed, FaTable, FaStore, FaThLarge, FaDoorOpen, FaLightbulb 
+import {
+  FaChevronRight, FaSpinner, FaExclamationTriangle, FaCouch, FaChair,
+  FaBed, FaTable, FaStore, FaThLarge, FaDoorOpen, FaLightbulb
 } from 'react-icons/fa';
 import { MdCategory, MdKitchen, MdTableRestaurant, MdOutdoorGrill } from 'react-icons/md';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,7 +13,9 @@ const CategoryDropdown = ({
   onClose,
   isMobileSidebar = false,
   onCategoryClick,
-  activeCategory
+  activeCategory,
+  onMouseEnter,
+  onMouseLeave
 }) => {
   const navigate = useNavigate();
   const { categories, loadCategories, isLoading, error } = useProducts();
@@ -30,11 +32,13 @@ const CategoryDropdown = ({
 
   // Mouse event handlers for hover functionality
   const handleMouseEnter = () => {
-    // Keep dropdown open when mouse enters
+    if (onMouseEnter) onMouseEnter();
   };
 
   const handleMouseLeave = (e) => {
-    if (!categoryDropdownRef.current?.contains(e.relatedTarget)) {
+    if (onMouseLeave) {
+      onMouseLeave(e);
+    } else if (!categoryDropdownRef.current?.contains(e.relatedTarget)) {
       if (onClose) onClose();
     }
   };
@@ -96,7 +100,7 @@ const CategoryDropdown = ({
 
   const handleMobileCategoryClick = (category) => {
     if (selectedCategory?.id === category.id) {
-      handleInternalCategoryClick({ stopPropagation: () => {}, preventDefault: () => {} }, category);
+      handleInternalCategoryClick({ stopPropagation: () => { }, preventDefault: () => { } }, category);
     } else {
       setSelectedCategory(category);
     }
@@ -196,8 +200,8 @@ const CategoryDropdown = ({
                       ) : !selectedCategory ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                           {categories.slice(0, 8).map((category) => (
-                            <div 
-                              key={category.id} 
+                            <div
+                              key={category.id}
                               className="group"
                               onMouseEnter={() => handleCategoryHover(category)}
                             >
@@ -243,15 +247,15 @@ const CategoryDropdown = ({
 
                     {/* Image Section - Right Side */}
                     <div className="col-span-1 md:col-span-4">
-                      <motion.div 
+                      <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.3 }}
                         className="bg-white rounded-2xl overflow-hidden shadow-xl h-full"
                       >
                         <div className="relative h-full min-h-[400px] overflow-hidden">
-                          <img 
-                            src={getStaticImageUrl()} 
+                          <img
+                            src={getStaticImageUrl()}
                             alt="Premium Furniture Collection"
                             className="w-full h-full object-cover"
                             onError={(e) => {
@@ -306,9 +310,8 @@ const CategoryDropdown = ({
                 >
                   <button
                     onClick={() => handleMobileCategoryClick(category)}
-                    className={`flex items-center justify-between p-3 rounded-lg w-full text-left transition-all duration-300 font-roboto touch-target shadow-sm relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-[#ff4747] after:transition-all after:duration-300 hover:after:w-full ${
-                      activeCategory === category.name ? 'text-[#ff4747]' : 'bg-white hover:bg-gray-100'
-                    }`}
+                    className={`flex items-center justify-between p-3 rounded-lg w-full text-left transition-all duration-300 font-roboto touch-target shadow-sm relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-[#ff4747] after:transition-all after:duration-300 hover:after:w-full ${activeCategory === category.name ? 'text-[#ff4747]' : 'bg-white hover:bg-gray-100'
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className="text-lg">{getCategoryIcon(category.name)}</div>

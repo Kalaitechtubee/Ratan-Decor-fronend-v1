@@ -25,12 +25,18 @@ function LoginPage() {
       }
     } else if (status === 'failed' && error && !hasNavigatedRef.current) {
       hasNavigatedRef.current = true;
-      let userFriendlyMessage = 'Something went wrong. Please try again later.';
-      if (error.includes('Password is incorrect')) {
-        userFriendlyMessage = 'The password you entered is incorrect. Please try again.';
-      } else if (error.includes('User not found')) {
-        userFriendlyMessage = 'No account found with this email. Please register';
+      let userFriendlyMessage = typeof error === 'string' ? error : 'Something went wrong. Please try again later.';
+
+      if (typeof error === 'string') {
+        if (error.includes('Password is incorrect')) {
+          userFriendlyMessage = 'The password you entered is incorrect. Please try again.';
+        } else if (error.includes('User not found')) {
+          userFriendlyMessage = 'No account found with this email. Please register';
+        } else if (error.includes('rejected')) {
+          userFriendlyMessage = 'Your account has been rejected. Please contact support.';
+        }
       }
+
       setFormError(userFriendlyMessage);
       toast.error(userFriendlyMessage);
     }
@@ -54,7 +60,7 @@ function LoginPage() {
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -62,7 +68,7 @@ function LoginPage() {
     >
       {/* Left Section - Image with Content */}
       <div className="hidden lg:flex lg:w-3/5 relative overflow-hidden">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: 'url("https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2158&q=80")'
@@ -180,8 +186,8 @@ function LoginPage() {
                 </div>
 
                 <div className="text-sm">
-                  <a 
-                    href="/forgot-password" 
+                  <a
+                    href="/forgot-password"
                     className="font-medium text-[#e2202b] hover:text-[#c01b24]"
                     onClick={(e) => {
                       e.preventDefault();
@@ -198,11 +204,10 @@ function LoginPage() {
                   type="button"
                   onClick={handleSubmit}
                   disabled={status === 'loading'}
-                  className={`w-full flex justify-center py-3 px-4 border border-transparent shadow-sm text-sm font-medium text-white transition-all duration-200 ${
-                    status === 'loading'
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-[#e2202b] hover:bg-[#c01b24] focus:ring-2 focus:ring-offset-2 focus:ring-[#e2202b]'
-                  }`}
+                  className={`w-full flex justify-center py-3 px-4 border border-transparent shadow-sm text-sm font-medium text-white transition-all duration-200 ${status === 'loading'
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-[#e2202b] hover:bg-[#c01b24] focus:ring-2 focus:ring-offset-2 focus:ring-[#e2202b]'
+                    }`}
                 >
                   {status === 'loading' ? (
                     <div className="flex items-center">
@@ -219,8 +224,8 @@ function LoginPage() {
             <div className="mt-6 mb-10 text-center">
               <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
-                <a 
-                  href="/register" 
+                <a
+                  href="/register"
                   className="font-medium text-[#e2202b] hover:text-[#c01b24]"
                   onClick={(e) => {
                     e.preventDefault();
