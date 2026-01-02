@@ -15,7 +15,7 @@ function App() {
   const [seoData, setSeoData] = useState({
     title: 'Ratan Decor - Premium Interior Solutions',
     description:
-      'Explore Ratan Decor’s premium interior products for Residential, Commercial, and Modular Kitchen spaces in Chennai.',
+      'Explore Ratan Decor\'s premium interior products for Residential, Commercial, and Modular Kitchen spaces in Chennai.',
   });
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const location = useLocation();
@@ -33,7 +33,7 @@ function App() {
       '/contact': 'contact',
       '/faq': 'faq',
       '/cookiespolicy': 'cookiespolicy',
-      '/cookies-policy': 'cookiespolicy', // Handle possible hyphen variation
+      '/cookies-policy': 'cookiespolicy',
       '/disclaimer': 'disclaimer',
       '/privacy': 'privacy',
       '/returns-and-refunds-policy': 'returns',
@@ -51,55 +51,79 @@ function App() {
       '/verify-otp': 'verify-otp',
       '/reset-password': 'reset-password',
       '/details': 'details',
-      '/orders': 'orders', // SEO for order listing page
+      '/orders': 'orders',
       '/enquiry-form': 'enquiry-form',
     };
 
-    // Direct match
     if (map[path]) return map[path];
 
-    // Dynamic product details (/products/:id)
+    // Dynamic product details
     if (path.startsWith('/products/') && path.split('/').length >= 3) {
       return 'productdetails';
     }
 
-    // Dynamic order details (/orders/:id)
+    // Dynamic order details
     if (path.startsWith('/orders/') && path.split('/').length >= 3) {
       return 'orderdetails';
     }
 
-    // Fallback: derive from path
     const derived =
       path.replace(/\//g, '').replace(/-/g, '').toLowerCase() || 'home';
     return derived;
   };
 
-  //  Restore session on app load
+  // ✅ Initialize app state and localStorage on mount
   useEffect(() => {
-    const restoreSession = async () => {
-      // Check for isLoggedIn flag or userId as fallback
+    const initializeApp = async () => {
+      console.log('[App] Initializing application...');
+      
+      // Initialize localStorage flags if not present
+      if (!localStorage.getItem('userTypeConfirmed')) {
+        localStorage.setItem('userTypeConfirmed', 'false');
+        console.log('[App] Initialized userTypeConfirmed flag');
+      }
+
+      if (!localStorage.getItem('userType')) {
+        localStorage.setItem('userType', 'General');
+        console.log('[App] Initialized default userType');
+      }
+
+      // Restore session if user was previously logged in
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || !!localStorage.getItem('userId');
       if (isLoggedIn) {
         try {
+          console.log('[App] Attempting to restore session...');
           const response = await api.get('/auth/profile');
           if (response.data.success && response.data.user) {
+            console.log('[App] Session restored for user:', response.data.user.email);
             dispatch(setUser(response.data.user));
+            // If user is authenticated, mark userType as confirmed
+            if (response.data.user.userType) {
+              localStorage.setItem('userType', response.data.user.userType);
+              localStorage.setItem('userTypeConfirmed', 'true');
+              console.log('[App] Updated userType from user profile:', response.data.user.userType);
+            }
           }
         } catch (error) {
-          console.error('Failed to restore session:', error);
-          // If session is invalid, clear state
+          console.error('[App] Failed to restore session:', error);
           dispatch(logout());
+          localStorage.removeItem('userTypeConfirmed');
+          localStorage.removeItem('userType');
         }
+      } else {
+        console.log('[App] No previous session found');
+        // If user is not logged in, reset userTypeConfirmed to false
+        localStorage.setItem('userTypeConfirmed', 'false');
       }
+
       setIsInitialLoad(false);
     };
 
-    restoreSession();
+    initializeApp();
   }, [dispatch]);
 
   const fetchSeoData = useCallback(
     async (path) => {
-      // Expanded list of public paths (normalized to lowercase)
       const publicPaths = [
         '/',
         '/about',
@@ -124,15 +148,13 @@ function App() {
         '/order-success',
       ];
 
-      // Include dynamic product details routes
       const isProductDetails = path.startsWith('/products/') && path.split('/').length >= 3;
 
-      // For non-public paths when unauthenticated, use default login SEO
       if (!isAuthenticated && !publicPaths.includes(path) && !isProductDetails) {
         setSeoData({
           title: 'Ratan Decor - Login',
           description:
-            'Login to access Ratan Decor’s premium interior solutions.',
+            'Login to access Ratan Decor\'s premium interior solutions.',
         });
         return;
       }
@@ -153,22 +175,21 @@ function App() {
               pageName.slice(1).replace('-', ' ')}`,
             description:
               response.data.description ||
-              `Explore Ratan Decor’s ${pageName.replace(
+              `Explore Ratan Decor's ${pageName.replace(
                 '-',
                 ' '
               )} page for premium decor solutions in Chennai.`,
           });
         }
       } catch (error) {
-        // Silently handle 404s for SEO to avoid console noise, use defaults
         if (error.response?.status !== 404) {
-          console.error(`Error fetching SEO data for ${pageName}:`, error);
+          console.error(`[App] Error fetching SEO data for ${pageName}:`, error);
         }
 
         setSeoData({
           title: `Ratan Decor - ${pageName.charAt(0).toUpperCase() +
             pageName.slice(1).replace('-', ' ')}`,
-          description: `Explore Ratan Decor’s ${pageName.replace(
+          description: `Explore Ratan Decor's ${pageName.replace(
             '-',
             ' '
           )} page for premium decor solutions in Chennai.`,

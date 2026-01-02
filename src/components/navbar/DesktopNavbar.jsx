@@ -36,7 +36,7 @@ export default function DesktopNavbar({
   isCartOpen,
   cartCount = 0,
   onProductsMouseEnter,
-  onProductsMouseLeave
+  onProductsMouseLeave,
 }) {
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
@@ -82,8 +82,13 @@ export default function DesktopNavbar({
               <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FaSignOutAlt className="text-2xl" />
               </div>
-              <h3 className="text-xl font-bold text-neutral-900 mb-2">Ready to Leave?</h3>
-              <p className="text-sm text-neutral-500">Are you sure you want to log out of your account? You will need to sign in again to access your profile.</p>
+              <h3 className="text-xl font-bold text-neutral-900 mb-2">
+                Ready to Leave?
+              </h3>
+              <p className="text-sm text-neutral-500">
+                Are you sure you want to log out of your account? You will need
+                to sign in again to access your profile.
+              </p>
             </div>
             <div className="flex border-t border-neutral-100">
               <button
@@ -138,7 +143,11 @@ export default function DesktopNavbar({
                     strokeWidth="2"
                     viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
               </div>
@@ -154,8 +163,11 @@ export default function DesktopNavbar({
               <div className="flex items-center space-x-1">
                 <Link
                   to="/"
-                  className={`px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${isActiveRoute("/") ? "text-[#ff4747]" : "text-gray-700 hover:text-[#ff4747]"
-                    }`}
+                  className={`px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${
+                    isActiveRoute("/")
+                      ? "text-[#ff4747]"
+                      : "text-gray-700 hover:text-[#ff4747]"
+                  }`}
                   aria-label="Go to home page"
                 >
                   Home
@@ -171,21 +183,28 @@ export default function DesktopNavbar({
                       navigate("/products");
                       setIsCategoryDropdownOpen(false);
                     }}
-                    className={`flex items-center gap-1 px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${isCategoryDropdownOpen ? "text-[#ff4747]" : "text-gray-700 hover:text-[#ff4747]"
-                      }`}
+                    className={`flex items-center gap-1 px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${
+                      isCategoryDropdownOpen
+                        ? "text-[#ff4747]"
+                        : "text-gray-700 hover:text-[#ff4747]"
+                    }`}
                     aria-label="Product categories"
                   >
                     <span>Products</span>
                     <FaChevronDown
-                      className={`text-[#ff4747] text-sm transition-transform duration-300 ${isCategoryDropdownOpen ? "rotate-180" : ""
-                        }`}
+                      className={`text-[#ff4747] text-sm transition-transform duration-300 ${
+                        isCategoryDropdownOpen ? "rotate-180" : ""
+                      }`}
                     />
                   </button>
                 </div>
                 <Link
                   to="/about"
-                  className={`px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-colors duration-200 ${isActiveRoute("/about") ? "text-[#ff4747]" : "text-gray-700 hover:text-[#ff4747]"
-                    }`}
+                  className={`px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-colors duration-200 ${
+                    isActiveRoute("/about")
+                      ? "text-[#ff4747]"
+                      : "text-gray-700 hover:text-[#ff4747]"
+                  }`}
                   aria-label="Go to about page"
                 >
                   Company
@@ -193,10 +212,11 @@ export default function DesktopNavbar({
 
                 <button
                   onClick={onOpenVideoCallPopup}
-                  className={`flex items-center gap-2 px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${isActiveRoute("/video-call")
-                    ? "text-[#ff4747] bg-[#ff4747]/10"
-                    : "text-gray-700 hover:text-[#ff4747]"
-                    }`}
+                  className={`flex items-center gap-2 px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${
+                    isActiveRoute("/video-call")
+                      ? "text-[#ff4747] bg-[#ff4747]/10"
+                      : "text-gray-700 hover:text-[#ff4747]"
+                  }`}
                   aria-label="Open video call scheduler popup"
                 >
                   <FaVideo className="text-[#ff4747] text-lg" />
@@ -205,15 +225,19 @@ export default function DesktopNavbar({
                 <button
                   onClick={onOpenCart}
                   aria-label="Open cart"
-                  className={`flex items-center gap-3 px-4 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${isCartOpen || isActiveRoute("/cart")
-                    ? "text-[#ff4747] bg-[#ff4747]/10"
-                    : "text-gray-700 hover:text-[#ff4747]"
-                    }`}
+                  className={`flex items-center gap-3 px-4 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${
+                    isCartOpen || isActiveRoute("/cart")
+                      ? "text-[#ff4747] bg-[#ff4747]/10"
+                      : "text-gray-700 hover:text-[#ff4747]"
+                  }`}
                 >
                   <div className="relative flex items-center justify-center">
                     <FaShoppingCart
-                      className={`text-lg transition-colors duration-200 ${isCartOpen || isActiveRoute("/cart") ? "text-[#ff4747]" : "text-gray-700"
-                        }`}
+                      className={`text-lg transition-colors duration-200 ${
+                        isCartOpen || isActiveRoute("/cart")
+                          ? "text-[#ff4747]"
+                          : "text-gray-700"
+                      }`}
                     />
                     {cartCount > 0 && (
                       <span className="absolute -top-2.5 -right-3 bg-[#ff4747] text-white text-[11px] font-bold h-5 min-w-[22px] px-1.5 rounded-full border-2 border-white flex items-center justify-center shadow-lg">
@@ -241,8 +265,9 @@ export default function DesktopNavbar({
                       {user?.name || "User"}
                     </span>
                     <FaChevronDown
-                      className={`text-white text-sm transition-transform duration-300 ${isProfileOpen ? "rotate-180" : ""
-                        }`}
+                      className={`text-white text-sm transition-transform duration-300 ${
+                        isProfileOpen ? "rotate-180" : ""
+                      }`}
                     />
                   </button>
                   <AnimatePresence>
@@ -265,7 +290,11 @@ export default function DesktopNavbar({
                           </div>
                           <button
                             onClick={() => {
-                              navigate("/profile");
+                              if (user?.status?.toLowerCase() === "pending") {
+                                navigate("/check-status");
+                              } else {
+                                navigate("/profile");
+                              }
                               setIsProfileOpen(false);
                             }}
                             className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-[#ff4747]/10 hover:text-[#ff4747] transition-all duration-300 font-roboto"
@@ -273,6 +302,7 @@ export default function DesktopNavbar({
                             <FaUser className="inline mr-3 text-base" />
                             My Profile
                           </button>
+
                           <hr className="my-1" />
                           <button
                             onClick={() => {
@@ -291,7 +321,7 @@ export default function DesktopNavbar({
                 </div>
               ) : (
                 <Link
-                  to="/login"
+                  to="/register"
                   className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#ff4747] rounded-full hover:bg-[#ff4747]/80 transition-all duration-300 font-roboto"
                   aria-label="Sign in"
                 >
@@ -303,8 +333,6 @@ export default function DesktopNavbar({
           </div>
         </div>
       </nav>
-
-
 
       {/* Compact Logout Confirmation Modal */}
       <LogoutConfirmModal

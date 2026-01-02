@@ -282,8 +282,7 @@ function DetailsForm() {
                 type="text"
                 name="name"
                 value={formData.name}
-                onChange={handleInputChange}
-                placeholder="Enter your full name"
+                disabled
                 className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
               />
               {errors.name && (
@@ -300,8 +299,7 @@ function DetailsForm() {
                 type="email"
                 name="email"
                 value={formData.email}
-                onChange={handleInputChange}
-                placeholder="your.email@example.com"
+                disabled
                 className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
               />
               {errors.email && (
@@ -310,22 +308,32 @@ function DetailsForm() {
             </div>
 
             {/* Mobile */}
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Mobile Number *
-              </label>
-              <input
-                type="tel"
-                name="mobile"
-                value={formData.mobile}
-                onChange={handleInputChange}
-                placeholder="Enter your mobile number"
-                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
-              />
-              {errors.mobile && (
-                <p className="text-xs text-red-500 mt-1">{errors.mobile}</p>
-              )}
-            </div>
+<div>
+  <label className="block text-xs font-medium text-gray-700 mb-1">
+    Mobile Number *
+  </label>
+  <input
+    type="tel"
+    name="mobile"
+    value={formData.mobile}
+    placeholder="Enter 10 digit mobile number"
+    maxLength={10}
+    inputMode="numeric"
+    pattern="[0-9]{10}"
+    onChange={(e) => {
+      const value = e.target.value.replace(/\D/g, ''); // digits only
+      if (value.length <= 10) {
+        setFormData({ ...formData, mobile: value });
+      }
+    }}
+    className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
+  />
+
+  {errors.mobile && (
+    <p className="text-xs text-red-500 mt-1">{errors.mobile}</p>
+  )}
+</div>
+
 
             {/* Company */}
             <div>
