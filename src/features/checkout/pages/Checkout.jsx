@@ -49,6 +49,7 @@ const Checkout = () => {
   const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
 
   const fetched = useRef(false);
 
@@ -743,6 +744,19 @@ const Checkout = () => {
               )}
             </div>
 
+            {/* Shipping Notice */}
+            <div className='p-4 bg-blue-50/50 rounded-xl border border-blue-100 flex items-start gap-3'>
+              <div className='p-2 bg-blue-100 rounded-lg'>
+                <Truck className='w-5 h-5 text-blue-600' />
+              </div>
+              <div>
+                <h3 className='text-sm font-bold text-blue-900 uppercase tracking-wider mb-1'>Shipping Notice</h3>
+                <p className='text-sm text-blue-800 leading-relaxed font-medium'>
+                  Please note that delivery charges are extra. Our sales team will update you with the charges based on your delivery location.
+                </p>
+              </div>
+            </div>
+
             {/* Payment Method */}
             <div className='p-6 bg-white rounded-xl border border-gray-100 shadow-sm'>
               <div className='flex items-center mb-4'>
@@ -768,7 +782,7 @@ const Checkout = () => {
 
                 {paymentMethod === 'UPI' && (
                   <div className='mt-4 p-4 bg-green-50 rounded-lg border border-green-200'>
-                    <p className='text-sm text-green-800 mb-3'>Click the button below to proceed with UPI payment:</p>
+
                     <UpiPaymentButton
                       amount={cartSummary.totalAmount}
                       note={`Payment for Order - ${cart.length} items`}
@@ -776,52 +790,32 @@ const Checkout = () => {
                     {orderDetails && (
                       <SubmitUTR orderId={orderDetails.id} amount={cartSummary.totalAmount} />
                     )}
-                  </div>
-                )}
 
-                <label className='flex items-center p-4 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50'>
-                  <input
-                    type='radio'
-                    name='payment'
-                    value='BankTransfer'
-                    className='mr-3 text-[#ff4747]'
-                    checked={paymentMethod === 'BankTransfer'}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                  />
-                  <div className='flex items-center'>
-                    <Building className='mr-2 w-5 h-5 text-gray-600' />
-                    <span className='font-medium'>Bank Transfer</span>
-                  </div>
-                </label>
-
-                {paymentMethod === 'BankTransfer' && (
-                  <div className='mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200'>
-                    <h4 className='text-sm font-semibold text-blue-900 mb-2'>Bank Details for Transfer:</h4>
-                    <div className='space-y-1 text-sm text-blue-800'>
-                      <p><span className='font-medium'>Account Name:</span> Ratan Decor</p>
-                      <p><span className='font-medium'>Bank Name:</span> HDFC Bank</p>
-                      <p><span className='font-medium'>Account Number:</span> 50200012345678</p>
-                      <p><span className='font-medium'>IFSC Code:</span> HDFC0001234</p>
-                      <p><span className='font-medium'>Branch:</span> Main Branch, New Delhi</p>
+                    <div className='mt-4 pt-4 border-t border-green-200'>
+                      <label className='flex items-start cursor-pointer group'>
+                        <div className='flex items-center h-5'>
+                          <input
+                            id='payment-confirm'
+                            type='checkbox'
+                            className='w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 transition-all cursor-pointer'
+                            checked={paymentConfirmed}
+                            onChange={(e) => setPaymentConfirmed(e.target.checked)}
+                          />
+                        </div>
+                        <div className='ml-3 text-sm'>
+                          <span className='font-medium text-green-900 group-hover:text-green-700 transition-colors'>
+                            I confirm that I have completed the payment via UPI or QR code.
+                          </span>
+                          <p className='text-green-600 text-xs mt-0.5'>Please ensure the payment is successful before placing the order.</p>
+                        </div>
+                      </label>
                     </div>
-                    <p className='mt-3 text-xs text-blue-600 italic'>* Please share the payment screenshot or UTR number with our team after the transfer.</p>
                   </div>
                 )}
 
-                <label className='flex items-center p-4 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50'>
-                  <input
-                    type='radio'
-                    name='payment'
-                    value='COD'
-                    className='mr-3 text-[#ff4747]'
-                    checked={paymentMethod === 'COD'}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                  />
-                  <div className='flex items-center'>
-                    <Building className='mr-2 w-5 h-5 text-gray-600' />
-                    <span className='font-medium'>Cash on Delivery</span>
-                  </div>
-                </label>
+
+
+
               </div>
             </div>
           </div>
@@ -829,11 +823,15 @@ const Checkout = () => {
           {/* Order Summary */}
           <div className='lg:col-span-1'>
             <div className='sticky top-8'>
-              <div className='p-6 bg-white rounded-xl border border-gray-100 shadow-sm'>
-                <h2 className='mb-4 text-lg font-semibold text-gray-900'>Order Summary</h2>
+              <div className='bg-white rounded-2xl border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden'>
+                {/* Header */}
+                <div className='p-6 border-b border-gray-50'>
+                  <h2 className='text-lg font-bold text-gray-900'>Order Summary</h2>
+
+                </div>
 
                 {/* Cart Items */}
-                <div className='mb-4 space-y-3 max-h-64 overflow-y-auto'>
+                <div className='p-6 space-y-5 max-h-[25rem] overflow-y-auto custom-scrollbar'>
                   {cart.map((item) => {
                     const product = item.product || item.Product || {};
                     const unitPrice = item.itemCalculations?.unitPrice || product.price || 0;
@@ -841,62 +839,105 @@ const Checkout = () => {
                     const productImageUrl = getProductImageUrl(product) || 'https://via.placeholder.com/48';
 
                     return (
-                      <div key={item.id} className='flex items-center space-x-3'>
-                        <img
-                          src={productImageUrl}
-                          alt={product.name}
-                          className='object-cover w-12 h-12 rounded-lg'
-                          onError={(e) => {
-                            e.target.src = 'https://via.placeholder.com/48';
-                          }}
-                        />
-                        <div className='flex-1 min-w-0'>
-                          <p className='text-sm font-medium text-gray-900 truncate'>
-                            {product.name || 'Unknown Product'}
-                          </p>
-                          <p className='text-sm text-gray-500'>Qty: {item.quantity}</p>
+                      <div key={item.id} className='flex gap-4 group'>
+                        <div className='relative shrink-0'>
+                          <img
+                            src={productImageUrl}
+                            alt={product.name}
+                            className='object-cover w-16 h-16 rounded-xl border border-gray-100 bg-gray-50 shadow-sm transition-transform group-hover:scale-105 duration-300'
+                            onError={(e) => {
+                              e.target.src = 'https://via.placeholder.com/48';
+                            }}
+                          />
+                          <span className='absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-gray-900 text-[10px] font-bold text-white ring-2 ring-white shadow-md'>
+                            {item.quantity}
+                          </span>
                         </div>
-                        <div className='text-sm font-medium text-gray-900'>{formatPrice(totalPrice)}</div>
+                        <div className='flex-1 min-w-0 flex flex-col justify-center'>
+                          <div className='flex justify-between items-start gap-2'>
+                            <p className='text-sm font-semibold text-gray-900 leading-snug line-clamp-2'>
+                              {product.name || 'Unknown Product'}
+                            </p>
+                            <p className='text-sm font-bold text-gray-900 whitespace-nowrap'>
+                              {formatPrice(totalPrice)}
+                            </p>
+                          </div>
+
+                          <div className='flex flex-col mt-1.5'>
+                            <div className='flex items-center text-xs text-gray-500 space-x-1.5'>
+                              <span>{item.quantity} × {formatPrice(item.itemCalculations?.unitPrice || unitPrice)}</span>
+                              {product.gst && (
+                                <>
+                                  <span className='text-gray-300'>•</span>
+                                  <span className='text-xs text-orange-600 font-medium bg-orange-50 px-1.5 py-0.5 rounded'>
+                                    GST {product.gst}%
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                            {item.itemCalculations?.gstAmount > 0 && (
+                              <p className='text-[10px] text-gray-400 mt-0.5'>
+                                Incl. {formatPrice(item.itemCalculations.gstAmount)} GST
+                              </p>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     );
                   })}
                 </div>
 
                 {/* Price Breakdown */}
-                <div className='pt-4 space-y-2 border-t border-gray-200'>
+                <div className='p-6 bg-gray-50/50 border-t border-gray-100 space-y-3'>
                   <div className='flex justify-between text-sm'>
-                    <span className='text-gray-600'>Subtotal</span>
-                    <span className='text-gray-900'>{formatPrice(cartSummary.subtotal)}</span>
+                    <span className='text-gray-500'>Subtotal</span>
+                    <span className='font-semibold text-gray-900'>{formatPrice(cartSummary.subtotal)}</span>
                   </div>
-                  <div className='flex justify-between text-sm'>
-                    <span className='text-gray-600'>GST</span>
-                    <span className='text-gray-900'>{formatPrice(cartSummary.gstAmount)}</span>
-                  </div>
-                  <div className='pt-2 border-t border-gray-200'>
-                    <div className='flex justify-between font-semibold'>
-                      <span className='text-gray-900'>Total</span>
-                      <span className='text-lg text-[#ff4747]'>{formatPrice(cartSummary.totalAmount)}</span>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Place Order Button */}
-                <button
-                  className='px-6 py-3 mt-6 w-full font-semibold text-white rounded-lg transition-all bg-[#ff4747] hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed'
-                  onClick={handlePlaceOrder}
-                  disabled={loading || !billingAddress || addressesLoading || showOrderConfirmation}
-                >
-                  {loading ? 'Processing...' : `Place Order - ${formatPrice(cartSummary.totalAmount)}`}
-                </button>
-
-                {/* Security Notice */}
-                <div className='p-3 mt-4 bg-green-50 rounded-lg'>
-                  <div className='flex items-start text-sm text-green-800'>
-                    <Shield className='w-4 h-4 mr-2 mt-0.5' />
-                    <div>
-                      <p className='font-medium'>Secure Checkout</p>
-                      <p className='mt-1 text-xs'>Your payment information is encrypted and secure.</p>
+                  {/* Basic Tax Breakdown */}
+                  {cartSummary.gstAmount > 0 && (
+                    <div className='pt-1 pb-1'>
+                      <div className='flex justify-between text-sm'>
+                        <span className='text-gray-500'>Total GST</span>
+                        <span className='font-semibold text-gray-900'>{formatPrice(cartSummary.gstAmount)}</span>
+                      </div>
                     </div>
+                  )}
+
+                  <div className='pt-4 pb-2 mt-2 border-t border-dashed border-gray-200'>
+                    <div className='flex justify-between items-end'>
+                      <span className='text-base font-bold text-gray-900'>Total Amount</span>
+                      <div className='text-right'>
+                        <span className='text-2xl font-extrabold text-[#ff4747]'>{formatPrice(cartSummary.totalAmount)}</span>
+                      </div>
+                    </div>
+                    <p className='text-[11px] text-gray-400 text-right mt-1'>Inclusive of all taxes</p>
+                  </div>
+
+                  {/* Place Order Button */}
+                  <button
+                    className='group relative flex items-center justify-center w-full px-6 py-4 mt-4 font-bold text-white rounded-xl transition-all duration-200 bg-[#ff4747] hover:bg-[#e63e3e] hover:shadow-lg hover:shadow-red-500/30 hover:-translate-y-0.5 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 disabled:hover:bg-gray-300'
+                    onClick={handlePlaceOrder}
+                    disabled={loading || !billingAddress || addressesLoading || showOrderConfirmation || !paymentConfirmed}
+                  >
+                    {loading ? (
+                      <span className='flex items-center gap-2'>
+                        <div className='w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin'></div>
+                        Processing...
+                      </span>
+                    ) : (
+                      <>
+                        <span>Place Order</span>
+                        <span className='mx-2 opacity-50'>|</span>
+                        <span>{formatPrice(cartSummary.totalAmount)}</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Security Notice */}
+                  <div className='flex justify-center items-center gap-2 mt-4 text-xs text-gray-500'>
+                    <Shield className='w-3.5 h-3.5 text-green-600' />
+                    <span>Secure Checkout • 256-bit SSL Encrypted</span>
                   </div>
                 </div>
               </div>
@@ -1087,9 +1128,13 @@ const Checkout = () => {
                 </div>
 
                 <h2 className='text-3xl font-bold text-gray-900 mb-2'>Order Confirmed!</h2>
-                <p className='text-gray-500 mb-8 max-w-[80%] leading-relaxed'>
+                <p className='text-gray-500 mb-2 max-w-[80%] leading-relaxed'>
                   Thank you for your purchase. We have received your order and will begin processing it right away.
                 </p>
+                <div className='flex items-center gap-2 mb-6 px-4 py-2 bg-green-50 text-green-700 rounded-full text-xs font-medium border border-green-100'>
+                  <Shield className='w-3.5 h-3.5' />
+                  <span>A confirmation email has been sent to your registered email.</span>
+                </div>
 
                 <div className='w-full bg-gray-50 rounded-xl p-6 mb-8 border border-gray-100'>
                   <h3 className='text-sm uppercase tracking-wider font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2'>Order Summary</h3>
@@ -1099,11 +1144,16 @@ const Checkout = () => {
                       <span className='font-mono font-medium text-gray-900 bg-white px-2 py-1 rounded border border-gray-200'>#{orderDetails.id}</span>
                     </div>
 
-                    <div className='flex justify-between items-center'>
-                      <span className='text-sm text-gray-500'>Amount Paid</span>
-                      <span className='font-bold text-gray-900 text-lg'>
-                        {formatPrice(orderDetails.totalAmount || cartSummary.totalAmount)}
-                      </span>
+                    <div className='flex justify-between items-start'>
+                      <span className='text-sm text-gray-500 mt-1'>Amount Paid</span>
+                      <div className='text-right'>
+                        <span className='font-bold text-gray-900 text-xl block'>
+                          {formatPrice(orderDetails.totalAmount || cartSummary.totalAmount)}
+                        </span>
+                        <span className='text-[10px] text-gray-500 italic block mt-0.5'>
+                          Includes {formatPrice(orderDetails.gstAmount || cartSummary.gstAmount)} Tax
+                        </span>
+                      </div>
                     </div>
 
                     <div className='flex justify-between items-center'>
