@@ -299,7 +299,9 @@ function UserTypePopup({ onClose, redirectToRegister = false }) {
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:gap-4">
-          {userTypes.map((type, index) => (
+          {userTypes
+            .filter(type => type.name.toLowerCase() !== 'general')
+            .map((type, index) => (
             <button
               key={type.id}
               onClick={() => handleSelectType(type)}
