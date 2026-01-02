@@ -373,6 +373,11 @@ const OrderDetails = () => {
                               <p className='text-xs sm:text-sm text-gray-500'>
                                 Price: {formatPrice(unitPrice)}
                               </p>
+                              {item.gstRate > 0 && (
+                                <p className='text-xs sm:text-[11px] text-[#ff4747] font-medium'>
+                                  Tax Rate: {item.gstRate}% (Included)
+                                </p>
+                              )}
                               <p className='text-xs sm:text-sm text-gray-500'>
                                 Unit Type: {product.unitType || 'Sheet'}
                               </p>
@@ -421,11 +426,25 @@ const OrderDetails = () => {
                   </span>
                 </div>
                 {order.gstAmount > 0 && (
-                  <div className='flex justify-between text-sm'>
-                    <span className='text-gray-600'>GST</span>
-                    <span className='text-gray-900'>
-                      {formatPrice(order.gstAmount)}
-                    </span>
+                  <div className='pt-1 space-y-2'>
+                    {order.deliveryAddress?.data?.state?.toLowerCase().includes('tamil nadu') ||
+                      order.deliveryAddress?.data?.state?.toLowerCase().includes('tn') ? (
+                      <>
+                        <div className='flex justify-between text-sm'>
+                          <span className='text-gray-500'>CGST (9%)</span>
+                          <span className='text-gray-700 font-medium'>{formatPrice(order.gstAmount / 2)}</span>
+                        </div>
+                        <div className='flex justify-between text-sm'>
+                          <span className='text-gray-500'>SGST (9%)</span>
+                          <span className='text-gray-700 font-medium'>{formatPrice(order.gstAmount / 2)}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className='flex justify-between text-sm'>
+                        <span className='text-gray-500'>IGST (18%)</span>
+                        <span className='text-gray-700 font-medium'>{formatPrice(order.gstAmount)}</span>
+                      </div>
+                    )}
                   </div>
                 )}
                 <div className='border-t border-gray-200 pt-2 sm:pt-3'>
