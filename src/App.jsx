@@ -78,14 +78,16 @@ function App() {
       console.log('[App] Initializing application...');
       
       // Initialize localStorage flags if not present
+      // Set to false by default so popup shows on first visit
       if (!localStorage.getItem('userTypeConfirmed')) {
         localStorage.setItem('userTypeConfirmed', 'false');
-        console.log('[App] Initialized userTypeConfirmed flag');
+        console.log('[App] Initialized userTypeConfirmed flag to false');
       }
 
+      // Set default userType to General if not present
       if (!localStorage.getItem('userType')) {
         localStorage.setItem('userType', 'General');
-        console.log('[App] Initialized default userType');
+        console.log('[App] Initialized default userType to General');
       }
 
       // Restore session if user was previously logged in
@@ -97,7 +99,7 @@ function App() {
           if (response.data.success && response.data.user) {
             console.log('[App] Session restored for user:', response.data.user.email);
             dispatch(setUser(response.data.user));
-            // If user is authenticated, mark userType as confirmed
+            // If user is authenticated and has a userType from profile, use it
             if (response.data.user.userType) {
               localStorage.setItem('userType', response.data.user.userType);
               localStorage.setItem('userTypeConfirmed', 'true');
@@ -107,13 +109,14 @@ function App() {
         } catch (error) {
           console.error('[App] Failed to restore session:', error);
           dispatch(logout());
-          localStorage.removeItem('userTypeConfirmed');
-          localStorage.removeItem('userType');
+          // Reset flags for logged out user
+          localStorage.setItem('userTypeConfirmed', 'false');
+          localStorage.setItem('userType', 'General');
         }
       } else {
         console.log('[App] No previous session found');
-        // If user is not logged in, reset userTypeConfirmed to false
-        localStorage.setItem('userTypeConfirmed', 'false');
+        // For non-authenticated users, keep userTypeConfirmed as false
+        // so they see the popup on first visit
       }
 
       setIsInitialLoad(false);

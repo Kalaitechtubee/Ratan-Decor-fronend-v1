@@ -44,20 +44,13 @@ function Home() {
       isPopupOpen
     });
 
-    if (!isAuthenticated) {
-      // For non-logged-in users: always show popup
-      console.log("Non-auth: Opening popup");
+    // Show popup for ALL users (auth and non-auth) if they haven't confirmed a type
+    if (!userTypeConfirmed) {
+      console.log("UserType not confirmed, opening popup");
       dispatch(openPopup());
       popupTriggeredRef.current = true;
     } else {
-      // For logged-in users: show popup only if userType is not confirmed
-      if (!userTypeConfirmed) {
-        console.log("Auth: UserType not confirmed, opening popup");
-        dispatch(openPopup());
-        popupTriggeredRef.current = true;
-      } else {
-        console.log("Auth: UserType confirmed, no popup needed");
-      }
+      console.log("UserType confirmed, no popup needed");
     }
   }, [dispatch, isAuthenticated, isPopupOpen]);
 
