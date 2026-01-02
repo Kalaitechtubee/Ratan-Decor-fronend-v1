@@ -5,7 +5,7 @@ import { FiCheck } from 'react-icons/fi';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { registerApi } from '../api/authApi';
-import { fetchPincodeData } from '../../../services/pincodeApi';
+
 import { setUser } from '../authSlice';
 
 function DetailsForm() {
@@ -25,12 +25,8 @@ function DetailsForm() {
     state: '',
     city: '',
     pincode: '',
-    village: '',
-    userTypeName: 'residential',
   });
 
-  const [villageOptions, setVillageOptions] = useState([]);
-  const [cityOptions, setCityOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
@@ -46,7 +42,6 @@ function DetailsForm() {
     country: '',
     state: '',
     city: '',
-    userTypeName: '',
   });
 
   useEffect(() => {
@@ -59,7 +54,6 @@ function DetailsForm() {
       email: registrationData.email || '',
       password: registrationData.password || '',
       role: registrationData.role || 'customer',
-      userTypeName: 'residential',
     }));
   }, [location.state]);
 
@@ -119,52 +113,12 @@ function DetailsForm() {
     if (!formData.country) newErrors.country = 'Country is required';
     if (!formData.state) newErrors.state = 'State is required';
     if (!formData.city) newErrors.city = 'City is required';
-    if (!formData.userTypeName)
-      newErrors.userTypeName = 'User Type is required';
 
     setErrors((prev) => ({ ...prev, ...newErrors }));
     return Object.keys(newErrors).length === 0;
   };
 
-  const handlePincodeChange = async (pincode) => {
-    if (pincode.length === 6) {
-      setLoading(true);
-      setErrors((prev) => ({ ...prev, pincode: '', general: '' }));
-      try {
-        const data = await fetchPincodeData(pincode);
-        if (data[0].Status === 'Success') {
-          const postOffices = data[0].PostOffice;
-          setVillageOptions(postOffices.map((po) => po.Name));
-          setCityOptions([...new Set(postOffices.map((po) => po.Block))]);
-          setFormData((prev) => ({
-            ...prev,
-            state: postOffices[0].State,
-            country: postOffices[0].Country,
-          }));
-        } else {
-          setErrors((prev) => ({ ...prev, pincode: 'Invalid Pincode' }));
-          setVillageOptions([]);
-          setCityOptions([]);
-          setFormData((prev) => ({
-            ...prev,
-            village: '',
-            city: '',
-            state: '',
-            country: '',
-          }));
-        }
-      } catch (err) {
-        setErrors((prev) => ({
-          ...prev,
-          pincode: 'Error fetching pincode data',
-        }));
-        setVillageOptions([]);
-        setCityOptions([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -174,7 +128,6 @@ function DetailsForm() {
     try {
       const combinedAddress = [
         formData.address,
-        formData.village,
         formData.city,
         formData.state,
         formData.country,
@@ -191,8 +144,6 @@ function DetailsForm() {
         company: formData.company || '',
         address: combinedAddress,
         role: formData.role.toLowerCase(),
-        userTypeName: formData.userTypeName,
-        village: formData.village || '',
         city: formData.city,
         state: formData.state,
         country: formData.country,
@@ -223,8 +174,6 @@ function DetailsForm() {
         localStorage.setItem('company', formData.company || '');
         localStorage.setItem('mobile', formData.mobile || '');
         localStorage.setItem('address', combinedAddress || '');
-        localStorage.setItem('userType', formData.userTypeName || '');
-        localStorage.setItem('village', formData.village || '');
         localStorage.setItem('city', formData.city || '');
         localStorage.setItem('state', formData.state || '');
         localStorage.setItem('country', formData.country || '');
@@ -241,8 +190,6 @@ function DetailsForm() {
             company: formData.company || '',
             mobile: formData.mobile || '',
             address: combinedAddress || '',
-            userTypeName: formData.userTypeName || '',
-            village: formData.village || '',
             city: formData.city || '',
             state: formData.state || '',
             country: formData.country || '',
@@ -394,30 +341,6 @@ function DetailsForm() {
                 className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
               />
             </div>
-
-            {/* User Type */}
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                User Type *
-              </label>
-              <select
-                name="userTypeName"
-                value={formData.userTypeName}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
-              >
-                <option value="">Select User Type</option>
-                <option value="residential">Residential</option>
-                <option value="commercial">Commercial</option>
-                <option value="modular-kitchen">Modular Kitchen</option>
-                <option value="others">Others</option>
-              </select>
-              {errors.userTypeName && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.userTypeName}
-                </p>
-              )}
-            </div>
           </div>
         </motion.div>
 
@@ -447,71 +370,19 @@ function DetailsForm() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {/* Pincode */}
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Pincode *
-              </label>
-              <input
-                type="text"
-                name="pincode"
-                value={formData.pincode}
-                onChange={(e) => {
-                  handleInputChange(e);
-                  handlePincodeChange(e.target.value);
-                }}
-                placeholder="Enter 6-digit pincode"
-                maxLength="6"
-                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
-              />
-              {loading && (
-                <p className="text-xs text-gray-500 mt-1">Loading...</p>
-              )}
-              {errors.pincode && (
-                <p className="text-xs text-red-500 mt-1">{errors.pincode}</p>
-              )}
-            </div>
-
-            {/* Village */}
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Village
-              </label>
-              <select
-                name="village"
-                value={formData.village}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
-                disabled={!villageOptions.length}
-              >
-                <option value="">Select Village</option>
-                {villageOptions.map((village, index) => (
-                  <option key={index} value={village}>
-                    {village}
-                  </option>
-                ))}
-              </select>
-            </div>
-
             {/* City */}
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">
                 City *
               </label>
-              <select
+              <input
+                type="text"
                 name="city"
                 value={formData.city}
                 onChange={handleInputChange}
+                placeholder="Enter city"
                 className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
-                disabled={!cityOptions.length}
-              >
-                <option value="">Select City</option>
-                {cityOptions.map((city, index) => (
-                  <option key={index} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
+              />
               {errors.city && (
                 <p className="text-xs text-red-500 mt-1">{errors.city}</p>
               )}
@@ -526,11 +397,34 @@ function DetailsForm() {
                 type="text"
                 name="state"
                 value={formData.state}
-                readOnly
+                onChange={handleInputChange}
+                placeholder="Enter state"
                 className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
               />
               {errors.state && (
                 <p className="text-xs text-red-500 mt-1">{errors.state}</p>
+              )}
+            </div>
+
+            {/* Pincode */}
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Pincode *
+              </label>
+              <input
+                type="text"
+                name="pincode"
+                value={formData.pincode}
+                onChange={handleInputChange}
+                placeholder="604408"
+                maxLength="6"
+                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
+              />
+              {loading && (
+                <p className="text-xs text-gray-500 mt-1">Loading...</p>
+              )}
+              {errors.pincode && (
+                <p className="text-xs text-red-500 mt-1">{errors.pincode}</p>
               )}
             </div>
 
@@ -543,7 +437,8 @@ function DetailsForm() {
                 type="text"
                 name="country"
                 value={formData.country}
-                readOnly
+                onChange={handleInputChange}
+                placeholder="Enter country"
                 className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
               />
               {errors.country && (
@@ -562,8 +457,8 @@ function DetailsForm() {
             whileTap="tap"
             disabled={loading}
             className={`w-full md:w-auto px-8 py-2.5 rounded-none font-medium text-white transition-all duration-300 ${loading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-[#e2202b] hover:bg-[#c41d26]'
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-[#e2202b] hover:bg-[#c41d26]'
               }`}
           >
             {loading ? (
