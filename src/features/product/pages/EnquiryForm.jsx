@@ -21,7 +21,7 @@ const ROLE_OPTIONS = [
 const FormInput = ({ label, name, type = 'text', value, onChange, hasError, required = false, readOnly = false, ...props }) => (
   <div>
     <label className="block mb-2 text-sm font-medium text-gray-700">
-      {label} {required && <span className="text-primary">*</span>}
+      {label} {required && <span className="text-red-500">*</span>}
     </label>
     <input
       type={type}
@@ -136,7 +136,7 @@ const LocationSelector = ({
       <div className="relative">
         <label className="block mb-2 text-sm font-medium text-gray-700">
           <MapPin size={16} className="inline mr-1" />
-          Pincode {required && <span className="text-primary">*</span>}
+          Pincode {required && <span className="text-red-500">*</span>}
         </label>
         <div className="relative">
           <input
@@ -190,7 +190,7 @@ const LocationSelector = ({
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
           <label className="block mb-2 text-sm font-medium text-gray-700">
-            State {required && <span className="text-primary">*</span>}
+            State {required && <span className="text-red-500">*</span>}
           </label>
           <input
             type="text"
@@ -207,7 +207,7 @@ const LocationSelector = ({
         </div>
         <div>
           <label className="block mb-2 text-sm font-medium text-gray-700">
-            City/District {required && <span className="text-primary">*</span>}
+            City/District {required && <span className="text-red-500">*</span>}
           </label>
           <input
             type="text"
@@ -280,9 +280,9 @@ const EnquiryForm = ({ isOpen, onClose, product, user: propUser }) => {
         productDescription: product?.description || '',
       }));
     }
-  }, [isOpen, user, product]); // Added user and product dependencies
+  }, [isOpen, user, product]);
 
-  // Sync userType once when userTypes are loaded if not already set or if it's the initial load
+  // Sync userType once when userTypes are loaded
   useEffect(() => {
     if (isOpen && userTypes.length > 0 && (user?.userType || user?.userTypeName || user?.userTypeId)) {
       const typeToMatch = user.userType || user.userTypeName || user.userTypeId;
@@ -294,7 +294,6 @@ const EnquiryForm = ({ isOpen, onClose, product, user: propUser }) => {
 
       if (match) {
         const matchedValue = match.id || match.name;
-        // Only update if the value is different (e.g. switching from Name to ID)
         if (formData.userType !== matchedValue) {
           setFormData((prev) => ({
             ...prev,
@@ -303,7 +302,7 @@ const EnquiryForm = ({ isOpen, onClose, product, user: propUser }) => {
         }
       }
     }
-  }, [userTypes, user, isOpen]); // Removed formData.userType from dependency to avoid loops, though strict check prevents it
+  }, [userTypes, user, isOpen]);
 
   useEffect(() => {
     const fetchUserTypes = async () => {
@@ -314,7 +313,6 @@ const EnquiryForm = ({ isOpen, onClose, product, user: propUser }) => {
         const result = await getUserTypes();
         if (result.success && result.data) {
           setUserTypes(result.data);
-          // Removed auto-selection of first user type to allow 'Select User Type' default for guests
         }
       } catch (error) {
         console.error('Error fetching user types:', error);
@@ -325,7 +323,6 @@ const EnquiryForm = ({ isOpen, onClose, product, user: propUser }) => {
             { id: 'Architect', name: 'Architect' },
             { id: 'Contractor', name: 'Contractor' }
           ]);
-          // Removed auto-select fallback to keep field empty for guests
         } else {
           toast.error('Failed to load user types');
           setUserTypes([
@@ -341,7 +338,7 @@ const EnquiryForm = ({ isOpen, onClose, product, user: propUser }) => {
     };
 
     fetchUserTypes();
-  }, [isOpen]); // Removed duplicate call and formData.userType dependency
+  }, [isOpen]);
 
   // Default userType for guests
   useEffect(() => {
@@ -351,35 +348,96 @@ const EnquiryForm = ({ isOpen, onClose, product, user: propUser }) => {
         setFormData(prev => ({ ...prev, userType: defaultType.name || defaultType.id }));
       }
     }
-  }, [isOpen, user, userTypes]);
+  }, [isOpen, user, userTypes, formData.userType]);
 
-  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const validatePhone = (phone) => /^[0-9]{10,15}$/.test(phone.replace(/[^\d]/g, ''));
+  // Enhanced validation functions
+  const validateEmail = (email) => {
+    if (!email) return false;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email.trim());
+  };
+
+  const validatePhone = (phone) => {
+    if (!phone) return false;
+    const cleanPhone = phone.replace(/[^\d]/g, '');
+    return cleanPhone.length >= 10 && cleanPhone.length <= 15;
+  };
+
+  const validateName = (name) => {
+    if (!name || !name.trim()) return false;
+    const trimmedName = name.trim();
+    // Name should be at least 2 characters and contain only letters and spaces
+    return trimmedName.length >= 2 && /^[a-zA-Z\s]+$/.test(trimmedName);
+  };
+
+  const validatePincode = (pincode) => {
+    if (!pincode) return true; // Optional field
+    return /^\d{6}$/.test(pincode);
+  };
+
+  const validateCity = (city) => {
+    if (!city || !city.trim()) return false;
+    const trimmedCity = city.trim();
+    return trimmedCity.length >= 2;
+  };
+
+  const validateState = (state) => {
+    if (!state || !state.trim()) return false;
+    const trimmedState = state.trim();
+    return trimmedState.length >= 2;
+  };
+
   const formatPhoneNumber = (phone) => phone.replace(/[^\d]/g, '');
-  const validatePincode = (pincode) => (pincode ? /^\d{6}$/.test(pincode) : true);
 
   const validateForm = (data) => {
     const errors = {};
-    const requiredFields = ['name', 'email', 'phoneNo', 'state', 'city'];
 
-    requiredFields.forEach((field) => {
-      if (!data[field]?.trim()) {
-        errors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
-      }
-    });
+    // Name validation
+    if (!data.name || !data.name.trim()) {
+      errors.name = 'Name is required';
+    } else if (!validateName(data.name)) {
+      errors.name = 'Please enter a valid name (letters and spaces only, minimum 2 characters)';
+    }
 
-    if (data.email && !validateEmail(data.email)) {
+    // Email validation
+    if (!data.email || !data.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!validateEmail(data.email)) {
       errors.email = 'Please enter a valid email address';
     }
 
-    if (data.phoneNo && !validatePhone(data.phoneNo)) {
-      errors.phoneNo = 'Please enter a valid phone number (10-15 digits)';
+    // Phone validation
+    if (!data.phoneNo || !data.phoneNo.trim()) {
+      errors.phoneNo = 'Phone number is required';
+    } else if (!validatePhone(data.phoneNo)) {
+      errors.phoneNo = 'Please enter a valid 10-digit phone number';
     }
 
+    // State validation
+    if (!data.state || !data.state.trim()) {
+      errors.state = 'State is required';
+    } else if (!validateState(data.state)) {
+      errors.state = 'Please enter a valid state name (minimum 2 characters)';
+    }
+
+    // City validation
+    if (!data.city || !data.city.trim()) {
+      errors.city = 'City is required';
+    } else if (!validateCity(data.city)) {
+      errors.city = 'Please enter a valid city name (minimum 2 characters)';
+    }
+
+    // Pincode validation (optional but must be valid if provided)
     if (data.pincode && !validatePincode(data.pincode)) {
       errors.pincode = 'Please enter a valid 6-digit pincode';
     }
 
+    // Role validation for non-logged-in users
+    if (!user && (!data.role || !data.role.trim())) {
+      errors.role = 'Please select a role';
+    }
+
+    // User type validation
     if (userTypes.length > 0 && !data.userType) {
       errors.userType = 'Please select a user type';
     }
@@ -407,8 +465,14 @@ const EnquiryForm = ({ isOpen, onClose, product, user: propUser }) => {
 
   const handleInputChange = useCallback((name, value) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    // Clear validation error for this field when user starts typing
     if (validationErrors[name]) {
-      setValidationErrors((prev) => ({ ...prev, [name]: undefined }));
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
     }
   }, [validationErrors]);
 
@@ -418,11 +482,14 @@ const EnquiryForm = ({ isOpen, onClose, product, user: propUser }) => {
       state: state || prev.state,
       city: city || prev.city,
     }));
-    setValidationErrors((prev) => ({
-      ...prev,
-      state: state ? undefined : prev.state,
-      city: city ? undefined : prev.city,
-    }));
+    
+    // Clear validation errors for location fields
+    setValidationErrors((prev) => {
+      const newErrors = { ...prev };
+      if (state) delete newErrors.state;
+      if (city) delete newErrors.city;
+      return newErrors;
+    });
   }, []);
 
   const handleSubmit = async () => {
@@ -433,7 +500,19 @@ const EnquiryForm = ({ isOpen, onClose, product, user: propUser }) => {
       const errors = validateForm(formData);
       if (Object.keys(errors).length > 0) {
         setValidationErrors(errors);
-        toast.error('Please fix the validation errors');
+        
+        // Show first error in toast
+        const firstError = Object.values(errors)[0];
+        toast.error(firstError);
+        
+        // Scroll to first error
+        const firstErrorField = Object.keys(errors)[0];
+        const element = document.querySelector(`[name="${firstErrorField}"]`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.focus();
+        }
+        
         return;
       }
 
@@ -506,6 +585,7 @@ const EnquiryForm = ({ isOpen, onClose, product, user: propUser }) => {
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   hasError={validationErrors.name}
                   readOnly={isLoggedIn}
+                  placeholder="Enter your full name"
                 />
 
                 <FormInput
@@ -514,9 +594,14 @@ const EnquiryForm = ({ isOpen, onClose, product, user: propUser }) => {
                   type="tel"
                   required
                   value={formData.phoneNo}
-                  onChange={(e) => handleInputChange('phoneNo', e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                    handleInputChange('phoneNo', value);
+                  }}
                   hasError={validationErrors.phoneNo}
                   readOnly={isLoggedIn}
+                  placeholder="Enter 10 digit phone number"
+                  maxLength={10}
                 />
 
                 <FormInput
@@ -528,7 +613,9 @@ const EnquiryForm = ({ isOpen, onClose, product, user: propUser }) => {
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   hasError={validationErrors.email}
                   readOnly={isLoggedIn}
+                  placeholder="your.email@example.com"
                 />
+                
                 <FormInput
                   label="Company Name"
                   name="companyName"
@@ -548,14 +635,18 @@ const EnquiryForm = ({ isOpen, onClose, product, user: propUser }) => {
                 ) : (
                   <div>
                     <label className="block mb-2 text-sm font-medium text-gray-700">
-                      Role <span className="text-primary">*</span>
+                      Role <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <select
                         name="role"
                         value={formData.role}
                         onChange={(e) => handleInputChange('role', e.target.value)}
-                        className="w-full px-3 py-2 bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow appearance-none"
+                        className={`w-full px-3 py-2 bg-white rounded-lg border transition-shadow appearance-none ${
+                          validationErrors.role
+                            ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-transparent'
+                            : 'border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent'
+                        }`}
                       >
                         <option value="">Select Role</option>
                         {ROLE_OPTIONS.map((option) => (
@@ -570,9 +661,11 @@ const EnquiryForm = ({ isOpen, onClose, product, user: propUser }) => {
                         </svg>
                       </div>
                     </div>
+                    {validationErrors.role && (
+                      <p className="mt-1 text-sm text-red-600">{validationErrors.role}</p>
+                    )}
                   </div>
                 )}
-
               </div>
             </div>
 
@@ -599,6 +692,7 @@ const EnquiryForm = ({ isOpen, onClose, product, user: propUser }) => {
                     Additional Notes
                   </label>
                   <textarea
+                    name="notes"
                     value={formData.notes}
                     onChange={(e) => handleInputChange('notes', e.target.value)}
                     rows={4}
