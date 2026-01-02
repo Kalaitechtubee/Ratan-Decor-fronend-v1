@@ -62,7 +62,7 @@ export default function MobileBottomNav({
       isSearch: true
     },
     {
-      path: isAuthenticated ? '/profile' : '/register',
+      path: '#account',
       icon: FaUser,
       label: 'Account',
       isProfile: true
@@ -160,16 +160,35 @@ export default function MobileBottomNav({
                 transition={{ delay: index * 0.1 }}
                 whileTap={{ scale: 0.9 }}
               >
-                <Link
-                  to={item.path}
-                  className={buttonClasses}
-                  aria-label={isAuthenticated ? "Go to profile" : "Go to register"}
-                >
-                  <div className="flex flex-col items-center justify-center h-full">
-                    <Icon className="text-xl mb-1" />
-                    <span className="text-xs font-medium font-roboto text-center leading-tight">{item.label}</span>
-                  </div>
-                </Link>
+                {isAuthenticated ? (
+                  <button
+                    onClick={() => {
+                      if (user?.status?.toLowerCase() === 'pending') {
+                        navigate('/check-status');
+                      } else {
+                        navigate('/profile');
+                      }
+                    }}
+                    className={buttonClasses}
+                    aria-label="Go to profile"
+                  >
+                    <div className="flex flex-col items-center justify-center h-full">
+                      <Icon className="text-xl mb-1" />
+                      <span className="text-xs font-medium font-roboto text-center leading-tight">{item.label}</span>
+                    </div>
+                  </button>
+                ) : (
+                  <Link
+                    to="/register"
+                    className={buttonClasses}
+                    aria-label="Go to register"
+                  >
+                    <div className="flex flex-col items-center justify-center h-full">
+                      <Icon className="text-xl mb-1" />
+                      <span className="text-xs font-medium font-roboto text-center leading-tight">{item.label}</span>
+                    </div>
+                  </Link>
+                )}
               </motion.div>
             );
           }

@@ -34,11 +34,7 @@ function PrivateRoute({ children, requiresUserType }) {
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-
-  if (requiresUserType && !userType) {
-    return <Navigate to="/details" replace />;
-  }
-
+  
   const role = (user?.role || '').toString().toLowerCase();
   const isTradeRole = role === 'architect' || role === 'dealer';
 
