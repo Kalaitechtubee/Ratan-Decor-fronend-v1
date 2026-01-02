@@ -177,10 +177,7 @@ const CheckStatus = () => {
                       <label className="block text-sm font-medium text-gray-500 mb-1">Company</label>
                       <p className="text-gray-900 text-sm">{user.company || 'N/A'}</p>
                     </div>
-                    <div className="border border-gray-200 p-4 rounded-md">
-                      <label className="block text-sm font-medium text-gray-500 mb-1">User Type</label>
-                      <p className="text-gray-900 text-sm">{user.userTypeName || 'N/A'}</p>
-                    </div>
+
                     <div className="border border-gray-200 p-4 rounded-md">
                       <label className="block text-sm font-medium text-gray-500 mb-1">Mobile</label>
                       <p className="text-gray-900 text-sm">{user.mobile || 'N/A'}</p>
@@ -246,7 +243,7 @@ const CheckStatus = () => {
                     Sign Out
                   </button>
                   <button
-                    onClick={() => window.open('mailto:support@ratan-decor.com')}
+                    onClick={() => navigate('/contact')}
                     className="flex-1 py-2 px-4 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
                   >
                     Contact Support
