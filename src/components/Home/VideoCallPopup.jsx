@@ -43,23 +43,71 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
     }
   }, [isOpen, user]);
 
-  /* Removed redundant fetching logic */
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    // Only allow 10 digits for phone number
+    if (name === 'phoneNo') {
+      const digitsOnly = value.replace(/\D/g, '').slice(0, 10);
+      setFormData((prev) => ({ ...prev, [name]: digitsOnly }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+    
     if (error) setError("");
     if (success) setSuccess("");
   };
 
-  const isValidPhone = (phone) =>
-    /^\+?\d{10,15}$/.test(phone.replace(/\s/g, ""));
+  const isValidEmail = (email) => {
+    if (!email) return false;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email.trim());
+  };
+
+  const isValidPhone = (phone) => {
+    if (!phone) return true; // Phone is optional
+    const digitsOnly = phone.replace(/\D/g, '');
+    return digitsOnly.length === 10;
+  };
 
   const nextStep = () => {
-    if (currentStep === 1 && (!formData.name || !formData.email)) {
-      setError("Please fill in name and email to continue.");
-      return;
+    if (currentStep === 1) {
+      // Validate Step 1 fields
+      if (!formData.name || !formData.name.trim()) {
+        setError("Please enter your name to continue.");
+        return;
+      }
+      if (!formData.email || !formData.email.trim()) {
+        setError("Please enter your email to continue.");
+        return;
+      }
+      if (!isValidEmail(formData.email)) {
+        setError("Invalid email format. Please enter a valid email address.");
+        return;
+      }
+      if (formData.phoneNo && !isValidPhone(formData.phoneNo)) {
+        setError("Please enter a valid 10-digit phone number.");
+        return;
+      }
     }
+    
+    if (currentStep === 2) {
+      // Validate Step 2 fields (Date and Time)
+      if (!formData.videoCallDate || !formData.videoCallDate.trim()) {
+        setError("Please select a date for your appointment.");
+        return;
+      }
+      if (!formData.videoCallTime || !formData.videoCallTime.trim()) {
+        setError("Please select a time for your appointment.");
+        return;
+      }
+      if (new Date(formData.videoCallDate) < new Date().setHours(0, 0, 0, 0)) {
+        setError("Please select a future date.");
+        return;
+      }
+    }
+    
+    setError(""); // Clear any previous errors
     setCurrentStep((prev) => prev + 1);
   };
 
@@ -84,7 +132,7 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
       return;
     }
     if (formData.phoneNo && !isValidPhone(formData.phoneNo)) {
-      setError("Please enter a valid phone number.");
+      setError("Please enter a valid 10-digit phone number.");
       setSubmitting(false);
       return;
     }
@@ -235,12 +283,7 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
                 <h3 className="text-lg font-semibold text-gray-900 font-roboto">
                   Personal Information
                 </h3>
-                {/* <p className="text-gray-600 mt-1 text-xs font-roboto">
-                  Let's start with your basic details
-                </p> */}
               </div>
-
-
 
               {/* Name and Phone: Same row, two columns */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -271,8 +314,12 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
                     value={formData.phoneNo}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm font-roboto"
-                    placeholder="+1 (555) 123-4567"
+                    placeholder="Enter 10 digit number"
+                    maxLength={10}
                   />
+                  <p className="text-xs text-gray-500 mt-1 font-roboto">
+                    Optional - 10 digits only
+                  </p>
                 </div>
               </div>
 
@@ -320,8 +367,6 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
                   </div>
                 </div>
               </div>
-
-
             </div>
           )}
 
@@ -332,9 +377,6 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
                 <h3 className="text-lg font-semibold text-gray-900 font-roboto">
                   Schedule Your Session
                 </h3>
-                {/* <p className="text-gray-600 mt-1 text-xs font-roboto">
-                  Choose the date and time for your consultation
-                </p> */}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -412,9 +454,6 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
                 <h3 className="text-lg font-semibold text-gray-900 font-roboto">
                   Review Your Appointment
                 </h3>
-                {/* <p className="text-gray-600 mt-1 text-xs font-roboto">
-                  Please confirm your details before booking
-                </p> */}
               </div>
 
               <div className="bg-gray-50 rounded-xl p-4 space-y-3">

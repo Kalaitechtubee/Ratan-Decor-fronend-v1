@@ -97,7 +97,7 @@ export default function MobileNavbar({
                 aria-label="Open cart"
               >
                 <div className="relative">
-                  <FaShoppingCart className={`text-3xl transition-colors duration-200 ${isCartOpen ? 'text-[#ff4747]' : 'text-gray-700'}`} />
+                  <FaShoppingCart className={`text-2xl transition-colors duration-200 ${isCartOpen ? 'text-[#ff4747]' : 'text-gray-700'}`} />
                   {cartCount > 0 && (
                     <span className="absolute -top-2 -right-2 bg-[#ff4747] text-white text-[10px] font-bold h-5 min-w-[20px] px-1.5 rounded-full border-2 border-white flex items-center justify-center shadow-md transform scale-105">
                       {cartCount > 99 ? '99+' : cartCount}
