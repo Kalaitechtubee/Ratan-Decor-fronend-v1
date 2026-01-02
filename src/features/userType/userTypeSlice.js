@@ -24,12 +24,19 @@ const normalize = (type) => {
 const getInitialType = () => {
   const storedType = localStorage.getItem('userType');
   const confirmed = localStorage.getItem('userTypeConfirmed') === 'true';
-  
+
+  // Only return a userType if it's been confirmed by the user
   if (storedType && confirmed) {
-    return normalize(storedType);
+    const normalized = normalize(storedType);
+    // Don't show 'General' in navbar - it's just an internal default
+    if (normalized.toLowerCase() === 'general') {
+      return null;
+    }
+    return normalized;
   }
-  
-  return normalize('general'); // Default fallback
+
+  // Return null so navbar shows placeholder like "Select Type"
+  return null;
 };
 
 const userTypeSlice = createSlice({
@@ -47,112 +54,112 @@ const userTypeSlice = createSlice({
       localStorage.setItem('userType', lower);
       localStorage.setItem('userTypeConfirmed', 'true');
       state.isPopupOpen = false;
-      
+
       console.log('[userTypeSlice] User type set to:', mapped);
-      
+
       // Dispatch events for other components
       setTimeout(() => {
         window.dispatchEvent(new StorageEvent('storage', {
           key: 'userType',
           newValue: lower,
         }));
-        
+
         window.dispatchEvent(new CustomEvent('userTypeChanged', {
-          detail: { 
+          detail: {
             userType: mapped,
-            userTypeId: state.userTypeId 
+            userTypeId: state.userTypeId
           }
         }));
       }, 0);
     },
-    
+
     // New action to set both userType and userTypeId
     setUserTypeWithId(state, action) {
       const { userType, userTypeId } = action.payload;
       const mapped = normalize(userType);
       const lower = mapped.toLowerCase();
-      
+
       state.userType = mapped;
       state.userTypeId = userTypeId;
-      
+
       localStorage.setItem('userType', lower);
       localStorage.setItem('userTypeId', userTypeId?.toString() || '');
       localStorage.setItem('userTypeConfirmed', 'true');
       state.isPopupOpen = false;
-      
+
       console.log('[userTypeSlice] User type set to:', mapped, 'with ID:', userTypeId);
-      
+
       // Dispatch events for other components
       setTimeout(() => {
         window.dispatchEvent(new StorageEvent('storage', {
           key: 'userType',
           newValue: lower,
         }));
-        
+
         window.dispatchEvent(new CustomEvent('userTypeChanged', {
-          detail: { 
+          detail: {
             userType: mapped,
-            userTypeId 
+            userTypeId
           }
         }));
       }, 0);
     },
-    
+
     openPopup(state) {
       console.log('[userTypeSlice] Opening popup');
       state.isPopupOpen = true;
     },
-    
+
     closePopup(state) {
       console.log('[userTypeSlice] Closing popup');
       state.isPopupOpen = false;
       localStorage.setItem('userTypeConfirmed', 'true');
     },
-    
+
     resetPopupTrigger(state) {
       // Reset the popup trigger state
       state.isPopupOpen = false;
     },
-    
+
     // Sync from profile data
     syncFromProfile(state, action) {
       const { userTypeId, userTypeName } = action.payload;
-      
+
       if (userTypeId && userTypeName) {
         const mapped = normalize(userTypeName);
         const lower = mapped.toLowerCase();
-        
+
         state.userType = mapped;
         state.userTypeId = userTypeId;
-        
+
         localStorage.setItem('userType', lower);
         localStorage.setItem('userTypeId', userTypeId.toString());
-        
+
         console.log('[userTypeSlice] Synced from profile:', mapped, userTypeId);
       }
     }
   },
 });
 
-export const { 
-  setUserType, 
+export const {
+  setUserType,
   setUserTypeWithId,
-  openPopup, 
-  closePopup, 
+  openPopup,
+  closePopup,
   resetPopupTrigger,
-  syncFromProfile 
+  syncFromProfile
 } = userTypeSlice.actions;
 
 // Updated middleware to handle login properly
 export const userTypeMiddleware = store => next => action => {
   const result = next(action);
-  
+
   // Handle login success
   if (action.type === 'auth/login/fulfilled') {
     const state = store.getState();
     const isAuthenticated = state.auth.isAuthenticated;
     const userTypeConfirmed = localStorage.getItem('userTypeConfirmed') === 'true';
-    
+
     // Only open popup after login if user type is not confirmed
     if (isAuthenticated && !userTypeConfirmed) {
       console.log('[Middleware] Opening popup after login - user type not confirmed');
@@ -161,7 +168,7 @@ export const userTypeMiddleware = store => next => action => {
       }, 500);
     }
   }
-  
+
   return result;
 };
 

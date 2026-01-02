@@ -57,17 +57,34 @@ export default function Navbar() {
   // User Type State
   const [currentUserType, setCurrentUserType] = useState(() => {
     const stored = localStorage.getItem('userType');
-    if (userType) return userType;
-    if (stored) {
-      return stored.charAt(0).toUpperCase() + stored.slice(1).toLowerCase();
+    const confirmed = localStorage.getItem('userTypeConfirmed') === 'true';
+    
+    // If userType from Redux is set and not 'general', use it
+    if (userType && userType.toLowerCase() !== 'general') {
+      return userType;
     }
-    return 'General';
+    
+    // If stored type is confirmed and not 'general', use it
+    if (stored && confirmed) {
+      const normalized = stored.charAt(0).toUpperCase() + stored.slice(1).toLowerCase();
+      if (normalized.toLowerCase() !== 'general') {
+        return normalized;
+      }
+    }
+    
+    // Default to 'Select Type' placeholder instead of 'General'
+    return 'Select Type';
   });
 
   // User type synchronization
   useEffect(() => {
     if (userType && userType !== currentUserType) {
-      setCurrentUserType(userType);
+      // Don't show 'General' in navbar
+      if (userType.toLowerCase() === 'general') {
+        setCurrentUserType('Select Type');
+      } else {
+        setCurrentUserType(userType);
+      }
       console.log('Navbar: Updated currentUserType from Redux to:', userType);
     }
   }, [userType]);
@@ -124,12 +141,20 @@ export default function Navbar() {
 
   const handleUserTypePopupClose = () => {
     setIsUserTypePopupOpen(false);
-    const storedType = localStorage.getItem('userType') || 'general';
-    const newUserType = storedType.charAt(0).toUpperCase() + storedType.slice(1).toLowerCase();
-    setCurrentUserType(newUserType);
-    window.dispatchEvent(new CustomEvent('userTypeChanged', { detail: { userType: newUserType } }));
-    document.dispatchEvent(new CustomEvent('userTypeChanged', { detail: { userType: newUserType } }));
-    console.log('Navbar: handleUserTypePopupClose dispatched events with:', newUserType);
+    const storedType = localStorage.getItem('userType');
+    const confirmed = localStorage.getItem('userTypeConfirmed') === 'true';
+    
+    // Only update if a real userType was selected (not 'general')
+    if (storedType && confirmed && storedType.toLowerCase() !== 'general') {
+      const newUserType = storedType.charAt(0).toUpperCase() + storedType.slice(1).toLowerCase();
+      setCurrentUserType(newUserType);
+      window.dispatchEvent(new CustomEvent('userTypeChanged', { detail: { userType: newUserType } }));
+      document.dispatchEvent(new CustomEvent('userTypeChanged', { detail: { userType: newUserType } }));
+      console.log('Navbar: handleUserTypePopupClose dispatched events with:', newUserType);
+    } else {
+      // If no valid type selected, show placeholder
+      setCurrentUserType('Select Type');
+    }
   };
 
   const handleLogout = async () => {
