@@ -477,9 +477,9 @@ const EnquiryFormPage = ({ product: propProduct, user: propUser }) => {
     if (name === 'phoneNo') {
       value = value.replace(/\D/g, '').slice(0, 10);
     }
-    
+
     setFormData((prev) => ({ ...prev, [name]: value }));
-    
+
     // Clear validation error for this field
     if (validationErrors[name]) {
       setValidationErrors((prev) => {
@@ -496,7 +496,7 @@ const EnquiryFormPage = ({ product: propProduct, user: propUser }) => {
       state: state || prev.state,
       city: city || prev.city,
     }));
-    
+
     // Clear validation errors for location fields
     setValidationErrors((prev) => {
       const newErrors = { ...prev };
@@ -510,15 +510,15 @@ const EnquiryFormPage = ({ product: propProduct, user: propUser }) => {
     try {
       setSubmitting(true);
       setValidationErrors({});
-      
+
       const errors = validateForm(formData);
       if (Object.keys(errors).length > 0) {
         setValidationErrors(errors);
-        
+
         // Show first error in toast
         const firstError = Object.values(errors)[0];
         toast.error(firstError);
-        
+
         // Scroll to first error field
         const firstErrorField = Object.keys(errors)[0];
         const element = document.querySelector(`[name="${firstErrorField}"]`);
@@ -526,10 +526,10 @@ const EnquiryFormPage = ({ product: propProduct, user: propUser }) => {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });
           element.focus();
         }
-        
+
         return;
       }
-      
+
       const formattedEnquiry = {
         name: formData.name.trim(),
         companyName: formData.companyName?.trim() || null,
@@ -547,7 +547,7 @@ const EnquiryFormPage = ({ product: propProduct, user: propUser }) => {
         source: 'Website',
         productId: product?.id || null,
       };
-      
+
       const response = await createEnquiry(formattedEnquiry);
       setSuccessMessage(response.message || 'Enquiry submitted successfully!');
       setShowSuccessPopup(true);
@@ -570,7 +570,7 @@ const EnquiryFormPage = ({ product: propProduct, user: propUser }) => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
-      <main className="flex-grow py-8 px-4 sm:px-6 lg:px-8">
+      <main className="flex-grow mt-20 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           {/* Page Header */}
           <div className="text-center mb-8">
@@ -657,11 +657,10 @@ const EnquiryFormPage = ({ product: propProduct, user: propUser }) => {
                             name="role"
                             value={formData.role}
                             onChange={(e) => handleInputChange('role', e.target.value)}
-                            className={`w-full px-3 py-2 bg-white rounded-lg border transition-shadow appearance-none ${
-                              validationErrors.role
-                                ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-transparent'
-                                : 'border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent'
-                            }`}
+                            className={`w-full px-3 py-2 bg-white rounded-lg border transition-shadow appearance-none ${validationErrors.role
+                              ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-transparent'
+                              : 'border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent'
+                              }`}
                           >
                             <option value="">Select Role</option>
                             {ROLE_OPTIONS.map((option) => (

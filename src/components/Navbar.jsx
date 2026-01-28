@@ -58,12 +58,12 @@ export default function Navbar() {
   const [currentUserType, setCurrentUserType] = useState(() => {
     const stored = localStorage.getItem('userType');
     const confirmed = localStorage.getItem('userTypeConfirmed') === 'true';
-    
+
     // If userType from Redux is set and not 'general', use it
     if (userType && userType.toLowerCase() !== 'general') {
       return userType;
     }
-    
+
     // If stored type is confirmed and not 'general', use it
     if (stored && confirmed) {
       const normalized = stored.charAt(0).toUpperCase() + stored.slice(1).toLowerCase();
@@ -71,7 +71,7 @@ export default function Navbar() {
         return normalized;
       }
     }
-    
+
     // Default to 'Select Type' placeholder instead of 'General'
     return 'Select Type';
   });
@@ -143,7 +143,7 @@ export default function Navbar() {
     setIsUserTypePopupOpen(false);
     const storedType = localStorage.getItem('userType');
     const confirmed = localStorage.getItem('userTypeConfirmed') === 'true';
-    
+
     // Only update if a real userType was selected (not 'general')
     if (storedType && confirmed && storedType.toLowerCase() !== 'general') {
       const newUserType = storedType.charAt(0).toUpperCase() + storedType.slice(1).toLowerCase();
@@ -425,6 +425,7 @@ export default function Navbar() {
       <MoreMenu
         {...sharedProps}
         {...stateProps}
+        moreMenuRef={moreMenuRef}
       />
 
       {/* Desktop Category Dropdown - FIXED: Removed conflicting mouse handlers */}

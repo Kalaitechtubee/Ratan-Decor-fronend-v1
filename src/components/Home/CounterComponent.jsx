@@ -97,21 +97,19 @@ const CounterComponent = ({ apiStats }) => {
   }, [hasAnimated, stats]);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4">
+    <div className="bg-gray-50 px-4">
       <div className="max-w-7xl mx-auto">
         <div ref={sectionRef} role="region" aria-label="Achievements Section">
           <div className="text-center">
             <h2
-              className={`text-4xl md:text-5xl font-bold text-gray-900 mb-4 transition-all duration-1000 ${
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`}
+              className={`text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-700 mb-4 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                }`}
             >
               Our <span className="text-[#ff4747]">Journey in Numbers</span>
             </h2>
             <p
-              className={`text-xl text-gray-600 max-w-2xl mx-auto transition-all duration-1000 delay-300 ${
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`}
+              className={`text-xl text-gray-600 max-w-2xl mx-auto transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                }`}
             >
               Numbers that reflect our experience, scale, and trust built with customers across India
             </p>
@@ -120,9 +118,8 @@ const CounterComponent = ({ apiStats }) => {
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 items-center">
             {/* Image */}
             <div
-              className={`relative group transition-all duration-1000 delay-500 ${
-                isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
-              }`}
+              className={`relative group transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
+                }`}
             >
               <div className="absolute inset-0 bg-[#ff4747] rounded-3xl transform rotate-3 opacity-20 group-hover:rotate-6 transition-transform duration-500"></div>
               <div className="relative bg-white rounded-3xl p-2 shadow-2xl">
@@ -147,9 +144,8 @@ const CounterComponent = ({ apiStats }) => {
                 return (
                   <div
                     key={stat.id}
-                    className={`group relative bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 ${
-                      isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                    }`}
+                    className={`group relative bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                      }`}
                     style={{ transitionDelay: `${700 + index * 200}ms` }}
                     role="figure"
                     aria-label={`${stat.label}: ${formatNumber(currentValue)}${stat.suffix}`}
@@ -163,21 +159,20 @@ const CounterComponent = ({ apiStats }) => {
                         <IconComponent className="w-8 h-8 text-white" aria-hidden="true" />
                       </div>
 
-                     {/* Number + Label */}
-<div className="text-left flex-1 sm:flex-none p-3 sm:p-0">
-  <div
-    className={`text-4xl md:text-5xl font-bold text-gray-900 mb-1 sm:mb-2 ${
-      currentValue > 0 && currentValue < stat.value ? 'animate-pulse' : ''
-    }`}
-  >
-    {formatNumber(currentValue)}
-    <span className="text-[#ff4747]">{stat.suffix}</span>
-  </div>
+                      {/* Number + Label */}
+                      <div className="text-left flex-1 sm:flex-none p-3 sm:p-0">
+                        <div
+                          className={`text-4xl md:text-5xl font-bold text-gray-900 mb-1 sm:mb-2 ${currentValue > 0 && currentValue < stat.value ? 'animate-pulse' : ''
+                            }`}
+                        >
+                          {formatNumber(currentValue)}
+                          <span className="text-[#ff4747]">{stat.suffix}</span>
+                        </div>
 
-  <p className="text-gray-600 font-medium text-base sm:text-lg leading-tight !mb-0">
-    {stat.label}
-  </p>
-</div>
+                        <p className="text-gray-600 font-medium text-base sm:text-lg leading-tight !mb-0">
+                          {stat.label}
+                        </p>
+                      </div>
 
                     </div>
 

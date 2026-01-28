@@ -70,7 +70,7 @@ const CategoryDropdown = ({
     if (onCategoryClick) onCategoryClick(category);
 
     if (category && category.id) {
-      navigate(`/products?categoryId=${category.id}&categoryName=${encodeURIComponent(category.name)}`);
+      navigate(`/products?categoryIds=${category.id}&categoryName=${encodeURIComponent(category.name)}`);
     } else if (category && category.name) {
       navigate(`/products?search=${encodeURIComponent(category.name)}`);
     } else {
@@ -90,7 +90,7 @@ const CategoryDropdown = ({
     if (onCategoryClick) onCategoryClick(subcategory);
 
     if (subcategory && subcategory.id) {
-      navigate(`/products?categoryId=${subcategory.id}&categoryName=${encodeURIComponent(subcategory.name)}`);
+      navigate(`/products?categoryIds=${subcategory.id}&categoryName=${encodeURIComponent(subcategory.name)}`);
     } else if (subcategory && subcategory.name) {
       navigate(`/products?search=${encodeURIComponent(subcategory.name)}`);
     }
@@ -310,17 +310,61 @@ const CategoryDropdown = ({
                 >
                   <button
                     onClick={() => handleMobileCategoryClick(category)}
-                    className={`flex items-center justify-between p-3 rounded-lg w-full text-left transition-all duration-300 font-roboto touch-target shadow-sm relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-[#ff4747] after:transition-all after:duration-300 hover:after:w-full ${activeCategory === category.name ? 'text-[#ff4747]' : 'bg-white hover:bg-gray-100'
+                    className={`flex items-center justify-between p-3 rounded-xl w-full text-left transition-all duration-300 font-roboto touch-target shadow-sm relative overflow-hidden group ${selectedCategory?.id === category.id
+                      ? 'bg-red-50 text-[#ff4747] ring-1 ring-red-100'
+                      : 'bg-white text-gray-800 hover:bg-gray-50 border border-gray-100'
                       }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="text-lg">{getCategoryIcon(category.name)}</div>
-                      <span className="text-base text-gray-800 font-roboto">
+                      <div className={`p-2 rounded-lg transition-colors duration-300 ${selectedCategory?.id === category.id ? 'bg-white text-[#ff4747] shadow-sm' : 'bg-gray-50 text-gray-500'}`}>
+                        {getCategoryIcon(category.name)}
+                      </div>
+                      <span className={`text-sm font-semibold tracking-wide ${selectedCategory?.id === category.id ? 'text-[#ff4747]' : 'text-gray-700'}`}>
                         {toUpperCase(category.name)}
                       </span>
                     </div>
-                    <FaChevronRight className="text-[#ff4747] text-sm" />
+                    <motion.div
+                      animate={{ rotate: selectedCategory?.id === category.id ? 90 : 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <FaChevronRight className={`text-xs ${selectedCategory?.id === category.id ? 'text-[#ff4747]' : 'text-gray-400'}`} />
+                    </motion.div>
                   </button>
+
+                  {/* Mobile Subcategories Accordion */}
+                  <AnimatePresence>
+                    {selectedCategory?.id === category.id && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        className="overflow-hidden"
+                      >
+                        <div className="py-2 px-1 space-y-1 mt-1 ml-4 border-l-2 border-red-100">
+                          {/* Option to see all in this category */}
+                          <button
+                            onClick={(e) => handleInternalCategoryClick(e, category)}
+                            className="w-full text-left py-2.5 px-3 text-xs font-bold text-[#ff4747] hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            VIEW ALL {toUpperCase(category.name)}
+                          </button>
+
+                          {category.subCategories?.map((sub) => (
+                            <button
+                              key={sub.id}
+                              onClick={(e) => handleSubcategoryClick(e, category, sub)}
+                              className="w-full text-left py-2.5 px-3 text-sm text-gray-600 hover:text-[#ff4747] hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2"
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full bg-red-200 group-hover:bg-[#ff4747]"></span>
+                              {sub.name}
+                            </button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                 </motion.div>
               ))}
             </div>

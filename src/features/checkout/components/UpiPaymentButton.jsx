@@ -1,8 +1,8 @@
 import React from "react";
 
 const UpiPayButton = ({ amount, note }) => {
-    const upiID = "vg19022005@oksbi";     // Your UPI ID
-    const payeeName = "Ganesh";   // Payee/Business Name
+    const upiID = "kalaitechtube2001@oksbi";     // Your UPI ID
+    const payeeName = "Kalaikumar";   // Payee/Business Name
 
     // Generate UPI Payment Link
     const upiLink = `upi://pay?pa=${upiID}&pn=${encodeURIComponent(

@@ -15,9 +15,9 @@ const PopularCategories = ({ onCategoryClick }) => {
   // Filter main categories (non-subcategories) and exclude "Others"
   const mainCategories = React.useMemo(() => {
     return categories.filter(
-      cat => !cat.isSubcategory && 
-             cat.name.toLowerCase() !== 'others' && 
-             cat.name.toLowerCase() !== 'other'
+      cat => !cat.isSubcategory &&
+        cat.name.toLowerCase() !== 'others' &&
+        cat.name.toLowerCase() !== 'other'
     );
   }, [categories]);
 
@@ -25,12 +25,12 @@ const PopularCategories = ({ onCategoryClick }) => {
     if (!category.imageUrl) {
       return null;
     }
-    
+
     // If imageUrl is already a complete URL, use it as-is
     if (category.imageUrl.startsWith('http://') || category.imageUrl.startsWith('https://')) {
       return category.imageUrl;
     }
-    
+
     // Otherwise, construct the full URL
     const baseUrl = import.meta?.env?.VITE_API_URL || 'http://localhost:3000/api';
     const baseUrlWithoutApi = baseUrl.replace('/api', '');
@@ -49,39 +49,39 @@ const PopularCategories = ({ onCategoryClick }) => {
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1, 
-      transition: { 
-        staggerChildren: 0.15, 
-        delayChildren: 0.1 
-      } 
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.1
+      }
     }
   };
 
   const cardVariants = {
     hidden: { opacity: 0, y: 40, scale: 0.95 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      scale: 1, 
-      transition: { 
-        type: "spring", 
-        stiffness: 100, 
-        damping: 12 
-      } 
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 12
+      }
     }
   };
 
   const titleVariants = {
     hidden: { opacity: 0, y: -20 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { 
-        type: "spring", 
-        stiffness: 120, 
-        damping: 10 
-      } 
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 120,
+        damping: 10
+      }
     }
   };
 
@@ -136,7 +136,7 @@ const PopularCategories = ({ onCategoryClick }) => {
   }
 
   return (
-    <section className="w-full py-12 lg:py-20">
+    <section className="w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           className="text-center mb-12 lg:mb-16"
@@ -168,7 +168,7 @@ const PopularCategories = ({ onCategoryClick }) => {
         >
           {mainCategories.map((category) => {
             const imageUrl = getCategoryImageUrl(category);
-            
+
             return (
               <motion.div
                 key={category.id}
@@ -180,7 +180,7 @@ const PopularCategories = ({ onCategoryClick }) => {
               >
                 {/* Shine Effect Layer */}
                 <div className="absolute inset-0 shine-overlay z-10 pointer-events-none"></div>
-                
+
                 <div className="relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 h-44 sm:h-96">
                   <div className="relative h-full overflow-hidden">
                     {imageUrl ? (
@@ -195,21 +195,21 @@ const PopularCategories = ({ onCategoryClick }) => {
                         }}
                       />
                     ) : null}
-                    
-                    <div 
+
+                    <div
                       className={`absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center ${imageUrl ? 'hidden' : 'flex'}`}
                       style={{ display: imageUrl ? 'none' : 'flex' }}
                     >
                       <Image className="w-16 h-16 text-gray-400" />
                     </div>
-                    
+
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300"></div>
-                    
+
                     <motion.div
                       className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300"
                       style={{ backgroundColor: primaryColor }}
                     />
-                    
+
                     <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
@@ -217,7 +217,7 @@ const PopularCategories = ({ onCategoryClick }) => {
                             {category.name}
                           </h3>
                         </div>
-                        
+
                         <motion.div
                           className="ml-4 opacity-0 group-hover:opacity-100 transition-all duration-300"
                           whileHover={{ x: 5 }}

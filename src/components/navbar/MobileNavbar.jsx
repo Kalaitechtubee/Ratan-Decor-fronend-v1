@@ -48,7 +48,7 @@ export default function MobileNavbar({
                   <img
                     src={logo}
                     alt="Ratan Decor Logo"
-                    className="h-7 transition-transform duration-300 hover:scale-105"
+                    className="h-6 transition-transform duration-300 hover:scale-105"
                   />
                 </Link>
               </motion.div>
