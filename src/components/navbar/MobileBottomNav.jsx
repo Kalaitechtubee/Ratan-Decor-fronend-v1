@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaHome, FaBars, FaSearch, FaUser, FaSignOutAlt, FaSignInAlt } from 'react-icons/fa';
+import { FaHome, FaBars, FaSearch, FaUser, FaSignOutAlt, FaSignInAlt, FaFilter } from 'react-icons/fa';
 import { MdGridView } from 'react-icons/md';
 import { useState, useEffect } from 'react';
 
@@ -18,30 +18,9 @@ export default function MobileBottomNav({
   isMobileSearchOpen,
   setIsMobileSearchOpen
 }) {
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  // Always visible sticky bottom navigation
+  const isVisible = true;
 
-  useEffect(() => {
-    let scrollTimeout;
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsVisible(false);
-      } else {
-        setIsVisible(true);
-      }
-      setLastScrollY(currentScrollY);
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(() => {
-        setIsVisible(true);
-      }, 150);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      clearTimeout(scrollTimeout);
-    };
-  }, [lastScrollY]);
 
   const toggleMobileSearch = () => {
     setIsMobileSearchOpen(!isMobileSearchOpen);
@@ -50,10 +29,10 @@ export default function MobileBottomNav({
   const bottomNavItems = [
     { path: '/', icon: FaHome, label: 'Home' },
     {
-      path: '/products',
-      icon: MdGridView,
-      label: 'Products',
-      isProductMenu: true
+      path: '#filters',
+      icon: FaFilter,
+      label: 'Filters',
+      isFilters: true
     },
     {
       path: '#search',
@@ -90,26 +69,56 @@ export default function MobileBottomNav({
         duration: 0.3
       }}
     >
-      <div className="flex items-center justify-center py-1 px-2 max-w-screen-lg mx-auto">
+      <div className="grid grid-cols-5 w-full max-w-screen-lg mx-auto">
         {bottomNavItems.map((item, index) => {
           const Icon = item.icon;
           const isActive = isActiveRoute(item.path);
-          const buttonClasses = `flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 relative touch-target w-20 h-16 font-roboto ${
-            isActive ||
-            (item.isProductMenu && location.pathname.startsWith('/products')) ||
+          const buttonClasses = `flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-300 relative touch-target w-full h-16 font-roboto ${isActive ||
             (item.isMoreMenu && isMoreMenuOpen) ||
-            (item.isSearch && isMobileSearchOpen)
-              ? 'text-[#ff4747] scale-110 shadow-sm'
-              : 'text-gray-600 hover:text-[#ff4747] active:scale-95'
-          }`;
+            (item.isSearch && isMobileSearchOpen) ||
+            (item.isFilters && location.pathname.startsWith('/products'))
+            ? 'text-[#ff4747] scale-105 shadow-sm'
+            : 'text-gray-600 hover:text-[#ff4747] active:scale-95'
+            }`;
 
-          if (item.isProductMenu) {
+          if (item.isMoreMenu) {
             return (
               <motion.button
-                key="products"
-                onClick={() => setIsProductSidebarOpen(true)}
+                key="more"
+                onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
                 className={buttonClasses}
-                aria-label="Open products menu"
+                aria-label="Open more menu"
+                whileTap={{ scale: 0.9 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <div className="flex flex-col items-center justify-center h-full">
+                  <motion.div
+                    animate={{ rotate: isMoreMenuOpen ? 90 : 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Icon className="text-xl mb-1" />
+                  </motion.div>
+                  <span className="text-xs font-medium font-roboto text-center leading-tight">{item.label}</span>
+                </div>
+              </motion.button>
+            );
+          }
+
+          if (item.isFilters) {
+            return (
+              <motion.button
+                key="filters"
+                onClick={() => {
+                  if (location.pathname.startsWith('/products')) {
+                    window.dispatchEvent(new CustomEvent('toggleMobileFilters'));
+                  } else {
+                    navigate('/products?openFilters=true');
+                  }
+                }}
+                className={buttonClasses}
+                aria-label="Toggle filters"
                 whileTap={{ scale: 0.9 }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -193,76 +202,8 @@ export default function MobileBottomNav({
             );
           }
 
-          if (item.isMoreMenu) {
-            return (
-              <motion.div key="more" className="relative">
-                <motion.button
-                  onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
-                  className={buttonClasses}
-                  aria-label="Open more menu"
-                  whileTap={{ scale: 0.9 }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <div className="flex flex-col items-center justify-center h-full">
-                    <motion.div
-                      animate={{ rotate: isMoreMenuOpen ? 180 : 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <Icon className="text-xl mb-1" />
-                    </motion.div>
-                    <span className="text-xs font-medium font-roboto text-center leading-tight">{item.label}</span>
-                  </div>
-                </motion.button>
-                <AnimatePresence>
-                  {isMoreMenuOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute bottom-16 left-0 right-0 bg-white border border-gray-200 shadow-lg rounded-lg mx-2 p-2 z-50"
-                    >
-                      <div className="space-y-1">
-                        {isAuthenticated ? (
-                          <button
-                            onClick={() => {
-                              handleLogout();
-                              setIsMoreMenuOpen(false);
-                            }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-all duration-300 font-roboto"
-                          >
-                            <FaSignOutAlt className="text-base" />
-                            <span>Sign Out</span>
-                          </button>
-                        ) : (
-                          <>
-                            <Link
-                              to="/signup"
-                              className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-100 rounded-lg transition-all duration-300 font-roboto"
-                              onClick={() => setIsMoreMenuOpen(false)}
-                            >
-                              <FaSignInAlt className="text-[#ff4747] text-base" />
-                              <span>Sign Up</span>
-                            </Link>
-                            <Link
-                              to="/login"
-                              className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-100 rounded-lg transition-all duration-300 font-roboto"
-                              onClick={() => setIsMoreMenuOpen(false)}
-                            >
-                              <FaSignInAlt className="text-[#ff4747] text-base" />
-                              <span>Sign In</span>
-                            </Link>
-                          </>
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            );
-          }
+
+
 
           return (
             <motion.div

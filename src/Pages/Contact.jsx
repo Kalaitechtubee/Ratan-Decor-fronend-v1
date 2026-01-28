@@ -102,14 +102,13 @@ const Contact = ({ isHome = false }) => {
       {!isHome && <Navbar />}
 
       <div
-        className={`max-w-7xl mx-auto px-3 sm:px-4 md:px-6 font-sans ${
-          isHome ? "pt-4 sm:pt-6 pb-8 sm:pb-12 min-h-fit" : "pt-16 sm:pt-24 pb-12 sm:pb-16 min-h-screen"
-        }`}
+        className={`max-w-7xl mx-auto px-3 sm:px-4 md:px-6 font-sans ${isHome ? "py-0 min-h-fit" : "mt-20 pt-8 sm:pt-12 pb-12 sm:pb-16 min-h-screen"
+          }`}
       >
         <div className="rounded-lg shadow-sm p-4 sm:p-6 md:p-8">
           {/* Header */}
           <div className="mb-6 sm:mb-8">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-700 mb-3 sm:mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-700 mb-3 sm:mb-4">
               Product Enquiry
             </h2>
             <div className="w-12 h-1 bg-red-600"></div>
@@ -135,11 +134,10 @@ const Contact = ({ isHome = false }) => {
                       placeholder="Your name"
                       value={formData.name}
                       onChange={handleChange}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border rounded-lg text-xs sm:text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 transition-all ${
-                        errors.name
-                          ? "border-red-500 focus:ring-red-500"
-                          : "border-gray-300 focus:ring-red-500 focus:border-red-500"
-                      }`}
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border rounded-lg text-xs sm:text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 transition-all ${errors.name
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-red-500 focus:border-red-500"
+                        }`}
                     />
                     {errors.name && (
                       <p className="text-red-500 text-xs mt-1 sm:mt-1.5">{errors.name}</p>
@@ -160,11 +158,10 @@ const Contact = ({ isHome = false }) => {
                       placeholder="Your email"
                       value={formData.email}
                       onChange={handleChange}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border rounded-lg text-xs sm:text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 transition-all ${
-                        errors.email
-                          ? "border-red-500 focus:ring-red-500"
-                          : "border-gray-300 focus:ring-red-500 focus:border-red-500"
-                      }`}
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border rounded-lg text-xs sm:text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 transition-all ${errors.email
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-red-500 focus:border-red-500"
+                        }`}
                     />
                     {errors.email && (
                       <p className="text-red-500 text-xs mt-1 sm:mt-1.5">
@@ -191,11 +188,10 @@ const Contact = ({ isHome = false }) => {
                       maxLength="10"
                       value={formData.phoneNumber}
                       onChange={handleChange}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border rounded-lg text-xs sm:text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 transition-all ${
-                        errors.phoneNumber
-                          ? "border-red-500 focus:ring-red-500"
-                          : "border-gray-300 focus:ring-red-500 focus:border-red-500"
-                      }`}
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border rounded-lg text-xs sm:text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 transition-all ${errors.phoneNumber
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-red-500 focus:border-red-500"
+                        }`}
                     />
                     {errors.phoneNumber && (
                       <p className="text-red-500 text-xs mt-1 sm:mt-1.5">
@@ -218,11 +214,10 @@ const Contact = ({ isHome = false }) => {
                       placeholder="Your location"
                       value={formData.location}
                       onChange={handleChange}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border rounded-lg text-xs sm:text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 transition-all ${
-                        errors.location
-                          ? "border-red-500 focus:ring-red-500"
-                          : "border-gray-300 focus:ring-red-500 focus:border-red-500"
-                      }`}
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border rounded-lg text-xs sm:text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 transition-all ${errors.location
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-red-500 focus:border-red-500"
+                        }`}
                     />
                     {errors.location && (
                       <p className="text-red-500 text-xs mt-1 sm:mt-1.5">
@@ -247,11 +242,10 @@ const Contact = ({ isHome = false }) => {
                     value={formData.message}
                     onChange={handleChange}
                     rows={5}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border rounded-lg text-xs sm:text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 transition-all resize-none ${
-                      errors.message
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-gray-300 focus:ring-red-500 focus:border-red-500"
-                    }`}
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border rounded-lg text-xs sm:text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 transition-all resize-none ${errors.message
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-red-500 focus:border-red-500"
+                      }`}
                   ></textarea>
                   {errors.message && (
                     <p className="text-red-500 text-xs mt-1 sm:mt-1.5">
@@ -265,11 +259,10 @@ const Contact = ({ isHome = false }) => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`w-full px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-medium text-xs sm:text-sm transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                      loading
-                        ? "bg-gray-400 cursor-not-allowed focus:ring-gray-400"
-                        : "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500"
-                    }`}
+                    className={`w-full px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-medium text-xs sm:text-sm transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 ${loading
+                      ? "bg-gray-400 cursor-not-allowed focus:ring-gray-400"
+                      : "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500"
+                      }`}
                   >
                     {loading ? "Sending..." : "Send a Message"}
                   </button>
@@ -278,11 +271,10 @@ const Contact = ({ isHome = false }) => {
                 {/* Submit Message */}
                 {submitMessage && (
                   <div
-                    className={`mt-3 sm:mt-4 p-3 sm:p-4 rounded-lg text-xs sm:text-sm ${
-                      submitMessage.includes("Thank you")
-                        ? "bg-green-50 text-green-800 border border-green-200"
-                        : "bg-red-50 text-red-800 border border-red-200"
-                    }`}
+                    className={`mt-3 sm:mt-4 p-3 sm:p-4 rounded-lg text-xs sm:text-sm ${submitMessage.includes("Thank you")
+                      ? "bg-green-50 text-green-800 border border-green-200"
+                      : "bg-red-50 text-red-800 border border-red-200"
+                      }`}
                   >
                     {submitMessage}
                   </div>

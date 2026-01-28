@@ -45,7 +45,7 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Only allow 10 digits for phone number
     if (name === 'phoneNo') {
       const digitsOnly = value.replace(/\D/g, '').slice(0, 10);
@@ -53,7 +53,7 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
-    
+
     if (error) setError("");
     if (success) setSuccess("");
   };
@@ -90,7 +90,7 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
         return;
       }
     }
-    
+
     if (currentStep === 2) {
       // Validate Step 2 fields (Date and Time)
       if (!formData.videoCallDate || !formData.videoCallDate.trim()) {
@@ -106,7 +106,7 @@ const VideoCallPopup = ({ isOpen, onClose }) => {
         return;
       }
     }
-    
+
     setError(""); // Clear any previous errors
     setCurrentStep((prev) => prev + 1);
   };

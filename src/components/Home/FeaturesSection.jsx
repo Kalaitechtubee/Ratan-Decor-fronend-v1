@@ -19,16 +19,16 @@ const FeaturesSection = () => {
   ];
 
   return (
-    <div className="py-0 sm:py-12 lg:py-16 px-4 max-w-7xl mx-auto">
+    <div className="px-4 max-w-7xl mx-auto">
       <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
         {features.map((feature, index) => (
-          <div 
-            key={feature.id} 
+          <div
+            key={feature.id}
             className="group relative transform transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02]"
           >
             {/* Main Card with Gradient Background */}
             <div className="relative bg-gradient-to-br from-[#ff4747] via-[#ff4747] to-[#e63946] rounded-3xl p-6 sm:p-8 lg:p-10 text-white overflow-hidden min-h-[320px] sm:min-h-[340px] lg:min-h-[320px] flex flex-col justify-end lg:justify-center pt-32 sm:pt-40 lg:pt-10 shadow-2xl shadow-[#ff4747]/20">
-              
+
               {/* Animated Background Elements */}
               <div className="absolute inset-0 opacity-10">
                 <div className="absolute top-0 right-0 w-64 sm:w-96 h-64 sm:h-96 bg-white rounded-full -translate-y-32 sm:-translate-y-48 translate-x-32 sm:translate-x-48 group-hover:scale-110 transition-transform duration-700"></div>
@@ -72,7 +72,7 @@ const FeaturesSection = () => {
               <div className="relative group-hover:scale-105 transition-transform duration-500">
                 {/* Animated Ring */}
                 <div className="absolute -inset-3 sm:-inset-4 rounded-full bg-gradient-to-r from-white/30 to-white/10 blur-sm group-hover:from-white/50 group-hover:to-white/20 transition-all duration-500"></div>
-                
+
                 {/* Main Image Container */}
                 <div className="relative w-24 h-24 sm:w-32 sm:h-32 lg:w-44 lg:h-44 rounded-full border-4 border-white bg-white shadow-2xl shadow-black/20 overflow-hidden group-hover:shadow-white/20 transition-shadow duration-500 flex-shrink-0">
                   <img
@@ -81,11 +81,11 @@ const FeaturesSection = () => {
                     className="w-full h-full object-contain p-3 sm:p-4 lg:p-8 transition-transform duration-700 group-hover:scale-110"
                     loading="lazy"
                   />
-                  
+
                   {/* Image Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
-                
+
                 {/* Floating Elements */}
                 <div className="absolute -top-2 -right-2 w-4 sm:w-6 h-4 sm:h-6 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 group-hover:-translate-y-1 group-hover:translate-x-1 transition-all duration-500 delay-200"></div>
                 <div className="absolute -bottom-2 -left-2 w-3 sm:w-4 h-3 sm:h-4 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 group-hover:translate-y-1 group-hover:-translate-x-1 transition-all duration-500 delay-300"></div>

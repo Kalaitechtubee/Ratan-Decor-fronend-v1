@@ -22,17 +22,15 @@ const SidebarLink = ({ tab, activeTab, handleTabChange }) => (
     whileHover={{ x: 4 }}
     whileTap={{ scale: 0.98 }}
     onClick={() => handleTabChange(tab.id)}
-    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 group ${
-      activeTab === tab.id
-        ? 'bg-primary text-white shadow-lg shadow-primary/20'
-        : 'text-neutral-600 hover:bg-primary/10 hover:text-primary'
-    }`}
+    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 group ${activeTab === tab.id
+      ? 'bg-primary text-white shadow-lg shadow-primary/20'
+      : 'text-neutral-600 hover:bg-primary/10 hover:text-primary'
+      }`}
   >
-    <tab.icon className={`text-lg transition-colors duration-300 ${
-      activeTab === tab.id 
-        ? 'text-white' 
-        : 'text-neutral-400 group-hover:text-primary'
-    }`} />
+    <tab.icon className={`text-lg transition-colors duration-300 ${activeTab === tab.id
+      ? 'text-white'
+      : 'text-neutral-400 group-hover:text-primary'
+      }`} />
     <span>{tab.label}</span>
     {activeTab === tab.id && (
       <motion.div
@@ -89,7 +87,6 @@ const LogoutModal = ({ isOpen, onClose, onConfirm }) => (
 
 const ProfilePage = () => {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [profile, setProfile] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
@@ -103,7 +100,7 @@ const ProfilePage = () => {
   const location = useLocation();
   const profileFetchedRef = useRef(false);
   const { clearCart } = useCart();
-  
+
   const isPopupOpen = useSelector((state) => state.userType.isPopupOpen);
 
   useEffect(() => {
@@ -125,9 +122,9 @@ const ProfilePage = () => {
       try {
         const response = await axios.get('/orders');
         if (response.data.success) {
-          const total = response.data.orderSummary?.totalOrders || 
-                       response.data.pagination?.total || 
-                       response.data.orders?.length || 0;
+          const total = response.data.orderSummary?.totalOrders ||
+            response.data.pagination?.total ||
+            response.data.orders?.length || 0;
           setTotalOrders(total);
         }
       } catch (err) {
@@ -235,98 +232,10 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-[#F8F9FA] font-roboto selection:bg-primary/10">
       <Navbar />
-      
-      {/* Mobile Sidebar Overlay & Drawer */}
-      <AnimatePresence>
-        {isMobileSidebarOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMobileSidebarOpen(false)}
-              className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-            />
-            <motion.div
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'tween', duration: 0.3 }}
-              className="lg:hidden fixed left-0 top-0 bottom-0 w-80 bg-white shadow-2xl z-50 overflow-y-auto"
-            >
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-xl font-bold text-neutral-900">Menu</h2>
-                  <button
-                    onClick={() => setIsMobileSidebarOpen(false)}
-                    className="w-10 h-10 flex items-center justify-center rounded-lg bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition-colors"
-                  >
-                    <FaTimes className="text-lg" />
-                  </button>
-                </div>
-
-                {/* Profile Info */}
-                <div className="flex flex-col items-center text-center mb-8 pb-6 border-b border-neutral-100">
-                  <div className="relative mb-4">
-                    <div className="w-20 h-20 bg-primary/5 rounded-2xl flex items-center justify-center border-2 border-white shadow-md">
-                      <FaUser className="text-3xl text-primary" />
-                    </div>
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-2 border-white rounded-full shadow-sm" />
-                  </div>
-                  <h3 className="text-lg font-bold text-neutral-900">{profile?.name}</h3>
-                  <p className="text-xs text-neutral-500 font-medium truncate w-full">{profile?.email}</p>
-                  <span className="mt-3 px-3 py-1 bg-neutral-100 text-neutral-600 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                    {profile?.role || 'Customer'}
-                  </span>
-                </div>
-
-                {/* Navigation Links */}
-                <div className="space-y-2 mb-6">
-                  {tabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => {
-                        handleTabChange(tab.id);
-                        setIsMobileSidebarOpen(false);
-                      }}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 group ${
-                        activeTab === tab.id
-                          ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                          : 'text-neutral-600 hover:bg-primary/10 hover:text-primary'
-                      }`}
-                    >
-                      <tab.icon className={`text-lg transition-colors duration-300 ${
-                        activeTab === tab.id 
-                          ? 'text-white' 
-                          : 'text-neutral-400 group-hover:text-primary'
-                      }`} />
-                      <span>{tab.label}</span>
-                    </button>
-                  ))}
-                </div>
-
-                <hr className="my-6 border-neutral-100" />
-
-                {/* Logout Button in Mobile Sidebar */}
-                <button
-                  onClick={() => {
-                    setIsMobileSidebarOpen(false);
-                    setIsLogoutModalOpen(true);
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 transition-all duration-300"
-                >
-                  <FaSignOutAlt className="text-lg" />
-                  <span>Logout</span>
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12">
         <div className="flex flex-col lg:flex-row gap-8">
-          
+
           {/* Desktop Sidebar */}
           <aside className="hidden lg:block w-72 shrink-0">
             <div className="sticky top-24 space-y-6">
@@ -347,11 +256,11 @@ const ProfilePage = () => {
 
                 <div className="space-y-1">
                   {tabs.map((tab) => (
-                    <SidebarLink 
-                      key={tab.id} 
-                      tab={tab} 
-                      activeTab={activeTab} 
-                      handleTabChange={handleTabChange} 
+                    <SidebarLink
+                      key={tab.id}
+                      tab={tab}
+                      activeTab={activeTab}
+                      handleTabChange={handleTabChange}
                     />
                   ))}
                 </div>
@@ -385,17 +294,22 @@ const ProfilePage = () => {
 
           {/* Main Content */}
           <div className="flex-1 min-w-0">
-            {/* Mobile Menu Button */}
-            <div className="lg:hidden flex items-center gap-4 mb-6">
-              <button
-                onClick={() => setIsMobileSidebarOpen(true)}
-                className="flex items-center gap-2 px-4 py-3 bg-white rounded-xl border border-neutral-100 shadow-sm text-neutral-700 font-semibold text-sm hover:bg-neutral-50 transition-all"
-              >
-                <FaBars className="text-base" />
-                <span>Menu</span>
-              </button>
-              <div className="flex-1 text-right">
-                <h2 className="text-lg font-bold text-neutral-900 capitalize">{activeTab === 'overview' ? 'Overview' : activeTab === 'personal' ? 'Personal Info' : 'Orders'}</h2>
+            {/* Mobile Horizontal Tabs */}
+            <div className="lg:hidden mb-8">
+              <div className="grid grid-cols-3 gap-2 sm:gap-4">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => handleTabChange(tab.id)}
+                    className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 px-2 py-3.5 rounded-2xl text-[10px] sm:text-xs font-bold transition-all duration-300 border shadow-sm ${activeTab === tab.id
+                      ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-[1.02]'
+                      : 'bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-50 active:scale-95 shadow-sm'
+                      }`}
+                  >
+                    <tab.icon className={`text-base sm:text-lg ${activeTab === tab.id ? 'text-white' : 'text-neutral-400'}`} />
+                    <span className="truncate w-full text-center">{tab.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -473,7 +387,7 @@ const ProfilePage = () => {
       </main>
 
       {isPopupOpen && (
-        <UserTypePopup 
+        <UserTypePopup
           onClose={() => dispatch(closePopup())}
           redirectToRegister={false}
         />
@@ -484,7 +398,7 @@ const ProfilePage = () => {
         onClose={() => setIsLogoutModalOpen(false)}
         onConfirm={handleLogout}
       />
-      
+
       <Footer />
     </div>
   );

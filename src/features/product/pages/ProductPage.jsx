@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Filter, Grid, List, X, Loader2, AlertCircle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Filter, Grid, List, X, Loader2, AlertCircle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, RotateCcw } from 'lucide-react';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
 import ProductGrid, { ProductGridSkeleton } from '../components/ProductGrid';
@@ -60,33 +60,68 @@ function ProductPage() {
     }
   }, [dispatch, categories.length]);
 
-  // Sync URL params to filters ONLY on initial mount
+  // Sync URL params to filters and handle navigation updates
   useEffect(() => {
-    if (isFirstMountRef.current) {
-      const urlParams = Object.fromEntries(searchParams);
-      if (Object.keys(urlParams).length > 0) {
-        const newFilters = { ...filters };
-        if (urlParams.search) newFilters.search = urlParams.search;
-        // Handle categoryIds - can be comma-separated in URL
-        if (urlParams.categoryIds) {
-          newFilters.categoryIds = urlParams.categoryIds.split(',').filter(Boolean);
-        } else if (urlParams.categoryId) {
-          // Backward compatibility with single categoryId
-          newFilters.categoryIds = [urlParams.categoryId];
-        }
-        if (urlParams.minPrice) newFilters.minPrice = urlParams.minPrice;
-        if (urlParams.maxPrice) newFilters.maxPrice = urlParams.maxPrice;
-        if (urlParams.designNumber) newFilters.designNumber = urlParams.designNumber;
-        if (urlParams.minDesignNumber) newFilters.minDesignNumber = urlParams.minDesignNumber;
-        if (urlParams.maxDesignNumber) newFilters.maxDesignNumber = urlParams.maxDesignNumber;
-        dispatch(setFilters(newFilters));
-        if (urlParams.page) {
-          dispatch(setPage(parseInt(urlParams.page)));
-        }
-      }
+    const urlParams = Object.fromEntries(searchParams);
+    if (Object.keys(urlParams).length === 0 && isFirstMountRef.current) {
       isFirstMountRef.current = false;
+      return;
     }
-  }, [dispatch, filters, searchParams]); // Added searchParams to deps for safety
+
+    const newFilters = { ...filters };
+    let hasChanges = false;
+
+    // Handle Search
+    if (urlParams.search !== undefined && urlParams.search !== filters.search) {
+      newFilters.search = urlParams.search;
+      hasChanges = true;
+    }
+
+    // Handle categoryIds - can be comma-separated in URL
+    const urlCategoryIds = urlParams.categoryIds ? urlParams.categoryIds.split(',').filter(Boolean) :
+      urlParams.categoryId ? [urlParams.categoryId] : [];
+
+    const currentCategoryIds = filters.categoryIds || [];
+    if (JSON.stringify(urlCategoryIds.sort()) !== JSON.stringify([...currentCategoryIds].sort())) {
+      newFilters.categoryIds = urlCategoryIds;
+      hasChanges = true;
+    }
+
+    // Handle Prices
+    if (urlParams.minPrice !== undefined && urlParams.minPrice !== filters.minPrice) {
+      newFilters.minPrice = urlParams.minPrice;
+      hasChanges = true;
+    }
+    if (urlParams.maxPrice !== undefined && urlParams.maxPrice !== filters.maxPrice) {
+      newFilters.maxPrice = urlParams.maxPrice;
+      hasChanges = true;
+    }
+
+    // Handle Design Numbers
+    if (urlParams.designNumber !== undefined && urlParams.designNumber !== filters.designNumber) {
+      newFilters.designNumber = urlParams.designNumber;
+      hasChanges = true;
+    }
+    if (urlParams.minDesignNumber !== undefined && urlParams.minDesignNumber !== filters.minDesignNumber) {
+      newFilters.minDesignNumber = urlParams.minDesignNumber;
+      hasChanges = true;
+    }
+    if (urlParams.maxDesignNumber !== undefined && urlParams.maxDesignNumber !== filters.maxDesignNumber) {
+      newFilters.maxDesignNumber = urlParams.maxDesignNumber;
+      hasChanges = true;
+    }
+
+    if (hasChanges) {
+      dispatch(setFilters(newFilters));
+      if (urlParams.page) {
+        dispatch(setPage(parseInt(urlParams.page)));
+      } else {
+        dispatch(setPage(1));
+      }
+    }
+
+    isFirstMountRef.current = false;
+  }, [dispatch, searchParams]); // Remove filters from deps to avoid loops, searchParams is the trigger
 
   // Memoized fetch params to avoid unnecessary re-renders
   const fetchParams = useMemo(() => {
@@ -161,6 +196,26 @@ function ProductPage() {
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [dispatch, getCurrentUserType]);
+
+  // Handle mobile filters toggle via custom event from MobileBottomNav
+  useEffect(() => {
+    const handleToggleFilters = () => {
+      setShowMobileFilters(prev => !prev);
+    };
+    window.addEventListener('toggleMobileFilters', handleToggleFilters);
+    return () => window.removeEventListener('toggleMobileFilters', handleToggleFilters);
+  }, []);
+
+  // Handle openFilters via search param (when coming from other pages)
+  useEffect(() => {
+    if (searchParams.get('openFilters') === 'true') {
+      setShowMobileFilters(true);
+      // Remove param from URL to prevent reopening on refresh
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('openFilters');
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // Update URL search params (passive, no side effects) - memoized filters string
   const filtersString = useMemo(() => JSON.stringify(filters), [filters]);
@@ -285,7 +340,7 @@ function ProductPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <div className="w-full px-4 sm:px-6 lg:px-8 py-12">
-          <h1 className="text-3xl font-bold text-gray-900">Our Products</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Our Products</h1>
       </div>
 
       <div className="w-full px-4 sm:px-6 lg:px-8 pb-12">
@@ -366,34 +421,33 @@ function ProductPage() {
                   </span>
                 )}
               </span>
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => handleViewModeChange('grid')}
-                  className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'}`}
-                  aria-label="Grid view"
-                >
-                  <Grid className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => handleViewModeChange('list')}
-                  className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'}`}
-                  aria-label="List view"
-                >
-                  <List className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setShowMobileFilters(true)}
-                  className="lg:hidden flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                  aria-label="Open filters"
-                >
-                  <Filter className="w-5 h-5 text-gray-600" />
-                  <span>Filters</span>
-                  {appliedFiltersCount > 0 && (
-                    <span className="px-2 py-1 text-xs font-medium text-white bg-primary rounded-full">
-                      {appliedFiltersCount}
-                    </span>
-                  )}
-                </button>
+              <div className="flex items-center space-x-3">
+                {appliedFiltersCount > 0 && (
+                  <button
+                    onClick={handleClearFilters}
+                    className="flex lg:hidden items-center space-x-2 px-3 py-2 bg-red-50 text-[#ff4747] border border-red-100 rounded-lg hover:bg-red-100 transition-all duration-200 text-xs font-semibold"
+                    aria-label="Clear all filters"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span>Filter Clear</span>
+                  </button>
+                )}
+                <div className="flex bg-gray-100 p-1 rounded-lg">
+                  <button
+                    onClick={() => handleViewModeChange('grid')}
+                    className={`p-1.5 rounded-md transition-all duration-200 ${viewMode === 'grid' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    aria-label="Grid view"
+                  >
+                    <Grid className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => handleViewModeChange('list')}
+                    className={`p-1.5 rounded-md transition-all duration-200 ${viewMode === 'list' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    aria-label="List view"
+                  >
+                    <List className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             </div>
 

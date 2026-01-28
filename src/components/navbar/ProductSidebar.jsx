@@ -15,11 +15,11 @@ export default function ProductSidebar({
   // Animation variants
   const overlayVariants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
       opacity: 1,
       transition: { duration: 0.2 }
     },
-    exit: { 
+    exit: {
       opacity: 0,
       transition: { duration: 0.2 }
     }
@@ -27,13 +27,13 @@ export default function ProductSidebar({
 
   const sidebarVariants = {
     hidden: { x: '-100%', opacity: 0 },
-    visible: { 
-      x: 0, 
+    visible: {
+      x: 0,
       opacity: 1,
       transition: { type: "spring", damping: 25, stiffness: 300 }
     },
-    exit: { 
-      x: '-100%', 
+    exit: {
+      x: '-100%',
       opacity: 0,
       transition: { duration: 0.3, ease: "easeInOut" }
     }
@@ -42,30 +42,14 @@ export default function ProductSidebar({
   // Handle category click with navigation
   const handleMobileCategoryClick = (category) => {
     console.log('Mobile category clicked:', category);
-    
+
     // Call parent handler if provided
     if (handleCategoryClick) {
       handleCategoryClick(category);
     }
-    
-    // Close sidebar
+
+    // Close sidebar - Navigation is handled by CategoryDropdown
     setIsProductSidebarOpen(false);
-    
-    // Navigate to products page with category filter
-    setTimeout(() => {
-      if (category && category.id) {
-        const url = `/products?categoryId=${category.id}&categoryName=${encodeURIComponent(category.name)}`;
-        console.log('Mobile navigating to:', url);
-        navigate(url);
-      } else if (category && category.name) {
-        const url = `/products?search=${encodeURIComponent(category.name)}`;
-        console.log('Mobile fallback navigation to:', url);
-        navigate(url);
-      } else {
-        console.log('Mobile navigating to all products');
-        navigate('/products');
-      }
-    }, 100);
   };
 
   // Handle sidebar close
@@ -86,7 +70,7 @@ export default function ProductSidebar({
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 md:hidden"
             onClick={handleCloseSidebar}
           />
-          
+
           {/* Sidebar */}
           <motion.div
             variants={sidebarVariants}
@@ -112,7 +96,7 @@ export default function ProductSidebar({
                 <MdClose className="text-base" />
               </button>
             </div>
-            
+
             {/* Sidebar Content */}
             <div className="sidebar-content bg-gray-50 h-full overflow-y-auto">
               <CategoryDropdown

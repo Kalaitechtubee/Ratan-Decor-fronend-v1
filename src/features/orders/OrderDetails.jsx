@@ -224,34 +224,63 @@ const OrderDetails = () => {
         transition={{ duration: 0.5 }}
         className='flex-1 container mx-auto px-4 py-8 sm:px-6 lg:px-8'
       >
-        {/* Header */}
-        <div className='flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8'>
-          <div className='flex items-center space-x-4 mb-4 sm:mb-0'>
+        {/* Premium Header Section */}
+        <div className='flex flex-col gap-6 mb-8'>
+          <div className='flex items-center justify-between'>
             <button
               onClick={() => navigate(-1)}
-              className='flex items-center p-2 text-gray-600 bg-white rounded-xl shadow-sm transition-colors hover:bg-gray-50 sm:p-2'
+              className='group flex items-center px-4 py-2.5 text-gray-600 bg-white rounded-2xl shadow-sm border border-gray-100 transition-all hover:bg-gray-50 active:scale-95'
             >
-              <ArrowLeft className='mr-2 w-5 h-5' />
-              Back
+              <ArrowLeft className='mr-2 w-5 h-5 transition-transform group-hover:-translate-x-1' />
+              <span className='font-bold text-xs uppercase tracking-widest'>Back</span>
             </button>
-            <div>
-              <h1 className='text-xl font-bold text-gray-900 sm:text-2xl'>
-                Order Details
-              </h1>
-              <p className='text-gray-600 text-sm sm:text-base'>
-                Order #{order.id}
-              </p>
+
+            <div className='hidden sm:block'>
+              <div className='flex flex-col items-end'>
+                <span className='text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1'>Order Status</span>
+                <span
+                  className={`inline-flex items-center px-4 py-1.5 rounded-full border text-xs font-bold shadow-sm transition-all ${getStatusColor(
+                    order.status
+                  )}`}
+                >
+                  <span className='scale-90'>{getStatusIcon(order.status)}</span>
+                  <span className='ml-2 capitalize tracking-wide'>{order.status}</span>
+                </span>
+              </div>
             </div>
           </div>
-          <div className='flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-3'>
-            <span
-              className={`inline-flex items-center px-4 py-2 rounded-lg border font-medium ${getStatusColor(
-                order.status
-              )} text-sm sm:text-base`}
-            >
-              {getStatusIcon(order.status)}
-              <span className='ml-2 capitalize'>{order.status}</span>
-            </span>
+
+          <div className='flex flex-col items-center sm:items-start'>
+            <div className='flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3'>
+              <h1 className='text-2xl sm:text-2xl font-black text-gray-900 tracking-tight'>
+                Order Details
+              </h1>
+              <div className='flex items-center gap-2'>
+                <span className='text-lg sm:text-lg font-bold text-gray-400'>
+                  Order #{order.id}
+                </span>
+              </div>
+            </div>
+
+            <p className='mt-2 text-gray-400 text-sm font-medium flex items-center gap-2'>
+              <Calendar className='w-4 h-4' />
+              Placed on {formatDate(order.orderDate)}
+            </p>
+
+            {/* Mobile Status Badge - More compact */}
+            <div className='mt-4 sm:hidden w-full'>
+              <div className='flex flex-col items-center p-4 bg-white rounded-2xl border border-gray-100 shadow-sm'>
+                <span className='text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2'>Order Status</span>
+                <span
+                  className={`inline-flex items-center px-6 py-2 rounded-full border font-bold text-sm shadow-sm transition-all ${getStatusColor(
+                    order.status
+                  )}`}
+                >
+                  <span className='scale-100'>{getStatusIcon(order.status)}</span>
+                  <span className='ml-3 capitalize tracking-wide'>{order.status}</span>
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -355,51 +384,51 @@ const OrderDetails = () => {
                         )}
                       </div>
                       {/* Product Details */}
-                      <div className='flex-1'>
-                        <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center'>
+                      <div className='flex-1 w-full'>
+                        <div className='flex flex-col md:flex-row justify-between h-full gap-4'>
                           <div className='flex-1'>
-                            <h3 className='font-semibold text-gray-900 text-sm sm:text-base hover:text-primary transition-colors'>
+                            <h3 className='font-bold text-gray-900 text-sm sm:text-base hover:text-primary transition-colors'>
                               <button
                                 onClick={() => handleViewProduct(product.id)}
-                                className='text-left hover:underline'
+                                className='text-left hover:underline line-clamp-2'
                               >
                                 {product.name || 'Unknown Product'}
                               </button>
                             </h3>
-                            <div className='mt-2 space-y-1'>
-                              <p className='text-xs sm:text-sm text-gray-500'>
-                                Qty: {item.quantity}
-                              </p>
-                              <p className='text-xs sm:text-sm text-gray-500'>
-                                Price: {formatPrice(unitPrice)}
-                              </p>
+                            <div className='mt-2.5 grid grid-cols-2 sm:flex sm:flex-wrap gap-x-5 gap-y-2.5'>
+                              <div className='flex flex-col'>
+                                <span className='text-[9px] uppercase font-bold text-gray-400 tracking-wider'>Qty</span>
+                                <span className='text-xs font-semibold text-gray-700'>{item.quantity}</span>
+                              </div>
+                              <div className='flex flex-col'>
+                                <span className='text-[9px] uppercase font-bold text-gray-400 tracking-wider'>Price</span>
+                                <span className='text-xs font-semibold text-gray-700'>{formatPrice(unitPrice)}</span>
+                              </div>
+                              <div className='flex flex-col'>
+                                <span className='text-[9px] uppercase font-bold text-gray-400 tracking-wider'>Type</span>
+                                <span className='text-xs font-semibold text-gray-700'>{product.unitType || 'Sheet'}</span>
+                              </div>
                               {item.gstRate > 0 && (
-                                <p className='text-xs sm:text-[11px] text-[#ff4747] font-medium'>
-                                  Tax Rate: {item.gstRate}% (Included)
-                                </p>
+                                <div className='flex flex-col'>
+                                  <span className='text-[9px] uppercase font-bold text-primary tracking-wider'>GST</span>
+                                  <span className='text-xs font-bold text-primary'>{item.gstRate}%</span>
+                                </div>
                               )}
-                              <p className='text-xs sm:text-sm text-gray-500'>
-                                Unit Type: {product.unitType || 'Sheet'}
-                              </p>
                             </div>
                           </div>
-                          <div className='text-right mt-2 sm:mt-0'>
-                            <p className='font-semibold text-base sm:text-lg text-gray-900'>
-                              {formatPrice(totalPrice)}
-                            </p>
-                            {product.currentPrice > product.orderPrice && (
-                              <p className='text-xs sm:text-sm text-gray-500 line-through'>
-                                {formatPrice(
-                                  product.currentPrice * item.quantity
-                                )}
+                          <div className='flex flex-col justify-between items-end bg-gray-50/50 p-3 sm:p-4 rounded-xl border border-gray-100 min-w-[120px]'>
+                            <div className='text-right w-full'>
+                              <p className='text-[9px] uppercase font-bold text-gray-400 tracking-wider mb-0.5'>Total</p>
+                              <p className='font-black text-lg sm:text-xl text-gray-900 tracking-tight'>
+                                {formatPrice(totalPrice)}
                               </p>
-                            )}
+                            </div>
                             <button
                               onClick={() => handleViewProduct(product.id)}
-                              className='mt-2 flex items-center text-xs sm:text-sm text-primary hover:text-red-600 transition-colors'
+                              className='mt-3 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 text-[10px] font-bold text-gray-700 rounded-lg hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm'
                             >
-                              <Eye className='w-3 h-3 sm:w-4 sm:h-4 mr-1' />
-                              View Product
+                              <Eye className='w-3.5 h-3.5' />
+                              View
                             </button>
                           </div>
                         </div>
@@ -427,24 +456,10 @@ const OrderDetails = () => {
                 </div>
                 {order.gstAmount > 0 && (
                   <div className='pt-1 space-y-2'>
-                    {order.deliveryAddress?.data?.state?.toLowerCase().includes('tamil nadu') ||
-                      order.deliveryAddress?.data?.state?.toLowerCase().includes('tn') ? (
-                      <>
-                        <div className='flex justify-between text-sm'>
-                          <span className='text-gray-500'>CGST (9%)</span>
-                          <span className='text-gray-700 font-medium'>{formatPrice(order.gstAmount / 2)}</span>
-                        </div>
-                        <div className='flex justify-between text-sm'>
-                          <span className='text-gray-500'>SGST (9%)</span>
-                          <span className='text-gray-700 font-medium'>{formatPrice(order.gstAmount / 2)}</span>
-                        </div>
-                      </>
-                    ) : (
-                      <div className='flex justify-between text-sm'>
-                        <span className='text-gray-500'>IGST (18%)</span>
-                        <span className='text-gray-700 font-medium'>{formatPrice(order.gstAmount)}</span>
-                      </div>
-                    )}
+                    <div className='flex justify-between text-sm'>
+                      <span className='text-gray-500'>GST</span>
+                      <span className='text-gray-700 font-medium'>{formatPrice(order.gstAmount)}</span>
+                    </div>
                   </div>
                 )}
                 <div className='border-t border-gray-200 pt-2 sm:pt-3'>

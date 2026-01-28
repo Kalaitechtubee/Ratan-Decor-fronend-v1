@@ -112,7 +112,7 @@ export default function DesktopNavbar({
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm transition-all duration-300 py-2 font-roboto">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm transition-all duration-300 py-2 font-roboto hidden md:block">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo and User Type */}
@@ -163,11 +163,10 @@ export default function DesktopNavbar({
               <div className="flex items-center space-x-1">
                 <Link
                   to="/"
-                  className={`px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${
-                    isActiveRoute("/")
+                  className={`px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${isActiveRoute("/")
                       ? "text-[#ff4747]"
                       : "text-gray-700 hover:text-[#ff4747]"
-                  }`}
+                    }`}
                   aria-label="Go to home page"
                 >
                   Home
@@ -183,28 +182,25 @@ export default function DesktopNavbar({
                       navigate("/products");
                       setIsCategoryDropdownOpen(false);
                     }}
-                    className={`flex items-center gap-1 px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${
-                      isCategoryDropdownOpen
+                    className={`flex items-center gap-1 px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${isCategoryDropdownOpen
                         ? "text-[#ff4747]"
                         : "text-gray-700 hover:text-[#ff4747]"
-                    }`}
+                      }`}
                     aria-label="Product categories"
                   >
                     <span>Products</span>
                     <FaChevronDown
-                      className={`text-[#ff4747] text-sm transition-transform duration-300 ${
-                        isCategoryDropdownOpen ? "rotate-180" : ""
-                      }`}
+                      className={`text-[#ff4747] text-sm transition-transform duration-300 ${isCategoryDropdownOpen ? "rotate-180" : ""
+                        }`}
                     />
                   </button>
                 </div>
                 <Link
                   to="/about"
-                  className={`px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-colors duration-200 ${
-                    isActiveRoute("/about")
+                  className={`px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-colors duration-200 ${isActiveRoute("/about")
                       ? "text-[#ff4747]"
                       : "text-gray-700 hover:text-[#ff4747]"
-                  }`}
+                    }`}
                   aria-label="Go to about page"
                 >
                   Company
@@ -212,11 +208,10 @@ export default function DesktopNavbar({
 
                 <button
                   onClick={onOpenVideoCallPopup}
-                  className={`flex items-center gap-2 px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${
-                    isActiveRoute("/video-call")
+                  className={`flex items-center gap-2 px-3 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${isActiveRoute("/video-call")
                       ? "text-[#ff4747] bg-[#ff4747]/10"
                       : "text-gray-700 hover:text-[#ff4747]"
-                  }`}
+                    }`}
                   aria-label="Open video call scheduler popup"
                 >
                   <FaVideo className="text-[#ff4747] text-lg" />
@@ -225,19 +220,17 @@ export default function DesktopNavbar({
                 <button
                   onClick={onOpenCart}
                   aria-label="Open cart"
-                  className={`flex items-center gap-3 px-4 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${
-                    isCartOpen || isActiveRoute("/cart")
+                  className={`flex items-center gap-3 px-4 py-2 text-base font-medium rounded-lg underline-animation font-roboto transition-all duration-200 ${isCartOpen || isActiveRoute("/cart")
                       ? "text-[#ff4747] bg-[#ff4747]/10"
                       : "text-gray-700 hover:text-[#ff4747]"
-                  }`}
+                    }`}
                 >
                   <div className="relative flex items-center justify-center">
                     <FaShoppingCart
-                      className={`text-lg transition-colors duration-200 ${
-                        isCartOpen || isActiveRoute("/cart")
+                      className={`text-lg transition-colors duration-200 ${isCartOpen || isActiveRoute("/cart")
                           ? "text-[#ff4747]"
                           : "text-gray-700"
-                      }`}
+                        }`}
                     />
                     {cartCount > 0 && (
                       <span className="absolute -top-2.5 -right-3 bg-[#ff4747] text-white text-[11px] font-bold h-5 min-w-[22px] px-1.5 rounded-full border-2 border-white flex items-center justify-center shadow-lg">
@@ -265,9 +258,8 @@ export default function DesktopNavbar({
                       {user?.name || "User"}
                     </span>
                     <FaChevronDown
-                      className={`text-white text-sm transition-transform duration-300 ${
-                        isProfileOpen ? "rotate-180" : ""
-                      }`}
+                      className={`text-white text-sm transition-transform duration-300 ${isProfileOpen ? "rotate-180" : ""
+                        }`}
                     />
                   </button>
                   <AnimatePresence>
