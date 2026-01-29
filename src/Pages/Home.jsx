@@ -139,7 +139,7 @@ function Home() {
           <HomeSlider />
 
           {/* ✅ MOBILE RESPONSIVE PADDING FIX HERE */}
-          <main className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-8 md:py-4 lg:py-0 pb-24 md:pb-0">
+          <main className="w-full px-4 sm:px-6 lg:px-8 py-2 lg:py-6 sm:py-8 md:py-4 lg:py-0 md:pb-0">
             {/* Popular Categories */}
             <section className="py-8 sm:py-10">
               <PopularCategories />

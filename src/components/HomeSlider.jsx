@@ -967,7 +967,7 @@ const EnhancedResponsiveSlider = () => {
                 >
                   <div className="space-y-1 sm:space-y-1.5 md:space-y-2 mb-2 sm:mb-2.5 md:mb-3 lg:mb-4 xl:mb-5 2xl:mb-6">
                     <span
-                      className="inline-block px-2 py-0.5 sm:px-2.5 sm:py-1 md:px-3 md:py-1.5 lg:px-4 lg:py-2 xl:px-5 xl:py-2.5 2xl:px-6 2xl:py-3
+                      className="inline-block px-2 py-[0.4rem] sm:px-2.5 sm:py-1 md:px-3 md:py-1.5 lg:px-4 lg:py-2 xl:px-5 xl:py-2.5 2xl:px-6 2xl:py-3
                                    bg-white/10 backdrop-blur-sm rounded-full text-white/90 
                                    text-xs sm:text-sm md:text-base lg:text-sm xl:text-base 2xl:text-lg
                                    font-medium tracking-wide whitespace-nowrap"
@@ -979,7 +979,7 @@ const EnhancedResponsiveSlider = () => {
                   <h1
                     className="text-xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl 2xl:text-5xl 3xl:text-6xl
                                font-bold text-white mb-2 sm:mb-2.5 md:mb-3 lg:mb-4 xl:mb-5 2xl:mb-6 
-                               leading-[1.1] sm:leading-[1.1] md:leading-[1.1] lg:leading-[1.1] xl:leading-none
+                               leading-[1.4] sm:leading-[1.1] md:leading-[1.1] lg:leading-[1.1] xl:leading-none
                                break-words hyphens-auto"
                   >
                     {slide.title}
@@ -1110,8 +1110,8 @@ const EnhancedResponsiveSlider = () => {
           /* Ensure text doesn't overflow - Increased sizes for mobile */
           h1 {
             font-size: 1.25rem !important;
-            line-height: 1.2 !important;
-            margin-bottom: 1rem !important;
+            line-height: 1.4 !important;
+            margin-bottom: 0.75rem !important;
           }
           
           p {
@@ -1122,8 +1122,9 @@ const EnhancedResponsiveSlider = () => {
           
           /* Ensure buttons are properly sized */
           button {
-            min-height: 40px !important;
-            font-size: 0.75rem !important;
+            min-height: 44px !important;
+            font-size: 0.875rem !important;
+            margin-bottom: 0.5rem !important;
           }
         }
 
@@ -1136,12 +1137,13 @@ const EnhancedResponsiveSlider = () => {
           
           h1 {
             font-size: 1.125rem !important;
-            margin-bottom: 0.75rem !important;
+            line-height: 1.4 !important;
+            margin-bottom: 0.5rem !important;
           }
           
           p {
             font-size: 0.875rem !important;
-            margin-bottom: 1rem !important;
+            margin-bottom: 0.75rem !important;
           }
         }
 

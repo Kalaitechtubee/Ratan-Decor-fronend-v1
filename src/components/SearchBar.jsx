@@ -129,8 +129,8 @@ const SearchBar = ({ currentUserType, isMobile = false, onClose }) => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search products or categories..."
-          className="w-full pl-10 pr-10 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-full 
-                     focus:ring-2 focus:ring-[#ff4747] outline-none transition-all font-roboto"
+          className="w-full pl-10 pr-10 py-2.5 text-sm bg-gray-50 border border-[#ff4747]/60 rounded-full 
+                     focus:border-[#ff4747] focus:ring-2 focus:ring-[#ff4747] outline-none transition-all font-roboto"
           onFocus={() => setIsSearchOpen(true)}
           onBlur={() => setTimeout(() => setIsSearchOpen(false), 200)}
           onKeyPress={(e) => e.key === "Enter" && handleSearchSubmit()}

@@ -310,6 +310,19 @@ export default function Navbar() {
             width: 100%;
             left: 0;
           }
+
+          .active-persistent-underline {
+            position: relative;
+          }
+          .active-persistent-underline::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #ff4747;
+          }
          
           /* Enhanced mobile responsiveness */
           @media (max-width: 767px) {
