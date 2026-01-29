@@ -144,7 +144,7 @@ const CounterComponent = ({ apiStats }) => {
                 return (
                   <div
                     key={stat.id}
-                    className={`group relative bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                    className={`group relative bg-white rounded-2xl overflow-hidden p-6 sm:p-8 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                       }`}
                     style={{ transitionDelay: `${700 + index * 200}ms` }}
                     role="figure"

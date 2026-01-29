@@ -14,6 +14,7 @@ import MobileNavbar from './navbar/MobileNavbar';
 import MobileBottomNav from './navbar/MobileBottomNav';
 import ProductSidebar from './navbar/ProductSidebar';
 import MoreMenu from './navbar/MoreMenu';
+import FloatingActionButtons from './navbar/FloatingActionButtons';
 import CategoryDropdown from './CategoryDropdown';
 import CartSidePanel from '../features/cart/components/CartSidePanel';
 
@@ -323,6 +324,12 @@ export default function Navbar() {
             height: 2px;
             background-color: #ff4747;
           }
+
+          @media (max-width: 767px) {
+            .active-persistent-underline::after {
+              bottom: 4px !important;
+            }
+          }
          
           /* Enhanced mobile responsiveness */
           @media (max-width: 767px) {
@@ -469,11 +476,13 @@ export default function Navbar() {
           />
         )}
       </AnimatePresence>
-      {/* Cart Side Panel */}
       <CartSidePanel
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
       />
+
+      {/* Floating Action Buttons for Mobile */}
+      <FloatingActionButtons onOpenVideoCallPopup={() => setIsVideoCallPopupOpen(true)} />
     </>
   );
 }

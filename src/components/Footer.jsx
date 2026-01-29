@@ -43,7 +43,7 @@ const Footer = () => {
               <h3 className="text-[15px] font-semibold text-white mb-1">
                 Need Help?
               </h3>
-              <p className="text-[13px] text-gray-300 leading-relaxed">
+              <p className="text-[14px] text-gray-300 leading-relaxed">
                 We're available to answer your queries and assist with your
                 orders.
               </p>
@@ -55,7 +55,7 @@ const Footer = () => {
                              transition-all duration-300 group-hover:text-[#ff4747] group-hover:scale-110"
                 />
                 <div>
-                  <p className="text-[12px] text-gray-400 mb-1">
+                  <p className="text-[13px] text-gray-400 mb-1">
                     Monday - Friday: 8am-9pm
                   </p>
                   <p className="text-[14px] font-medium text-white">
@@ -74,10 +74,10 @@ const Footer = () => {
                              transition-all duration-300 group-hover:text-[#ff4747] group-hover:scale-110"
                 />
                 <div>
-                  <p className="text-[12px] text-gray-400 mb-1">
+                  <p className="text-[13px] text-gray-400 mb-1">
                     Need help with your order?
                   </p>
-                  <p className="text-[13px] font-medium text-white">
+                  <p className="text-[14px] font-medium text-white">
                     support@ratandecor.com
                   </p>
                 </div>
@@ -101,7 +101,7 @@ const Footer = () => {
                   <li key={index}>
                     <Link
                       to={item.route}
-                      className="text-[13px] text-gray-300 hover:text-[#ff4747] hover:underline transition-all duration-200"
+                      className="text-[14px] text-gray-300 hover:text-[#ff4747] hover:underline transition-all duration-200"
                     >
                       {item.text}
                     </Link>
@@ -123,7 +123,7 @@ const Footer = () => {
                     <li key={item.id}>
                       <Link
                         to={`/products?category=${item.id}`}
-                        className="text-[13px] text-gray-300 hover:text-[#ff4747] hover:underline transition-all duration-200"
+                        className="text-[14px] text-gray-300 hover:text-[#ff4747] hover:underline transition-all duration-200"
                         title={item.name}
                       >
                         {item.name}
@@ -162,7 +162,7 @@ const Footer = () => {
                     <li key={index}>
                       <Link
                         to={item.route}
-                        className="text-[13px] text-gray-300 hover:text-[#ff4747] hover:underline transition-all duration-200"
+                        className="text-[14px] text-gray-300 hover:text-[#ff4747] hover:underline transition-all duration-200"
                       >
                         {item.text}
                       </Link>

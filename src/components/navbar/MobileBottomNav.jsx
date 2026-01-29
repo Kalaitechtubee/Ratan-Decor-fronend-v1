@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaHome, FaBars, FaSearch, FaUser, FaSignOutAlt, FaSignInAlt, FaFilter } from 'react-icons/fa';
+import { FaHome, FaBars, FaSearch, FaUser, FaSignOutAlt, FaSignInAlt, FaFilter, FaShoppingCart } from 'react-icons/fa';
 import { MdGridView } from 'react-icons/md';
 import { useState, useEffect } from 'react';
 
@@ -16,7 +16,10 @@ export default function MobileBottomNav({
   setIsMoreMenuOpen,
   currentUserType,
   isMobileSearchOpen,
-  setIsMobileSearchOpen
+  setIsMobileSearchOpen,
+  onOpenCart,
+  isCartOpen,
+  cartCount
 }) {
   // Always visible sticky bottom navigation
   const isVisible = true;
@@ -27,7 +30,12 @@ export default function MobileBottomNav({
   };
 
   const bottomNavItems = [
-    { path: '/', icon: FaHome, label: 'Home' },
+    {
+      path: '#more',
+      icon: FaBars,
+      label: 'More',
+      isMoreMenu: true
+    },
     {
       path: '#filters',
       icon: FaFilter,
@@ -47,10 +55,10 @@ export default function MobileBottomNav({
       isProfile: true
     },
     {
-      path: '#more',
-      icon: FaBars,
-      label: 'More',
-      isMoreMenu: true
+      path: '#cart',
+      icon: FaShoppingCart,
+      label: 'Cart',
+      isCart: true
     }
   ];
 
@@ -76,6 +84,7 @@ export default function MobileBottomNav({
           const buttonClasses = `flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-300 relative touch-target w-full h-16 font-roboto ${isActive ||
             (item.isMoreMenu && isMoreMenuOpen) ||
             (item.isSearch && isMobileSearchOpen) ||
+            (item.isCart && isCartOpen) ||
             (item.isFilters && location.pathname.startsWith('/products'))
             ? 'text-[#ff4747] scale-105 shadow-sm'
             : 'text-gray-600 hover:text-[#ff4747] active:scale-95'
@@ -168,6 +177,7 @@ export default function MobileBottomNav({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 whileTap={{ scale: 0.9 }}
+                className="w-full"
               >
                 {isAuthenticated ? (
                   <button
@@ -202,29 +212,32 @@ export default function MobileBottomNav({
             );
           }
 
-
-
-
-          return (
-            <motion.div
-              key={item.path}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Link
-                to={item.path}
+          if (item.isCart) {
+            return (
+              <motion.button
+                key="cart"
+                onClick={onOpenCart}
                 className={buttonClasses}
-                aria-label={`Go to ${item.label.toLowerCase()}`}
+                aria-label="Open cart"
+                whileTap={{ scale: 0.9 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
               >
-                <div className="flex flex-col items-center justify-center h-full">
+                <div className="flex flex-col items-center justify-center h-full relative">
                   <Icon className="text-xl mb-1" />
+                  {cartCount > 0 && (
+                    <span className="absolute top-1 right-2 bg-[#ff4747] text-white text-[10px] font-bold h-4 min-w-[16px] px-1 rounded-full border border-white flex items-center justify-center shadow-sm">
+                      {cartCount > 99 ? '99+' : cartCount}
+                    </span>
+                  )}
                   <span className="text-xs font-medium font-roboto text-center leading-tight">{item.label}</span>
                 </div>
-              </Link>
-            </motion.div>
-          );
+              </motion.button>
+            );
+          }
+
+          return null;
         })}
       </div>
     </motion.nav>

@@ -8,6 +8,7 @@ import {
   FaVideo,
   FaFileContract,
   FaHome,
+  FaWhatsapp,
 } from "react-icons/fa";
 import { MdClose } from "react-icons/md";
 import VideoCallPopup from "../Home/VideoCallPopup";
@@ -27,9 +28,15 @@ export default function MoreMenu({
     { path: "/enquiry-form", icon: FaFileContract, label: "Product Enquiry" },
     {
       icon: FaVideo,
-      label: "Video Call",
+      label: "Shop on call",
       isAction: true,
       action: () => setShowVideoCallPopup(true),
+    },
+    {
+      path: "https://wa.me/918360636885",
+      icon: FaWhatsapp,
+      label: "WhatsApp Us",
+      isExternal: true
     },
   ];
 
@@ -97,6 +104,17 @@ export default function MoreMenu({
                     >
                       {content}
                     </button>
+                  ) : item.isExternal ? (
+                    <a
+                      key={item.label}
+                      href={item.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setIsMoreMenuOpen(false)}
+                      className="block w-full"
+                    >
+                      {content}
+                    </a>
                   ) : (
                     <Link
                       key={item.label}

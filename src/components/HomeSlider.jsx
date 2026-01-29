@@ -904,7 +904,7 @@ const EnhancedResponsiveSlider = () => {
 
   return (
     <div
-      className="relative w-full overflow-hidden bg-black select-none
+      className="home-hero-slider relative w-full overflow-hidden bg-black select-none
                  h-[75vh] sm:h-[75vh] md:h-[85vh] lg:h-screen"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -1108,20 +1108,20 @@ const EnhancedResponsiveSlider = () => {
           }
           
           /* Ensure text doesn't overflow - Increased sizes for mobile */
-          h1 {
+          .home-hero-slider h1 {
             font-size: 1.25rem !important;
             line-height: 1.4 !important;
             margin-bottom: 0.75rem !important;
           }
           
-          p {
+          .home-hero-slider p {
             font-size: 0.875rem !important;
             line-height: 1.4 !important;
             margin-bottom: 1.25rem !important;
           }
           
           /* Ensure buttons are properly sized */
-          button {
+          .home-hero-slider button {
             min-height: 44px !important;
             font-size: 0.875rem !important;
             margin-bottom: 0.5rem !important;
@@ -1135,13 +1135,13 @@ const EnhancedResponsiveSlider = () => {
             padding-bottom: 4rem !important;
           }
           
-          h1 {
+          .home-hero-slider h1 {
             font-size: 1.125rem !important;
             line-height: 1.4 !important;
             margin-bottom: 0.5rem !important;
           }
           
-          p {
+          .home-hero-slider p {
             font-size: 0.875rem !important;
             margin-bottom: 0.75rem !important;
           }
