@@ -97,19 +97,7 @@ function ProductPage() {
       hasChanges = true;
     }
 
-    // Handle Design Numbers
-    if (urlParams.designNumber !== undefined && urlParams.designNumber !== filters.designNumber) {
-      newFilters.designNumber = urlParams.designNumber;
-      hasChanges = true;
-    }
-    if (urlParams.minDesignNumber !== undefined && urlParams.minDesignNumber !== filters.minDesignNumber) {
-      newFilters.minDesignNumber = urlParams.minDesignNumber;
-      hasChanges = true;
-    }
-    if (urlParams.maxDesignNumber !== undefined && urlParams.maxDesignNumber !== filters.maxDesignNumber) {
-      newFilters.maxDesignNumber = urlParams.maxDesignNumber;
-      hasChanges = true;
-    }
+    // Handle Design Numbers moved to search
 
     if (hasChanges) {
       dispatch(setFilters(newFilters));
@@ -247,9 +235,6 @@ function ProductPage() {
     if (filters.search && filters.search.trim()) count++;
     if (filters.minPrice && parseFloat(filters.minPrice) > 0) count++;
     if (filters.maxPrice && parseFloat(filters.maxPrice) < 10000) count++;
-    if (filters.designNumber && filters.designNumber.trim()) count++;
-    if (filters.minDesignNumber && filters.minDesignNumber.trim()) count++;
-    if (filters.maxDesignNumber && filters.maxDesignNumber.trim()) count++;
     return count;
   }, [filters]);
 
@@ -339,7 +324,7 @@ function ProductPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-12">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-gray-900">Our Products</h1>
       </div>
 
@@ -374,18 +359,10 @@ function ProductPage() {
                   className="absolute left-0 top-0 h-full w-80 bg-white shadow-lg overflow-y-auto"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="p-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
-                    <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
-                    <button
-                      onClick={() => setShowMobileFilters(false)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-full transition-all duration-200 active:scale-95"
-                    >
-                      <span className="text-sm font-medium">Close</span>
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
                   <div className="p-4">
                     <AdvancedProductFilters
+                      isMobile={true}
+                      onClose={() => setShowMobileFilters(false)}
                       categories={categories}
                       filters={filters}
                       onFilterChange={handleFilterChange}

@@ -904,7 +904,7 @@ const EnhancedResponsiveSlider = () => {
 
   return (
     <div
-      className="relative w-full overflow-hidden bg-black select-none
+      className="home-hero-slider relative w-full overflow-hidden bg-black select-none
                  h-[75vh] sm:h-[75vh] md:h-[85vh] lg:h-screen"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -953,7 +953,7 @@ const EnhancedResponsiveSlider = () => {
           <div className="w-full max-w-7xl mx-auto">
             <div
               className="max-w-full sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl 
-                            2xl:max-w-3xl mx-auto sm:mx-auto md:mx-auto lg:mx-0"
+                            2xl:max-w-3xl mx-0"
             >
               {slides.map((slide, index) => (
                 <div
@@ -967,7 +967,7 @@ const EnhancedResponsiveSlider = () => {
                 >
                   <div className="space-y-1 sm:space-y-1.5 md:space-y-2 mb-2 sm:mb-2.5 md:mb-3 lg:mb-4 xl:mb-5 2xl:mb-6">
                     <span
-                      className="inline-block px-2 py-0.5 sm:px-2.5 sm:py-1 md:px-3 md:py-1.5 lg:px-4 lg:py-2 xl:px-5 xl:py-2.5 2xl:px-6 2xl:py-3
+                      className="inline-block px-2 py-[0.4rem] sm:px-2.5 sm:py-1 md:px-3 md:py-1.5 lg:px-4 lg:py-2 xl:px-5 xl:py-2.5 2xl:px-6 2xl:py-3
                                    bg-white/10 backdrop-blur-sm rounded-full text-white/90 
                                    text-xs sm:text-sm md:text-base lg:text-sm xl:text-base 2xl:text-lg
                                    font-medium tracking-wide whitespace-nowrap"
@@ -979,7 +979,7 @@ const EnhancedResponsiveSlider = () => {
                   <h1
                     className="text-xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl 2xl:text-5xl 3xl:text-6xl
                                font-bold text-white mb-2 sm:mb-2.5 md:mb-3 lg:mb-4 xl:mb-5 2xl:mb-6 
-                               leading-[1.1] sm:leading-[1.1] md:leading-[1.1] lg:leading-[1.1] xl:leading-none
+                               leading-[1.4] sm:leading-[1.1] md:leading-[1.1] lg:leading-[1.1] xl:leading-none
                                break-words hyphens-auto"
                   >
                     {slide.title}
@@ -996,19 +996,19 @@ const EnhancedResponsiveSlider = () => {
                   </p>
 
                   <div
-                    className="flex flex-col sm:flex-row items-stretch sm:items-center 
+                    className="flex flex-col sm:flex-row items-start sm:items-center 
                                 gap-2 sm:gap-2.5 md:gap-3 lg:gap-4 xl:gap-5
                                 sm:space-y-0"
                   >
                     <button
                       onClick={() => handleCtaClick(slide.ctaUrl)}
-                      className="group relative px-3 py-1.5 sm:px-4 sm:py-2 md:px-5 md:py-2.5 lg:px-6 lg:py-3
-                                     xl:px-8 xl:py-3.5 2xl:px-10 2xl:py-4
+                      className="group relative px-8 py-1.5 sm:py-2 md:py-2.5 lg:py-3
+                                     xl:py-3.5 2xl:py-4
                                      bg-white text-black font-semibold rounded-full overflow-hidden
                                      transition-all duration-300 hover:scale-105 active:scale-95
                                      hover:shadow-2xl touch-manipulation
                                      text-xs sm:text-sm md:text-base lg:text-base xl:text-lg
-                                     w-full sm:w-auto text-center
+                                     w-auto sm:w-auto text-center
                                      min-h-[32px] sm:min-h-[36px] md:min-h-[40px] lg:min-h-[44px] xl:min-h-[48px] 2xl:min-h-[52px]
                                      flex items-center justify-center"
                     >
@@ -1108,22 +1108,23 @@ const EnhancedResponsiveSlider = () => {
           }
           
           /* Ensure text doesn't overflow - Increased sizes for mobile */
-          h1 {
-            font-size: 1.25rem !important;
+          .home-hero-slider h1 {
+            font-size: 1.75rem !important;
             line-height: 1.2 !important;
-            margin-bottom: 1rem !important;
+            margin-bottom: 0.75rem !important;
           }
           
-          p {
-            font-size: 0.875rem !important;
-            line-height: 1.4 !important;
-            margin-bottom: 1.25rem !important;
+          .home-hero-slider p {
+            font-size: 1rem !important;
+            line-height: 1.5 !important;
+            margin-bottom: 1.5rem !important;
           }
           
           /* Ensure buttons are properly sized */
-          button {
-            min-height: 40px !important;
-            font-size: 0.75rem !important;
+          .home-hero-slider button {
+            min-height: 44px !important;
+            font-size: 0.875rem !important;
+            margin-bottom: 0.5rem !important;
           }
         }
 
@@ -1134,14 +1135,15 @@ const EnhancedResponsiveSlider = () => {
             padding-bottom: 4rem !important;
           }
           
-          h1 {
+          .home-hero-slider h1 {
             font-size: 1.125rem !important;
-            margin-bottom: 0.75rem !important;
+            line-height: 1.4 !important;
+            margin-bottom: 0.5rem !important;
           }
           
-          p {
+          .home-hero-slider p {
             font-size: 0.875rem !important;
-            margin-bottom: 1rem !important;
+            margin-bottom: 0.75rem !important;
           }
         }
 

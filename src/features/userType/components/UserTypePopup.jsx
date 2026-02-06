@@ -249,7 +249,6 @@ function UserTypePopup({ onClose, redirectToRegister = false }) {
       className={`fixed inset-0 z-[1000] flex justify-center items-center bg-black p-3 transition-all duration-300 ${
         isVisible && !isClosing ? 'bg-opacity-60' : 'bg-opacity-0'
       }`}
-      onClick={handleClose}
     >
       <div 
         className={`relative px-6 py-5 sm:px-7 sm:py-6 w-full max-w-[400px] sm:max-w-[480px] md:max-w-[560px] max-h-[600px] bg-white rounded-xl shadow-xl overflow-y-auto transform transition-all duration-300 ${
@@ -257,18 +256,9 @@ function UserTypePopup({ onClose, redirectToRegister = false }) {
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close button */}
-        <button
-          onClick={handleClose}
-          className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
-          disabled={isUpdating}
-        >
-          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
 
-        <div className="mb-4 text-center pr-8">
+
+        <div className="mb-4 text-center">
           <h2 className={`mb-2 text-xl sm:text-2xl font-bold text-gray-900 transition-all duration-500 delay-100 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
           }`}>

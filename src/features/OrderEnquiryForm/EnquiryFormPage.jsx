@@ -15,9 +15,9 @@ const LoadingSpinner = ({ size = 'default', className = '' }) => {
 };
 
 const ROLE_OPTIONS = [
-  { value: 'Customer', label: 'End Consumer' },
   { value: 'Architect', label: 'Architect / Interior Designer' },
   { value: 'Dealer', label: 'Dealer / Distributor' },
+  { value: 'Customer', label: 'End Consumer' },
   { value: 'Customer', label: 'Others' }
 ];
 
@@ -579,20 +579,9 @@ const EnquiryFormPage = ({ product: propProduct, user: propUser }) => {
           </div>
 
           {/* Render EnquiryForm as modal but full-width for page */}
-          <div className={`bg-white rounded-xl shadow-2xl ${isOpen ? 'block' : 'hidden'}`}>
-            {/* Modal Header */}
-            <div className="flex justify-between items-center p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">Enquiry Form</h2>
-              <button
-                onClick={handleClose}
-                disabled={submitting}
-                className="text-gray-500 hover:text-gray-700 disabled:opacity-50 transition-colors"
-              >
-                <X size={24} />
-              </button>
-            </div>
-            {/* Modal Content */}
-            <div className="p-6 overflow-y-auto max-h-[calc(100vh-200px)]">
+          <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            {/* Form Content */}
+            <div className="p-8">
               <div className="space-y-6">
                 {/* Customer Information Section */}
                 <div>
@@ -716,19 +705,11 @@ const EnquiryFormPage = ({ product: propProduct, user: propUser }) => {
                 </div>
               </div>
             </div>
-            {/* Modal Footer */}
-            <div className="flex justify-end space-x-6 p-6 border-t border-gray-200 bg-gray-50">
-              <button
-                onClick={handleClose}
-                disabled={submitting}
-                className="px-6 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 transition-colors"
-              >
-                Cancel
-              </button>
+            <div className="flex justify-center p-8 border-t border-gray-100 bg-gray-50/50">
               <button
                 onClick={handleSubmit}
                 disabled={submitting || loadingUserTypes}
-                className="flex items-center px-6 py-2 space-x-2 text-white rounded-lg bg-primary hover:opacity-90 disabled:opacity-50 transition-opacity"
+                className="flex items-center justify-center px-12 py-3 space-x-2 text-white font-bold rounded-xl bg-primary hover:opacity-90 disabled:opacity-50 transition-all shadow-lg hover:shadow-primary/30 active:scale-[0.98]"
               >
                 {submitting && <LoadingSpinner size="small" className="text-white" />}
                 <span>{submitting ? 'Submitting...' : 'Submit Enquiry'}</span>

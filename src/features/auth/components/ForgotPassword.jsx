@@ -23,7 +23,7 @@ function ForgotPassword() {
       setMessage('OTP sent to your email. Please check your inbox.');
       setTimeout(() => navigate('/verify-otp', { state: { email } }), 1500);
     } catch (err) {
-      setError(err.message || 'Failed to send OTP. Please try again.');
+      setError(err.message || err || 'Failed to send OTP. Please try again.');
     } finally {
       setLoading(false);
     }

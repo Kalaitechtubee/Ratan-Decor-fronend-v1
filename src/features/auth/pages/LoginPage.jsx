@@ -111,12 +111,13 @@ function LoginPage() {
         <div className="flex-1 flex items-center justify-center">
           <div className="max-w-sm w-full">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                Welcome Back to Ratan Decor!
+              <h2 className="text-3xl font-bold text-gray-900 leading-tight">
+                Welcome Back to
+                <span className="block text-black">
+                  Ratan Decor!
+                </span>
               </h2>
-              <p className="text-gray-600">
-                Sign in to your account
-              </p>
+
             </div>
 
             <div className="space-y-6 mt-6">
@@ -232,7 +233,7 @@ function LoginPage() {
                     navigate('/register');
                   }}
                 >
-                  Register
+                  Sign up here
                 </a>
               </p>
             </div>

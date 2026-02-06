@@ -7,10 +7,12 @@ import {
   FaUser,
   FaSignOutAlt,
   FaVideo,
+  FaSync,
   FaShoppingCart,
   FaTimes,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
+import { ChefHat, Building2, Home } from "lucide-react";
 import logo from "../../assets/images/ratan-decor.png";
 import SearchBar from "../SearchBar";
 import { useState, useRef } from "react";
@@ -37,8 +39,8 @@ export default function DesktopNavbar({
   cartCount = 0,
   onProductsMouseEnter,
   onProductsMouseLeave,
+  setIsLogoutConfirmOpen,
 }) {
-  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
   const dropdownVariants = {
     hidden: { opacity: 0, y: -10, scale: 0.98 },
@@ -60,55 +62,6 @@ export default function DesktopNavbar({
     setIsCategoryDropdownOpen(false);
   };
 
-  // Compact Logout Confirmation Modal (same size as mobile/profile popup)
-  const LogoutConfirmModal = ({ isOpen, onClose, onConfirm }) => (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm"
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
-          >
-            <div className="p-8 text-center">
-              <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FaSignOutAlt className="text-2xl" />
-              </div>
-              <h3 className="text-xl font-bold text-neutral-900 mb-2">
-                Ready to Leave?
-              </h3>
-              <p className="text-sm text-neutral-500">
-                Are you sure you want to log out of your account? You will need
-                to sign in again to access your profile.
-              </p>
-            </div>
-            <div className="flex border-t border-neutral-100">
-              <button
-                onClick={onClose}
-                className="flex-1 px-6 py-4 text-sm font-bold text-neutral-600 hover:bg-neutral-50 transition-colors"
-              >
-                Stay Logged In
-              </button>
-              <button
-                onClick={onConfirm}
-                className="flex-1 px-6 py-4 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors border-l border-neutral-100"
-              >
-                Logout Now
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
-  );
 
   return (
     <>
@@ -117,45 +70,46 @@ export default function DesktopNavbar({
           <div className="flex items-center justify-between h-16">
             {/* Logo and User Type */}
             <div className="flex items-center space-x-4">
+              {/* Logo */}
               <Link to="/" className="flex items-center">
                 <img
                   src={logo}
                   alt="Ratan Decor Logo"
-                  className="h-7 transition-transform duration-300 hover:scale-105"
+                  className="h-8 transition-transform duration-300 hover:scale-105"
                 />
               </Link>
-              <div className="flex items-center">
+
+              {/* User Type Selector (e.g. Modular kitchen) */}
+              <div className="flex items-center active-persistent-underline pb-1">
                 <button
                   onClick={() => setIsUserTypePopupOpen(true)}
-                  className="flex items-center gap-2 px-3 py-1 rounded-xl font-medium text-gray-700 transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/40 font-roboto group underline-animation touch-target"
+                  className="flex items-center gap-2 px-3 py-1 rounded-xl font-medium text-gray-700 transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/40 font-roboto group touch-target"
                   aria-label="Change project type"
                 >
-                  <MdDashboard className="text-[#ff4747] text-xl transition-transform duration-200 group-hover:rotate-6" />
+                  {(() => {
+                    const iconClass = "text-[#ff4747] text-xl transition-transform duration-200 group-hover:rotate-6";
+                    const name = (currentUserType || "").toLowerCase();
+                    if (name.includes("modular") || name.includes("kitchen")) {
+                      return <ChefHat className={iconClass} size={20} />;
+                    } else if (name.includes("commercial")) {
+                      return <Building2 className={iconClass} size={20} />;
+                    } else if (name.includes("residential")) {
+                      return <Home className={iconClass} size={20} />;
+                    }
+                    return <FaSync className={iconClass} size={15}/>;
+                  })()}
                   <span className="text-base">
                     {currentUserType || (
                       <span className="text-gray-400 italic">Select Type</span>
                     )}
                   </span>
-                  <svg
-                    className="w-4 h-4 text-[#ff4747] group-hover:text-[#ff4747]/80 transition"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
                 </button>
               </div>
             </div>
 
             <div className="flex items-center justify-between flex-1">
               {/* Desktop Search Bar */}
-              <div className="flex-1 max-w-xl ml-2 mr-2">
+              <div className="flex-1 max-w-2xl ml-4 mr-4">
                 <SearchBar currentUserType={currentUserType} />
               </div>
 
@@ -214,7 +168,7 @@ export default function DesktopNavbar({
                     }`}
                   aria-label="Open video call scheduler popup"
                 >
-                  <FaVideo className="text-[#ff4747] text-lg" />
+                  <FaVideo className="text-[#ff4747] text-[1.7rem]" />
                   Shop on call
                 </button>
                 <button
@@ -226,12 +180,7 @@ export default function DesktopNavbar({
                     }`}
                 >
                   <div className="relative flex items-center justify-center">
-                    <FaShoppingCart
-                      className={`text-lg transition-colors duration-200 ${isCartOpen || isActiveRoute("/cart")
-                          ? "text-[#ff4747]"
-                          : "text-gray-700"
-                        }`}
-                    />
+                    <FaShoppingCart className="text-[#ff4747] text-[1.7rem] transition-colors duration-200" />
                     {cartCount > 0 && (
                       <span className="absolute -top-2.5 -right-3 bg-[#ff4747] text-white text-[11px] font-bold h-5 min-w-[22px] px-1.5 rounded-full border-2 border-white flex items-center justify-center shadow-lg">
                         {cartCount > 99 ? "99+" : cartCount}
@@ -313,7 +262,7 @@ export default function DesktopNavbar({
                 </div>
               ) : (
                 <Link
-                  to="/register"
+                  to="/login"
                   className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#ff4747] rounded-full hover:bg-[#ff4747]/80 transition-all duration-300 font-roboto"
                   aria-label="Sign in"
                 >
@@ -326,15 +275,6 @@ export default function DesktopNavbar({
         </div>
       </nav>
 
-      {/* Compact Logout Confirmation Modal */}
-      <LogoutConfirmModal
-        isOpen={isLogoutConfirmOpen}
-        onClose={() => setIsLogoutConfirmOpen(false)}
-        onConfirm={() => {
-          handleLogout();
-          setIsLogoutConfirmOpen(false);
-        }}
-      />
     </>
   );
 }
