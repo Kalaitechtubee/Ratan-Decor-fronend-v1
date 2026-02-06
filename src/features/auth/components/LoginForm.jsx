@@ -41,11 +41,12 @@ function LoginForm() {
         navigate('/profile');
       }
     } catch (err) {
-      const errorMsg = err.includes('pending approval')
+      const errStr = typeof err === 'string' ? err : err.message || '';
+      const errorMsg = errStr.includes('pending approval')
         ? 'Your account is pending approval.'
-        : err.includes('rejected')
+        : errStr.includes('rejected')
         ? 'Your account has been rejected.'
-        : err || 'Login failed. Please try again.';
+        : errStr || 'Login failed. Please try again.';
       setMessage(errorMsg);
       toast.error(errorMsg);
     }

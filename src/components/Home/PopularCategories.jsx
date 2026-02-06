@@ -139,20 +139,20 @@ const PopularCategories = ({ onCategoryClick }) => {
     <section className="w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
-          className="text-center mb-12 lg:mb-16"
+          className="text-center mb-6 lg:mb-16"
           variants={titleVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
         >
           <motion.h2
-            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4"
+            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4"
             variants={titleVariants}
           >
             Shop by <span style={{ color: primaryColor }}>Categories</span>
           </motion.h2>
           <motion.p
-            className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed"
             variants={titleVariants}
           >
             Discover our stunning range of premium materials for your dream space
@@ -160,7 +160,7 @@ const PopularCategories = ({ onCategoryClick }) => {
         </motion.div>
 
         <motion.div
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8"
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-6 lg:gap-8"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
@@ -181,7 +181,7 @@ const PopularCategories = ({ onCategoryClick }) => {
                 {/* Shine Effect Layer */}
                 <div className="absolute inset-0 shine-overlay z-10 pointer-events-none"></div>
 
-                <div className="relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 h-44 sm:h-96">
+                <div className="relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 h-48 sm:h-96">
                   <div className="relative h-full overflow-hidden">
                     {imageUrl ? (
                       <img
@@ -200,7 +200,7 @@ const PopularCategories = ({ onCategoryClick }) => {
                       className={`absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center ${imageUrl ? 'hidden' : 'flex'}`}
                       style={{ display: imageUrl ? 'none' : 'flex' }}
                     >
-                      <Image className="w-16 h-16 text-gray-400" />
+                      <Image className="w-12 h-12 text-gray-400" />
                     </div>
 
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300"></div>
@@ -210,16 +210,16 @@ const PopularCategories = ({ onCategoryClick }) => {
                       style={{ backgroundColor: primaryColor }}
                     />
 
-                    <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
-                      <div className="flex items-center justify-between">
+                    <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-6 z-20">
+                      <div className="flex items-end justify-between">
                         <div className="flex-1">
-                          <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 group-hover:translate-x-2 transition-transform duration-300">
+                          <h3 className="text-lg sm:text-2xl font-bold text-white mb-0 sm:mb-2 group-hover:translate-x-1 transition-transform duration-300 leading-tight">
                             {category.name}
                           </h3>
                         </div>
 
                         <motion.div
-                          className="ml-4 opacity-0 group-hover:opacity-100 transition-all duration-300"
+                          className="hidden sm:flex ml-4 opacity-0 group-hover:opacity-100 transition-all duration-300"
                           whileHover={{ x: 5 }}
                         >
                           <div

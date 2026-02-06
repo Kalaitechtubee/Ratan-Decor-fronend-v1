@@ -204,10 +204,7 @@ const initialState = {
     minPrice: null,
     maxPrice: null,
     search: '',
-    sortBy: 'featured',
-    designNumber: '',
-    minDesignNumber: '',
-    maxDesignNumber: ''
+    sortBy: 'featured'
   },
   viewMode: 'grid',
 
@@ -247,10 +244,7 @@ const productSlice = createSlice({
         minPrice: null,
         maxPrice: null,
         search: '',
-        sortBy: 'featured',
-        designNumber: '',
-        minDesignNumber: '',
-        maxDesignNumber: ''
+        sortBy: 'featured'
       };
       state.currentPage = 1;
     },

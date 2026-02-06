@@ -97,18 +97,18 @@ const CounterComponent = ({ apiStats }) => {
   }, [hasAnimated, stats]);
 
   return (
-    <div className="bg-gray-50 px-4">
+    <div className="bg-#ffffff px-4">
       <div className="max-w-7xl mx-auto">
         <div ref={sectionRef} role="region" aria-label="Achievements Section">
-          <div className="text-center">
+          <div className="text-center mb-8 sm:mb-12">
             <h2
-              className={`text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-700 mb-4 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+              className={`text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
             >
               Our <span className="text-[#ff4747]">Journey in Numbers</span>
             </h2>
             <p
-              className={`text-xl text-gray-600 max-w-2xl mx-auto transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+              className={`text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
             >
               Numbers that reflect our experience, scale, and trust built with customers across India
@@ -160,16 +160,16 @@ const CounterComponent = ({ apiStats }) => {
                       </div>
 
                       {/* Number + Label */}
-                      <div className="text-left flex-1 sm:flex-none p-3 sm:p-0">
+                      <div className="text-left flex-1 sm:flex-none p-2 sm:p-0">
                         <div
-                          className={`text-4xl md:text-5xl font-bold text-gray-900 mb-1 sm:mb-2 ${currentValue > 0 && currentValue < stat.value ? 'animate-pulse' : ''
+                          className={`text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-1 sm:mb-2 ${currentValue > 0 && currentValue < stat.value ? 'animate-pulse' : ''
                             }`}
                         >
                           {formatNumber(currentValue)}
                           <span className="text-[#ff4747]">{stat.suffix}</span>
                         </div>
 
-                        <p className="text-gray-600 font-medium text-base sm:text-lg leading-tight !mb-0">
+                        <p className="text-gray-600 font-medium text-sm sm:text-base lg:text-lg leading-tight !mb-0">
                           {stat.label}
                         </p>
                       </div>

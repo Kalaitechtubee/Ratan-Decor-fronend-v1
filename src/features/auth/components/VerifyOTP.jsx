@@ -26,7 +26,7 @@ function VerifyOTP() {
       // Pass email and otp to reset-password page (backend expects email + otp + newPassword)
       setTimeout(() => navigate('/reset-password', { state: { email, otp } }), 1500);
     } catch (err) {
-      setError(err.message || 'Invalid OTP. Please try again.');
+      setError(err.message || err || 'Invalid OTP. Please try again.');
     } finally {
       setLoading(false);
     }

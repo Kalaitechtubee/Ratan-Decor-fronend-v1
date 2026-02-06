@@ -11,16 +11,16 @@ const VideoContentSection = ({ onOpenVideoCallPopup }) => {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 bg-gray-50 flex flex-col lg:flex-row items-center gap-8 sm:gap-12 lg:gap-16">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 bg-#ffffff flex flex-col lg:flex-row items-center gap-8 sm:gap-12 lg:gap-16">
       {/* Left Side Content */}
       <div className="w-full lg:w-1/2 animate-fade-in-left">
         <div className="relative">
           {/* Decorative element - Mobile adjustment */}
           <div className="absolute -top-3 sm:-top-4 -left-3 sm:-left-4 w-12 sm:w-16 h-12 sm:h-16 bg-primary opacity-10 rounded-full blur-xl"></div>
 
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-700 mb-6 sm:mb-8 font-title leading-tight relative">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 sm:mb-8 leading-tight relative">
             Discover Our
-            <span className="block text-primary relative">
+            <span className="block text-primary relative mt-1">
               Experience Centre
 
               {/* Mobile-specific underline adjustment */}
@@ -30,10 +30,9 @@ const VideoContentSection = ({ onOpenVideoCallPopup }) => {
         </div>
 
         {/* Mobile text size and spacing adjustments */}
-        <p className="text-base sm:text-lg lg:text-xl text-gray-700 mb-6 sm:mb-10 font-poppins leading-relaxed max-w-md">
+        <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-8 sm:mb-10 leading-relaxed max-w-md">
           Step inside our store and explore a wide range of plywood, mica, veneers, doors, louvers, and decorative panels — all under one roof.
           Designed to help homeowners, architects, interior designers, and dealers choose the right materials with confidence.
-
         </p>
 
         {/* Updated button layout - Shop on Call and View Products */}

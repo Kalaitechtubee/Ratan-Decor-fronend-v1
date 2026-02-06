@@ -953,7 +953,7 @@ const EnhancedResponsiveSlider = () => {
           <div className="w-full max-w-7xl mx-auto">
             <div
               className="max-w-full sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl 
-                            2xl:max-w-3xl mx-auto sm:mx-auto md:mx-auto lg:mx-0"
+                            2xl:max-w-3xl mx-0"
             >
               {slides.map((slide, index) => (
                 <div
@@ -996,19 +996,19 @@ const EnhancedResponsiveSlider = () => {
                   </p>
 
                   <div
-                    className="flex flex-col sm:flex-row items-stretch sm:items-center 
+                    className="flex flex-col sm:flex-row items-start sm:items-center 
                                 gap-2 sm:gap-2.5 md:gap-3 lg:gap-4 xl:gap-5
                                 sm:space-y-0"
                   >
                     <button
                       onClick={() => handleCtaClick(slide.ctaUrl)}
-                      className="group relative px-3 py-1.5 sm:px-4 sm:py-2 md:px-5 md:py-2.5 lg:px-6 lg:py-3
-                                     xl:px-8 xl:py-3.5 2xl:px-10 2xl:py-4
+                      className="group relative px-8 py-1.5 sm:py-2 md:py-2.5 lg:py-3
+                                     xl:py-3.5 2xl:py-4
                                      bg-white text-black font-semibold rounded-full overflow-hidden
                                      transition-all duration-300 hover:scale-105 active:scale-95
                                      hover:shadow-2xl touch-manipulation
                                      text-xs sm:text-sm md:text-base lg:text-base xl:text-lg
-                                     w-full sm:w-auto text-center
+                                     w-auto sm:w-auto text-center
                                      min-h-[32px] sm:min-h-[36px] md:min-h-[40px] lg:min-h-[44px] xl:min-h-[48px] 2xl:min-h-[52px]
                                      flex items-center justify-center"
                     >
@@ -1109,15 +1109,15 @@ const EnhancedResponsiveSlider = () => {
           
           /* Ensure text doesn't overflow - Increased sizes for mobile */
           .home-hero-slider h1 {
-            font-size: 1.25rem !important;
-            line-height: 1.4 !important;
+            font-size: 1.75rem !important;
+            line-height: 1.2 !important;
             margin-bottom: 0.75rem !important;
           }
           
           .home-hero-slider p {
-            font-size: 0.875rem !important;
-            line-height: 1.4 !important;
-            margin-bottom: 1.25rem !important;
+            font-size: 1rem !important;
+            line-height: 1.5 !important;
+            margin-bottom: 1.5rem !important;
           }
           
           /* Ensure buttons are properly sized */

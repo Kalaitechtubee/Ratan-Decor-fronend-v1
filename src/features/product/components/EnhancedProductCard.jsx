@@ -7,6 +7,7 @@ import { useAuth } from '../../auth';
 import { slugify } from '../../../utils/utils';
 import toast from 'react-hot-toast';
 import VideoCallPopup from '../../../components/Home/VideoCallPopup';
+import { normalizeImageUrl } from '../../../utils/imageUtils';
 
 export default function EnhancedProductCard({ product, viewMode = 'grid' }) {
   const navigate = useNavigate();
@@ -49,13 +50,16 @@ export default function EnhancedProductCard({ product, viewMode = 'grid' }) {
 
   const currentPrice = getPrice();
   const imageUrls = product.imageUrls || [];
+  // Get the display image: prioritize imageUrls array, then imageUrl, then placeholder
+  const rawImage = (imageUrls.length > 0 ? imageUrls[0] : product.imageUrl);
+  const displayImage = normalizeImageUrl(rawImage) || '/placeholder-image.jpg';
 
   const handleAddToCart = async (e) => {
     e?.preventDefault?.();
     e?.stopPropagation?.();
 
     if (!isAuthenticated) {
-      navigate("/register");
+      navigate("/login");
       return;
     }
 
@@ -91,7 +95,7 @@ export default function EnhancedProductCard({ product, viewMode = 'grid' }) {
         >
           <div className={viewMode === 'list' ? 'h-64 min-h-[250px]' : 'h-64'}>
             <img
-              src={imageUrls[0] || '/placeholder-image.jpg'}
+              src={displayImage}
               alt={`Image of ${product.name}`}
               className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
               loading="lazy"

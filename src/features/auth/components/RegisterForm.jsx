@@ -3,13 +3,20 @@ import { motion } from 'framer-motion';
 import { User, Mail, Lock, EyeOff, Eye, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+const ROLE_OPTIONS = [
+  { value: 'Architect', label: 'Architect / Interior Designer' },
+  { value: 'Dealer', label: 'Dealer / Distributor' },
+  { value: 'customer', label: 'End Consumer' },
+  { value: 'customer', label: 'Others' }
+];
+
 function RegisterForm() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    role: 'customer',
+    role: 'Architect',
   });
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
@@ -276,9 +283,9 @@ function RegisterForm() {
                 }`}
                 required
               >
-                <option value="customer">End Consumer</option>
                 <option value="Architect">Architect / Interior Designer</option>
                 <option value="Dealer">Dealer / Distributor</option>
+                <option value="customer">End Consumer</option>
                 <option value="customer">Others</option>
               </select>
             </div>

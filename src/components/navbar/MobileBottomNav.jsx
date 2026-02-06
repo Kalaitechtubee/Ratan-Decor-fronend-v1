@@ -198,9 +198,9 @@ export default function MobileBottomNav({
                   </button>
                 ) : (
                   <Link
-                    to="/register"
+                    to="/login"
                     className={buttonClasses}
-                    aria-label="Go to register"
+                    aria-label="Go to login"
                   >
                     <div className="flex flex-col items-center justify-center h-full">
                       <Icon className="text-xl mb-1" />

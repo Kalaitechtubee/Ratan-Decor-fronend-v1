@@ -14,6 +14,7 @@ import MobileNavbar from './navbar/MobileNavbar';
 import MobileBottomNav from './navbar/MobileBottomNav';
 import ProductSidebar from './navbar/ProductSidebar';
 import MoreMenu from './navbar/MoreMenu';
+import LogoutConfirmModal from './navbar/LogoutConfirmModal';
 import FloatingActionButtons from './navbar/FloatingActionButtons';
 import CategoryDropdown from './CategoryDropdown';
 import CartSidePanel from '../features/cart/components/CartSidePanel';
@@ -41,6 +42,7 @@ export default function Navbar() {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isVideoCallPopupOpen, setIsVideoCallPopupOpen] = useState(false);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const hoverTimeoutRef = useRef(null);
 
@@ -172,6 +174,7 @@ export default function Navbar() {
       // Clear local state
       dispatch(logout());
       setIsProfileOpen(false);
+      setIsLogoutConfirmOpen(false); // Close the modal
       navigate('/login');
       toast.success('Logged out successfully');
     } catch (err) {
@@ -185,6 +188,7 @@ export default function Navbar() {
       // Even if API fails, clear local state and redirect
       dispatch(logout());
       setIsProfileOpen(false);
+      setIsLogoutConfirmOpen(false); // Close the modal
       navigate('/login');
       toast.error('Logged out (some cleanup may have failed)');
     }
@@ -250,7 +254,8 @@ export default function Navbar() {
     activeCategory,
     onOpenVideoCallPopup: () => setIsVideoCallPopupOpen(true),
     onProductsMouseEnter: handleProductsMouseEnter,
-    onProductsMouseLeave: handleProductsMouseLeave
+    onProductsMouseLeave: handleProductsMouseLeave,
+    setIsLogoutConfirmOpen
   };
 
   const stateProps = {
@@ -269,7 +274,9 @@ export default function Navbar() {
     isUserTypePopupOpen,
     setIsUserTypePopupOpen,
     isVideoCallPopupOpen,
-    setIsVideoCallPopupOpen
+    setIsVideoCallPopupOpen,
+    isLogoutConfirmOpen,
+    setIsLogoutConfirmOpen
   };
 
   const refProps = {
@@ -333,9 +340,10 @@ export default function Navbar() {
          
           /* Enhanced mobile responsiveness */
           @media (max-width: 767px) {
-            body {
-              padding-bottom: 80px;
+            footer {
+              padding-bottom: 80px !important;
             }
+          }
             .mobile-search-bar {
               animation: slideDown 0.3s ease-out;
             }
@@ -482,7 +490,15 @@ export default function Navbar() {
       />
 
       {/* Floating Action Buttons for Mobile */}
-      <FloatingActionButtons onOpenVideoCallPopup={() => setIsVideoCallPopupOpen(true)} />
+      <FloatingActionButtons 
+        currentUserType={currentUserType}
+        setIsUserTypePopupOpen={setIsUserTypePopupOpen}
+      />
+      <LogoutConfirmModal
+        isOpen={isLogoutConfirmOpen}
+        onClose={() => setIsLogoutConfirmOpen(false)}
+        onConfirm={handleLogout}
+      />
     </>
   );
 }

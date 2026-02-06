@@ -9,6 +9,7 @@ import {
   FaFileContract,
   FaHome,
   FaWhatsapp,
+  FaSignOutAlt,
 } from "react-icons/fa";
 import { MdClose } from "react-icons/md";
 import VideoCallPopup from "../Home/VideoCallPopup";
@@ -17,6 +18,8 @@ export default function MoreMenu({
   isMoreMenuOpen,
   setIsMoreMenuOpen,
   moreMenuRef,
+  setIsLogoutConfirmOpen,
+  isAuthenticated
 }) {
   const [showVideoCallPopup, setShowVideoCallPopup] = useState(false);
 
@@ -24,19 +27,27 @@ export default function MoreMenu({
   const moreMenuItems = [
     { path: "/", icon: FaHome, label: "Home" },
     { path: "/about", icon: FaBuilding, label: "Company" },
-    { path: "/contact", icon: FaPhone, label: "Contact Us" },
+    { 
+      path: "/contact", 
+      icon: FaPhone, 
+      label: "Contact Us", 
+      rotate: "90", 
+      color: "#ff4747" 
+    },
     { path: "/enquiry-form", icon: FaFileContract, label: "Product Enquiry" },
     {
       icon: FaVideo,
       label: "Shop on call",
       isAction: true,
       action: () => setShowVideoCallPopup(true),
+      color: "#ff4747"
     },
     {
       path: "https://wa.me/918360636885",
       icon: FaWhatsapp,
       label: "WhatsApp Us",
-      isExternal: true
+      isExternal: true,
+      color: "#25D366" // WhatsApp Green
     },
   ];
 
@@ -86,7 +97,13 @@ export default function MoreMenu({
 
                   const content = (
                     <div className="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-gray-50 transition">
-                      <Icon className="text-[#ff4747] text-lg" />
+                      <Icon 
+                        className="text-lg" 
+                        style={{ 
+                          transform: item.rotate ? `rotate(${item.rotate}deg)` : 'none',
+                          color: item.color || '#ff4747'
+                        }} 
+                      />
                       <span className="text-sm font-medium text-gray-800">
                         {item.label}
                       </span>
@@ -125,6 +142,24 @@ export default function MoreMenu({
                     </Link>
                   );
                 })}
+
+                {/* Logout Option for Authenticated Users */}
+                {isAuthenticated && (
+                  <button
+                    onClick={() => {
+                      setIsLogoutConfirmOpen(true);
+                      setIsMoreMenuOpen(false);
+                    }}
+                    className="w-full text-left"
+                  >
+                    <div className="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-red-50 transition border border-red-50 mt-2">
+                      <FaSignOutAlt className="text-red-500 text-lg" />
+                      <span className="text-sm font-medium text-red-600">
+                        Logout
+                      </span>
+                    </div>
+                  </button>
+                )}
               </div>
 
               {/* Footer */}

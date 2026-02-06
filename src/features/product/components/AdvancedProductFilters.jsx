@@ -38,7 +38,9 @@ export default function AdvancedProductFilters({
   onClearFilters,
   appliedFiltersCount = 0,
   productCount = 0,
-  isLoading = false
+  isLoading = false,
+  isMobile = false,
+  onClose = null
 }) {
   const [expandedCategories, setExpandedCategories] = useState(new Set());
   // Changed to array for multi-select
@@ -46,15 +48,11 @@ export default function AdvancedProductFilters({
     Array.isArray(filters.categoryIds) ? filters.categoryIds.map(String) : []
   );
   const [collapsedSections, setCollapsedSections] = useState(new Set()); // Categories section open by default
-  const [minDesignNumber, setMinDesignNumber] = useState(filters.minDesignNumber || '');
-  const [maxDesignNumber, setMaxDesignNumber] = useState(filters.maxDesignNumber || '');
-  const [designSearch, setDesignSearch] = useState(filters.designNumber || ''); // Added exact/partial search
   const [minPrice, setMinPrice] = useState(parseFloat(filters.minPrice) || 0);
   const [maxPrice, setMaxPrice] = useState(parseFloat(filters.maxPrice) || 50000);
   const [isDragging, setIsDragging] = useState(null);
   // Refs for price slider
   const sliderRef = useRef(null);
-  const designNumberTimeoutRef = useRef(null);
   const priceTimeoutRef = useRef(null);
   // Refs to track latest price values for event listeners
   const minPriceRef = useRef(minPrice);
@@ -76,21 +74,6 @@ export default function AdvancedProductFilters({
     // Helper to safely convert to string
     const toStr = (val) => (val === null || val === undefined) ? '' : String(val);
 
-    const filterMinDesign = toStr(filters.minDesignNumber);
-    if (filterMinDesign !== minDesignNumber) {
-      setMinDesignNumber(filterMinDesign);
-    }
-
-    const filterMaxDesign = toStr(filters.maxDesignNumber);
-    if (filterMaxDesign !== maxDesignNumber) {
-      setMaxDesignNumber(filterMaxDesign);
-    }
-
-    const filterDesign = toStr(filters.designNumber);
-    if (filterDesign !== designSearch) {
-      setDesignSearch(filterDesign);
-    }
-
     const filterMinPrice = parseFloat(filters.minPrice);
     if (!isNaN(filterMinPrice) && filterMinPrice !== minPrice && !isDragging) {
       setMinPrice(filterMinPrice);
@@ -110,34 +93,6 @@ export default function AdvancedProductFilters({
     minPriceRef.current = minPrice;
     maxPriceRef.current = maxPrice;
   }, [minPrice, maxPrice]);
-  // Debounced design number changes (now includes exact search)
-  useEffect(() => {
-    if (designNumberTimeoutRef.current) {
-      clearTimeout(designNumberTimeoutRef.current);
-    }
-    designNumberTimeoutRef.current = setTimeout(() => {
-      const currentSearch = designSearch.trim();
-      const currentMin = minDesignNumber.trim();
-      const currentMax = maxDesignNumber.trim();
-      const filterSearch = (filters.designNumber || '').trim();
-      const filterMin = (filters.minDesignNumber || '').trim();
-      const filterMax = (filters.maxDesignNumber || '').trim();
-      if (currentSearch !== filterSearch) {
-        onFilterChange('designNumber', currentSearch || '');
-      }
-      if (currentMin !== filterMin || currentMax !== filterMax) {
-        if (currentMin) onFilterChange('minDesignNumber', currentMin);
-        if (currentMax) onFilterChange('maxDesignNumber', currentMax);
-        if (!currentMin && filterMin) onFilterChange('minDesignNumber', '');
-        if (!currentMax && filterMax) onFilterChange('maxDesignNumber', '');
-      }
-    }, 500);
-    return () => {
-      if (designNumberTimeoutRef.current) {
-        clearTimeout(designNumberTimeoutRef.current);
-      }
-    };
-  }, [designSearch, minDesignNumber, maxDesignNumber]);
   // Auto-expand categories with selected subcategories
   useEffect(() => {
     if (selectedCategories.length > 0 && categories.length > 0) {
@@ -380,32 +335,6 @@ export default function AdvancedProductFilters({
       maxPrice: ''
     });
   };
-  // Handle design search input
-  const handleDesignSearchInput = (e) => {
-    const value = e.target.value;
-    // Only allow numbers
-    if (value !== '' && !/^\d+$/.test(value)) {
-      return;
-    }
-    setDesignSearch(value);
-    // Clear range if exact search is used (optional logic; adjust as needed)
-    if (value && (minDesignNumber || maxDesignNumber)) {
-      setMinDesignNumber('');
-      setMaxDesignNumber('');
-      onFilterChange('minDesignNumber', '');
-      onFilterChange('maxDesignNumber', '');
-    }
-  };
-  // Clear design filters
-  const clearDesignFilters = () => {
-    setDesignSearch('');
-    setMinDesignNumber('');
-    setMaxDesignNumber('');
-    onFilterChange('designNumber', '');
-    onFilterChange('minDesignNumber', '');
-    onFilterChange('maxDesignNumber', '');
-  };
-
   // Clear category filter
   const clearCategoryFilter = () => {
     setSelectedCategories([]);
@@ -526,26 +455,38 @@ export default function AdvancedProductFilters({
     </div>
   );
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-4 w-full">
+    <div className={`${isMobile ? 'bg-transparent pt-2' : 'bg-white rounded-xl border border-gray-200 p-6 sticky top-4'} w-full`}>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-2">
           <Filter className="w-5 h-5 text-accent" />
           <h2 className="text-xl font-bold text-gray-900">Filters</h2>
         </div>
-        {appliedFiltersCount > 0 && (
-          <button
-            onClick={onClearFilters}
-            className="text-sm text-accent hover:text-accent-dark transition-colors flex items-center space-x-1"
-          >
-            <X className="w-4 h-4" />
-            <span>Clear All</span>
-          </button>
-        )}
+        <div className="flex items-center space-x-3">
+          {appliedFiltersCount > 0 && (
+            <button
+              onClick={onClearFilters}
+              className="text-sm text-accent hover:text-accent-dark transition-colors flex items-center space-x-1"
+            >
+              <X className="w-4 h-4" />
+              <span>Clear All</span>
+            </button>
+          )}
+          {isMobile && onClose && (
+            <button
+              onClick={onClose}
+              className="flex items-center gap-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-all text-xs font-semibold"
+              aria-label="Close filters"
+            >
+              <X className="w-3.5 h-3.5" />
+              <span>Close</span>
+            </button>
+          )}
+        </div>
       </div>
       {/* Category Section */}
       {renderSection(
         'Categories',
-        Layers,
+        null,
         <div className="max-h-80 overflow-y-auto pr-2 custom-scrollbar">
           {renderAllCategoriesOption()}
           {Array.isArray(categories) && categories.length > 0 ? (
@@ -672,117 +613,6 @@ export default function AdvancedProductFilters({
           )}
         </div>,
         'priceRange'
-      )}
-      {/* Design Number Filter Section */}
-      {renderSection(
-        'Design Number',
-        null,
-        <div className="space-y-4">
-          {/* Exact/Partial Search Input */}
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              Search Design Number
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={designSearch}
-                onChange={handleDesignSearchInput}
-                placeholder="e.g., 12345 or partial"
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:border-transparent"
-              />
-            </div>
-          </div>
-          {/* Range Filters */}
-          <div className="grid grid-cols-2 gap-3">
-            {/* Minimum Design Number Dropdown */}
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Min Design Number
-              </label>
-              <div className="relative">
-                <select
-                  value={minDesignNumber}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setMinDesignNumber(value);
-                    if (value && maxDesignNumber && parseInt(value) >= parseInt(maxDesignNumber)) {
-                      setMaxDesignNumber('');
-                    }
-                  }}
-                  className="w-full pl-3 pr-8 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:border-transparent appearance-none"
-                >
-                  <option value="">No Minimum</option>
-                  {[
-                    { label: '1', value: '1' },
-                    { label: '1000', value: '1000' },
-                    { label: '5000', value: '5000' },
-                    { label: '10000', value: '10000' },
-                    { label: '20000', value: '20000' },
-                    { label: '50000', value: '50000' }
-                  ].map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              </div>
-            </div>
-            {/* Maximum Design Number Dropdown */}
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Max Design Number
-              </label>
-              <div className="relative">
-                <select
-                  value={maxDesignNumber}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setMaxDesignNumber(value);
-                    if (value && minDesignNumber && parseInt(value) <= parseInt(minDesignNumber)) {
-                      setMinDesignNumber('');
-                    }
-                  }}
-                  className="w-full pl-3 pr-8 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:border-transparent appearance-none"
-                >
-                  <option value="">No Maximum</option>
-                  {[
-                    { label: '1000', value: '1000' },
-                    { label: '5000', value: '5000' },
-                    { label: '10000', value: '10000' },
-                    { label: '20000', value: '20000' },
-                    { label: '50000', value: '50000' },
-                    { label: '999999', value: '999999' }
-                  ].map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              </div>
-            </div>
-          </div>
-          {(designSearch || minDesignNumber || maxDesignNumber) && (
-            <button
-              onClick={clearDesignFilters}
-              className="w-full py-2 text-sm border border-gray-200 text-gray-600 rounded hover:bg-gray-50 transition-colors"
-            >
-              Clear Design Filter
-            </button>
-          )}
-          {(designSearch || minDesignNumber || maxDesignNumber) && (
-            <div className="text-xs text-accent bg-accent/10 p-2 rounded">
-              {designSearch ? `Searching: ${designSearch}` : ''}
-              {designSearch && (minDesignNumber || maxDesignNumber) ? ' | ' : ''}
-              {minDesignNumber === maxDesignNumber && minDesignNumber
-                ? `Exact: ${minDesignNumber}`
-                : `Range: ${minDesignNumber || 'Any'} - ${maxDesignNumber || 'Any'}`}
-            </div>
-          )}
-        </div>,
-        'designNumberFilter'
       )}
       {/* Product Count Display */}
       <div className="mt-4 text-center text-sm text-gray-500">

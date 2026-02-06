@@ -367,7 +367,15 @@ function ProductDetail() {
   }
 
   const imageUrls = product.imageUrls || [];
-  const uniqueImageUrls = [...new Set(imageUrls)].map(url => normalizeImageUrl(url)).filter(Boolean);
+  // Ensure we have at least one image by adding product.imageUrl if it's not already in the array
+  const allImages = [...imageUrls];
+  if (product.imageUrl && !allImages.includes(product.imageUrl)) {
+    allImages.unshift(product.imageUrl);
+  }
+  
+  const uniqueImageUrls = [...new Set(allImages)]
+    .map(url => normalizeImageUrl(url))
+    .filter(Boolean);
   const discountPercentage = product.mrpPrice
     ? Math.round(((product.mrpPrice - getPrice()) / product.mrpPrice) * 100)
     : 0;
