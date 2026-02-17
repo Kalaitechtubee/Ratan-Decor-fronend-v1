@@ -17,10 +17,16 @@ import {
   resetProductsState
 } from '../productSlice';
 import { useAuth } from '../../auth/hooks/useAuth';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import { findCategoryBySlug, findCategoryById, slugify } from '../../../utils/slugify';
+
 
 function ProductPage() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { categorySlug, subSlug } = useParams();
+  const location = useLocation();
   const { userRole } = useAuth();
   const { userType } = useSelector((state) => state.userType);
 
@@ -49,6 +55,7 @@ function ProductPage() {
   const fetchTimeoutRef = useRef(null);
   const isFirstMountRef = useRef(true);
   const isFetchingRef = useRef(false);
+  const isNavigatingRef = useRef(false);
 
   const getCurrentUserType = useCallback(() => userType || localStorage.getItem('userType') || 'General', [userType]);
 
@@ -60,10 +67,13 @@ function ProductPage() {
     }
   }, [dispatch, categories.length]);
 
-  // Sync URL params to filters and handle navigation updates
+  // Unified URL/Path sync to filters
   useEffect(() => {
+    // 1. Get Params from URL sources
     const urlParams = Object.fromEntries(searchParams);
-    if (Object.keys(urlParams).length === 0 && isFirstMountRef.current) {
+    
+    // Skip if it's the first mount and URL is empty (usually home page to products)
+    if (Object.keys(urlParams).length === 0 && !categorySlug && !subSlug && isFirstMountRef.current) {
       isFirstMountRef.current = false;
       return;
     }
@@ -71,35 +81,90 @@ function ProductPage() {
     const newFilters = { ...filters };
     let hasChanges = false;
 
-    // Handle Search
-    if (urlParams.search !== undefined && urlParams.search !== filters.search) {
+    // Helper for robust comparison
+    const isEqual = (a, b) => {
+      const normalize = (v) => (v === undefined || v === null || v === 0) ? '' : String(v).trim();
+      return normalize(a) === normalize(b);
+    };
+
+    // --- 1. Handle Search ---
+    if (urlParams.search !== undefined && !isEqual(urlParams.search, filters.search)) {
       newFilters.search = urlParams.search;
       hasChanges = true;
     }
 
-    // Handle categoryIds - can be comma-separated in URL
-    const urlCategoryIds = urlParams.categoryIds ? urlParams.categoryIds.split(',').filter(Boolean) :
-      urlParams.categoryId ? [urlParams.categoryId] : [];
+    // --- 2. Handle Category IDs (Complex Logic) ---
+    let urlCategoryIds = [];
+    let skipCategorySync = false;
 
-    const currentCategoryIds = filters.categoryIds || [];
-    if (JSON.stringify(urlCategoryIds.sort()) !== JSON.stringify([...currentCategoryIds].sort())) {
-      newFilters.categoryIds = urlCategoryIds;
-      hasChanges = true;
+    // A. Priority 1: location.state (Instant transition data)
+    const stateCategoryId = location.state?.categoryId;
+    const stateSubcategoryId = location.state?.subcategoryId;
+    
+    if (stateSubcategoryId) {
+      urlCategoryIds = [stateSubcategoryId.toString()];
+    } else if (stateCategoryId) {
+      urlCategoryIds = [stateCategoryId.toString()];
+    } 
+    // B. Priority 2: Path Slugs (Direct URL access)
+    else if ((categorySlug || subSlug)) {
+      if (categories.length > 0) {
+        let targetCategory = null;
+        if (subSlug) {
+          targetCategory = findCategoryBySlug(categories, subSlug);
+        } else {
+          targetCategory = findCategoryBySlug(categories, categorySlug);
+        }
+        
+        if (targetCategory) {
+          urlCategoryIds = [targetCategory.id.toString()];
+        }
+      } else {
+        skipCategorySync = true; // Wait for categories to load before syncing path slugs
+      }
+    }
+    // C. Priority 3: Search Params (Multi-select or fallback)
+    else if (urlParams.categories) {
+      if (categories.length > 0) {
+        const slugs = urlParams.categories.split(',').filter(Boolean);
+        urlCategoryIds = slugs
+          .map(slug => findCategoryBySlug(categories, slug))
+          .filter(Boolean)
+          .map(cat => cat.id.toString());
+      } else {
+        skipCategorySync = true;
+      }
+    } else if (urlParams.categoryIds) {
+      urlCategoryIds = urlParams.categoryIds.split(',').filter(Boolean);
+    } else if (urlParams.categoryId) {
+      urlCategoryIds = [urlParams.categoryId];
     }
 
-    // Handle Prices
-    if (urlParams.minPrice !== undefined && urlParams.minPrice !== filters.minPrice) {
+    // Perform the update if needed
+    if (!skipCategorySync) {
+      const currentCategoryIds = (filters.categoryIds || []).map(String);
+      const sortedUrlIds = [...urlCategoryIds].sort().join(',');
+      const sortedCurrentIds = [...currentCategoryIds].sort().join(',');
+      
+      if (sortedUrlIds !== sortedCurrentIds) {
+        newFilters.categoryIds = urlCategoryIds;
+        hasChanges = true;
+      }
+    }
+
+    // --- 3. Handle Prices ---
+    if (urlParams.minPrice !== undefined && !isEqual(urlParams.minPrice, filters.minPrice)) {
       newFilters.minPrice = urlParams.minPrice;
       hasChanges = true;
     }
-    if (urlParams.maxPrice !== undefined && urlParams.maxPrice !== filters.maxPrice) {
+    if (urlParams.maxPrice !== undefined && !isEqual(urlParams.maxPrice, filters.maxPrice)) {
       newFilters.maxPrice = urlParams.maxPrice;
       hasChanges = true;
     }
 
-    // Handle Design Numbers moved to search
-
+    // --- Apply Changes ---
     if (hasChanges) {
+      console.log('Syncing URL/Path to filters. Changes:', newFilters);
       dispatch(setFilters(newFilters));
       if (urlParams.page) {
         dispatch(setPage(parseInt(urlParams.page)));
@@ -109,7 +174,7 @@ function ProductPage() {
     }
 
     isFirstMountRef.current = false;
-  }, [dispatch, searchParams]); // Remove filters from deps to avoid loops, searchParams is the trigger
+  }, [dispatch, searchParams, categories, categorySlug, subSlug, location.state]); 
 
   // Memoized fetch params to avoid unnecessary re-renders
   const fetchParams = useMemo(() => {
@@ -120,7 +185,7 @@ function ProductPage() {
       page: currentPage,
       userType: activeUserType,
       userRole: storedUserRole,
-      limit: 12, // Standardized limit
+      limit: 12,
       categoryIds: filters.categoryIds || []
     };
   }, [filters, currentPage, userRole, getCurrentUserType]);
@@ -208,39 +273,71 @@ function ProductPage() {
   // Update URL search params (passive, no side effects) - memoized filters string
   const filtersString = useMemo(() => JSON.stringify(filters), [filters]);
   useEffect(() => {
+    // Skip if we're currently navigating (prevents race condition)
+    if (isNavigatingRef.current) {
+      isNavigatingRef.current = false; // Reset for next time
+      return;
+    }
+    
+    // Check if we're on a category route by pathname
+    const isOnCategoryRoute = location.pathname.includes('/products/category/');
+    
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
-      // Handle categoryIds array specially
-      if (key === 'categoryIds' && Array.isArray(value) && value.length > 0) {
-        params.set(key, value.join(','));
-      } else if (value && value !== '' && value !== 'featured' && !Array.isArray(value)) {
+      // Logic for Category slugs
+      if (key === 'categoryIds') {
+        if (isOnCategoryRoute) return; // Skip if ID is already in Path
+        
+        if (Array.isArray(value) && value.length > 0) {
+          if (categories.length > 0) {
+            const slugs = value
+              .map(id => {
+                const cat = findCategoryById(categories, id);
+                return cat ? slugify(cat.name) : null;
+              })
+              .filter(Boolean);
+            
+            if (slugs.length > 0) {
+              params.set('categories', slugs.join(','));
+            }
+          } else {
+            params.set('categoryIds', value.join(','));
+          }
+        }
+        return;
+      }
+      
+      // Standard filters
+      if (value && value !== '' && value !== 'featured' && !Array.isArray(value)) {
         params.set(key, value.toString());
       }
     });
+
     if (currentPage > 1) params.set('page', currentPage.toString());
     if (viewMode !== 'grid') params.set('viewMode', viewMode);
 
     const newSearch = params.toString();
-    const currentSearch = searchParams.toString();
+    const currentSearch = window.location.search.replace(/^\?/, '');
 
     if (newSearch !== currentSearch) {
       setSearchParams(params, { replace: true, preventScrollReset: true });
     }
-  }, [filtersString, currentPage, viewMode, setSearchParams, searchParams]); // Use filtersString to avoid object ref issues
+  }, [filtersString, currentPage, viewMode, setSearchParams, location.pathname, categories]); // Removed searchParams, added categories
 
   // Calculate applied filters count
   const appliedFiltersCount = useMemo(() => {
     let count = 0;
     if (filters.categoryIds && filters.categoryIds.length > 0) count += filters.categoryIds.length;
     if (filters.search && filters.search.trim()) count++;
-    if (filters.minPrice && parseFloat(filters.minPrice) > 0) count++;
-    if (filters.maxPrice && parseFloat(filters.maxPrice) < 10000) count++;
+    if (filters.minPrice && (parseFloat(filters.minPrice) > 0)) count++;
+    if (filters.maxPrice && (parseFloat(filters.maxPrice) < 50000)) count++;
     return count;
   }, [filters]);
 
   // Optimized handlers - no duplicate fetches
   const handleFilterChange = useCallback((keyOrUpdates, value) => {
     let newFilters;
+    
     if (typeof keyOrUpdates === 'object' && keyOrUpdates !== null) {
       newFilters = { ...filters, ...keyOrUpdates };
     } else if (keyOrUpdates === 'categoryId') {
@@ -249,8 +346,14 @@ function ProductPage() {
       const categoryId = value.toString();
 
       if (categoryId === '') {
-        // Clear all categories
+        // Clear all categories - navigate to /products
         newFilters = { ...filters, categoryIds: [] };
+        dispatch(setFilters(newFilters));
+        dispatch(setPage(1));
+        lastFetchParamsRef.current = null;
+        isNavigatingRef.current = true;
+        navigate('/products', { replace: true });
+        return;
       } else {
         // Toggle the category
         const isSelected = currentIds.includes(categoryId);
@@ -266,16 +369,100 @@ function ProductPage() {
     } else {
       newFilters = { ...filters, [keyOrUpdates]: value };
     }
+    
+    // Dispatch the filter updates immediately 
+    // This allows the fetch effect to pick up the changes
     dispatch(setFilters(newFilters));
     dispatch(setPage(1));
-    lastFetchParamsRef.current = null; // Force re-fetch with new params
-  }, [dispatch, filters]);
+    lastFetchParamsRef.current = null;
+
+    // Helper to build the correct destination URL while preserving ALL current filters
+    const getTargetUrlInfo = (targetCategoryIds) => {
+      const isOnCategoryRoute = location.pathname.includes('/products/category/');
+      
+      // Build the standard query params (Price, Search, etc.)
+      const params = new URLSearchParams();
+      Object.entries(newFilters).forEach(([key, value]) => {
+        if (key === 'categoryIds') return; // Handled separately
+        if (value && value !== '' && value !== 'featured' && !Array.isArray(value)) {
+          params.set(key, value.toString());
+        }
+      });
+      if (currentPage > 1) params.set('page', '1'); // Reset to page 1 on filter change
+      if (viewMode !== 'grid') params.set('viewMode', viewMode);
+
+      // logic for route path and category query
+      if (targetCategoryIds.length === 0) {
+        // No categories - Always go to /products
+        return { path: '/products', query: params.toString(), needsNav: isOnCategoryRoute };
+      }
+
+      if (categories.length > 0) {
+        const findCategoryAndParent = (cats, targetId, parent = null) => {
+          for (const cat of cats) {
+            if (cat.id.toString() === targetId.toString()) return { category: cat, parent };
+            if (cat.subCategories?.length > 0) {
+              const found = findCategoryAndParent(cat.subCategories, targetId, cat);
+              if (found) return found;
+            }
+          }
+          return null;
+        };
+
+        const selectedWithParents = targetCategoryIds
+          .map(id => findCategoryAndParent(categories, id))
+          .filter(Boolean);
+
+        if (selectedWithParents.length === 1) {
+          // Exactly one category - use PATH-based slug route
+          const { category, parent } = selectedWithParents[0];
+          const slug = slugify(category.name);
+          const newPath = parent 
+            ? `/products/category/${slugify(parent.name)}/${slug}`
+            : `/products/category/${slug}`;
+          
+          return { 
+            path: newPath, 
+            query: params.toString(), 
+            needsNav: location.pathname !== newPath,
+            state: parent ? { categoryId: parent.id, subcategoryId: category.id } : { categoryId: category.id }
+          };
+        } else {
+          // Multiple categories - use BASE products route with slugs in query
+          const slugs = targetCategoryIds
+            .map(id => findCategoryById(categories, id))
+            .filter(Boolean)
+            .map(cat => slugify(cat.name));
+          
+          if (slugs.length > 0) {
+            params.set('categories', slugs.join(','));
+          }
+          
+          return { path: '/products', query: params.toString(), needsNav: isOnCategoryRoute };
+        }
+      }
+
+      return { path: location.pathname, query: params.toString(), needsNav: false };
+    };
+
+    const target = getTargetUrlInfo(newFilters.categoryIds || []);
+    
+    if (target.needsNav) {
+      isNavigatingRef.current = true;
+      const finalUrl = target.query ? `${target.path}?${target.query}` : target.path;
+      console.log('Navigating to target:', finalUrl);
+      navigate(finalUrl, { replace: true, state: target.state });
+    }
+    // If target.needsNav is false, the passive useEffect will handle query string updates for /products
+  }, [dispatch, filters, navigate, categories, location.pathname, currentPage, viewMode]);
 
   const handleClearFilters = useCallback(() => {
+    isNavigatingRef.current = true;
+    navigate('/products', { replace: true });
     dispatch(clearFilters());
     dispatch(setPage(1));
     lastFetchParamsRef.current = null;
-  }, [dispatch]);
+  }, [dispatch, navigate]);
 
   const handlePageChange = useCallback((page) => {
     dispatch(setPage(page));
@@ -293,6 +480,8 @@ function ProductPage() {
     isFetchingRef.current = false;
     dispatch(resetProductsState());
   }, [dispatch]);
+
+
 
   // Loading state for initial load
   if (isInitialLoad && status === 'loading') {
@@ -429,7 +618,7 @@ function ProductPage() {
             </div>
 
             <motion.div
-              key={`${currentPage}-${status}-${JSON.stringify(filters)}`} // Key on filters to remount on changes
+              key={`grid-${currentPage}-${status}`} // Stable key to reduce unnecessary remounts
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}

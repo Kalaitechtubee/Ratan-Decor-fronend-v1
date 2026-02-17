@@ -6,6 +6,12 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { CatalogService } from "../services/apiServices";
 import { useState, useEffect } from "react";
+import { 
+  ClipboardCheck, 
+  Lightbulb, 
+  MessagesSquare, 
+  CheckCircle2 
+} from "lucide-react";
 
 // Animation variants
 const containerVariants = {
@@ -57,7 +63,7 @@ const workProcess = [
     step: "01",
     title: "Understand Your Requirement",
     text: "We identify your project type—Residential, Commercial, or Modular Kitchen—and understand your material needs.",
-    icon: "📋",
+    icon: <ClipboardCheck className="w-8 h-8 text-primary" />,
     features: [
       "Project type selection",
       "Material requirement analysis",
@@ -68,7 +74,7 @@ const workProcess = [
     step: "02",
     title: "Recommend the Right Materials",
     text: "Our team suggests suitable plywood, mica, veneers, doors, or panels based on durability, usage, and budget.",
-    icon: "🎨",
+    icon: <Lightbulb className="w-8 h-8 text-primary" />,
     features: [
       "Quality assessment",
       "Durability analysis",
@@ -79,7 +85,7 @@ const workProcess = [
     step: "03",
     title: "Easy Enquiry & Consultation",
     text: "Connect with us via call, WhatsApp, email, or book a video call to discuss products in detail.",
-    icon: "💬",
+    icon: <MessagesSquare className="w-8 h-8 text-primary" />,
     features: [
       "Direct call support",
       "WhatsApp assistance",
@@ -90,7 +96,7 @@ const workProcess = [
     step: "04",
     title: "Smooth Order & Support",
     text: "We assist throughout enquiry tracking, pricing clarity, and post-enquiry support for a seamless experience.",
-    icon: "✅",
+    icon: <CheckCircle2 className="w-8 h-8 text-primary" />,
     features: ["Enquiry tracking", "Pricing clarity", "Post-enquiry support"],
   },
 ];
@@ -114,7 +120,7 @@ const About = () => {
 
       {/* Hero Section */}
       <motion.section
-        className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 pt-16"
+        className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 pt-24 sm:pt-28 lg:pt-16"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
@@ -124,7 +130,7 @@ const About = () => {
           {/* Content */}
           <motion.div
             className="space-y-6 sm:space-y-8"
-            variants={slideInFromRight}
+            variants={slideInFromLeft}
           >
             <motion.div
               className="inline-flex items-center px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium"
@@ -135,52 +141,53 @@ const About = () => {
               About Ratan Decor
             </motion.div>
 
+            {/* Refined Heading */}
             <motion.h1
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight"
+              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight"
               variants={itemVariants}
             >
-              Premium Materials
-              <span className="text-primary block">For Modern Interiors</span>
+              Your Reliable Partner in <br />
+              <span className="text-primary italic font-serif">Decorative Solutions</span>
             </motion.h1>
 
-            <motion.p
-              className="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-lg"
+            <motion.div
+              className="text-sm sm:text-base text-gray-600 leading-relaxed max-w-2xl space-y-4"
               variants={itemVariants}
             >
-              Ratan Decor is a trusted supplier of premium plywood, mica,
-              veneers, doors, louvers, and decorative panels. We serve
-              residential, commercial, and modular kitchen projects with
-              reliable materials, expert guidance, and consistent quality.
-            </motion.p>
+              <p>
+                Established in 2007, <span className="text-gray-900 font-semibold italic">Ratan Decor</span> is a trusted Wholesaler, Distributor, and Service Provider of premium interior and decorative materials. We are known for our consistent quality and reliable solutions tailored to diverse interior needs.
+              </p>
+              <p>
+                Driven by a dedicated and experienced team, we focus on meeting customer requirements with precision and care. Our commitment to excellence has earned us strong industry recognition and long-term trust from our clients.
+              </p>
+            </motion.div>
 
             <motion.div
-              className="flex flex-col sm:flex-row gap-3 sm:gap-4"
+              className="flex flex-col sm:flex-row gap-4"
               variants={itemVariants}
             >
               <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="inline-block w-full sm:w-auto"
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full sm:w-auto"
               >
                 <Link
-                  to="/products"
-                  className="block bg-primary text-white px-6 sm:px-8 py-3 sm:py-4
-               rounded-xl font-semibold hover:bg-primary/90
-               transition-all text-center text-sm sm:text-base"
-                  aria-label="Explore Ratan Decor Products"
+                  to="/contact"
+                  className="block bg-primary text-white px-10 py-4
+               rounded-2xl font-bold hover:bg-primary/95
+               transition-all text-center shadow-xl shadow-primary/20"
+                  aria-label="Contact Ratan Decor"
                 >
-                  Explore Our Work
+                  Reach Us
                 </Link>
               </motion.div>
 
               <motion.button
                 type="button"
-                className={`border-2 border-gray-300 text-gray-700 px-6 sm:px-8
-             py-3 sm:py-4 rounded-xl font-semibold hover:border-primary
+                className={`border-2 border-gray-600 text-black/100 px-10
+             py-4 rounded-2xl font-bold hover:border-primary
              hover:text-primary transition-all w-full sm:w-auto
-             text-sm sm:text-base ${!catalogUrl ? 'opacity-50 cursor-not-allowed' : ''}`}
-                whileHover={catalogUrl ? { scale: 1.05 } : {}}
-                whileTap={catalogUrl ? { scale: 0.95 } : {}}
+             ${!catalogUrl ? 'opacity-50 cursor-not-allowed' : ''}`}
                 onClick={() => {
                   if (catalogUrl) {
                     window.open(catalogUrl, "_blank");
@@ -189,46 +196,43 @@ const About = () => {
                   }
                 }}
               >
-                Download Catalog
+                View Catalog
               </motion.button>
             </motion.div>
           </motion.div>
 
           {/* Visual */}
           <motion.div
-            className="relative mt-8 sm:mt-0"
-            variants={slideInFromLeft}
+            className="relative mt-3 sm:mt-16 lg:mt-0"
+            variants={slideInFromRight}
           >
-            <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl">
+            <div className="relative rounded-[1.5rem] overflow-hidden shadow-2xl group">
               <motion.img
-                src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80"
-                alt="Modern Interior Design"
-                className="w-full h-64 sm:h-[500px] object-cover"
-                whileHover={{ scale: 1.03 }}
-                transition={{ duration: 0.3 }}
+                src="/Vinay.png"
+                alt="Mr. Vinay Sethia"
+                className="w-full h-64 sm:h-[580px] object-cover"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.5 }}
                 loading="lazy"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
             </div>
 
-            {/* Floating Card */}
+            {/* Elegant Founder Badge */}
             <motion.div
-              className="absolute -bottom-4 sm:-bottom-6 -left-4 sm:-left-6 bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-xl border"
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.6, duration: 0.5 }}
-              whileHover={{ scale: 1.05 }}
+              className="absolute -bottom-4 right-0 sm:-right-6 bg-white p-5 sm:p-6 rounded-3xl shadow-[0_20px_40px_rgba(0,0,0,0.15)] border-b-4 border-primary min-w-[220px]"
+              initial={{ x: 30, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.8 }}
             >
-              <div className="flex items-center space-x-2 sm:space-x-3">
-                <div className="w-8 sm:w-12 h-8 sm:h-12 bg-primary/10 rounded-lg sm:rounded-xl flex items-center justify-center">
-                  <span className="text-primary text-xl sm:text-2xl">⭐</span>
+              <div className="space-y-1">
+                <div className="font-extrabold text-gray-900 text-lg sm:text-xl tracking-tight">
+                  Mr. Vinay Sethia
                 </div>
-                <div>
-                  <div className="font-semibold text-gray-900 text-sm sm:text-base">
-                    Premium Quality
-                  </div>
-                  <div className="text-xs sm:text-sm text-gray-600">
-                    Certified Materials
+                <div className="flex items-center gap-2">
+                  <div className="h-[2px] w-3 bg-primary"></div>
+                  <div className="text-xs sm:text-sm text-gray-500 font-bold uppercase tracking-widest">
+                    Founder
                   </div>
                 </div>
               </div>
@@ -239,7 +243,7 @@ const About = () => {
 
       {/* Why Choose Ratan Decor */}
       <motion.section
-        className="container mx-auto px-4 py-8 sm:py-12"
+        className="container mx-auto px-4 py-10 sm:py-12 lg:py-16"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
@@ -247,10 +251,10 @@ const About = () => {
       >
         <div className="max-w-7xl mx-auto">
           <motion.div
-            className="text-center mb-8 sm:mb-12"
+            className="text-center mb-8 sm:mb-6"
             variants={itemVariants}
           >
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-3 sm:mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-3 sm:mb-2">
               Why Choose Ratan Decor
             </h2>
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto">
@@ -323,7 +327,7 @@ const About = () => {
       </motion.section>
 
       {/* We Serve Section */}
-      <motion.section
+      {/* <motion.section
         className="container mx-auto px-4 py-8 sm:py-12"
         initial="hidden"
         whileInView="visible"
@@ -385,11 +389,11 @@ const About = () => {
             </div>
           </div>
         </div>
-      </motion.section>
+      </motion.section> */}
 
       {/* HOW WE WORK - ENHANCED PROFESSIONAL DESIGN */}
       <motion.section
-        className="py-16 sm:py-20 bg-gradient-to-b from-gray-50 to-white"
+        className="py-10 sm:py-12 lg:py-16 bg-gradient-to-b from-gray-50 to-white"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
@@ -398,10 +402,10 @@ const About = () => {
         <div className="max-w-7xl mx-auto px-4">
           {/* Section Header */}
           <motion.div
-            className="text-center mb-12 sm:mb-16"
+            className="text-center mb-8 sm:mb-6"
             variants={itemVariants}
           >
-            <h2 className="text-3xl sm:text-4xl lg:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
+            <h2 className="text-3xl sm:text-4xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-2">
               How We Work
             </h2>
             <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
@@ -425,18 +429,19 @@ const About = () => {
                 )}
 
                 {/* Card */}
-                <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 h-full border border-gray-100 hover:border-primary/30">
+                <div className="bg-white rounded-2xl pt-5 pb-6 px-6 sm:pt-6 sm:pb-8 sm:px-8 shadow-lg hover:shadow-2xl transition-all duration-300 h-full border border-gray-100 hover:border-primary/30">
                   {/* Step Number Circle */}
-                  <div className="flex items-center justify-between mb-6 sm:mb-8">
+                  <div className="flex items-center justify-between mb-4 sm:mb-6">
                     <div className="relative">
-                      <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg group-hover:blur-xl transition-all"></div>
-                      <div className="relative w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center">
-                        <span className="text-white font-bold text-lg sm:text-xl">
+                      <div className="relative w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center group-hover:border-primary/30 transition-colors">
+                        <span className="text-gray-900 font-bold text-lg sm:text-xl">
                           {step.step}
                         </span>
                       </div>
                     </div>
-                    <div className="text-3xl sm:text-4xl">{step.icon}</div>
+                    <div className="bg-primary/5 p-3 rounded-2xl group-hover:bg-primary/10 transition-colors">
+                      {step.icon}
+                    </div>
                   </div>
 
                   {/* Title */}
@@ -469,189 +474,59 @@ const About = () => {
               </motion.div>
             ))}
           </div>
-
-          <motion.div
-            className="mt-12 sm:mt-16 text-center"
-            variants={itemVariants}
-          >
-            <p className="text-gray-600 mb-6 sm:mb-8">
-              Ready to get started with Ratan Decor?
-            </p>
-
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="inline-block"
-            >
-              <Link
-                to="/contact"
-                className="bg-primary text-white px-8 sm:px-10 py-3 sm:py-4
-                 rounded-xl font-semibold hover:bg-primary/90
-                 transition-all inline-block"
-                aria-label="Contact Ratan Decor"
-              >
-                Contact Us Today
-              </Link>
-            </motion.div>
-          </motion.div>
-        </div>
-      </motion.section>
-
-      {/* Support Team Section */}
-      <motion.section
-        className="container mx-auto px-4 py-8 sm:py-12"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-100px" }}
-        variants={containerVariants}
-      >
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            className="text-center mb-8 sm:mb-12"
-            variants={itemVariants}
-          >
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-3 sm:mb-4">
-              Our Support Team
-            </h2>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto">
-              Dedicated professionals ready to assist you with your interior
-              design needs
-            </p>
-          </motion.div>
-
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-16"
-            variants={containerVariants}
-          >
-            {[
-              {
-                image:
-                  "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-                name: "Rajesh Kumar",
-                role: "Sales Manager",
-                description:
-                  "Expert in residential solutions with 10+ years experience",
-              },
-              {
-                image:
-                  "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-                name: "Priya Sharma",
-                role: "Architect Relations",
-                description:
-                  "Specializes in commercial projects and architect collaborations",
-              },
-              {
-                image:
-                  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-                name: "Amit Patel",
-                role: "Technical Support",
-                description:
-                  "Handles product specifications and technical enquiries",
-              },
-              {
-                image:
-                  "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-                name: "Neha Gupta",
-                role: "Customer Success",
-                description:
-                  "Ensures seamless project execution and client satisfaction",
-              },
-            ].map((member, index) => (
-              <motion.div
-                key={index}
-                className="bg-white p-4 sm:p-6 rounded-lg sm:rounded-xl shadow-md hover:shadow-lg transition-all duration-300 text-center group"
-                variants={itemVariants}
-                whileHover={{ y: -8 }}
-              >
-                <div className="relative w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6">
-                  <motion.img
-                    src={member.image}
-                    alt={member.name}
-                    className="w-full h-full object-cover rounded-full border-4 border-white shadow-lg group-hover:border-primary transition-colors duration-300"
-                    whileHover={{ scale: 1.05 }}
-                    loading="lazy"
-                  />
-                </div>
-                <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-3">
-                  {member.name}
-                </h3>
-                <p className="text-primary font-semibold mb-3 sm:mb-4 text-sm sm:text-base">
-                  {member.role}
-                </p>
-                <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
-                  {member.description}
-                </p>
-              </motion.div>
-            ))}
-          </motion.div>
         </div>
       </motion.section>
 
       {/* CTA Section */}
       <motion.section
-        className="container mx-auto px-4 py-8 sm:py-12"
+        className="container mx-auto mb-8 py-6 md:py-14 lg:py-8 "
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
         variants={scaleUp}
       >
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            className="bg-gradient-to-tr from-primary to-[#e56666] rounded-2xl sm:rounded-3xl p-4 sm:p-8 text-white shadow-xl"
-            whileHover={{ y: -8 }}
-          >
-            <motion.h2
-              className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 sm:mb-8 text-center"
-              variants={itemVariants}
-            >
-              Ready to Start Your Project?
-            </motion.h2>
-            <motion.p
-              className="text-base sm:text-lg lg:text-xl mb-8 sm:mb-10 max-w-2xl mx-auto text-center text-red-100"
-              variants={itemVariants}
-            >
-              Contact us today to explore our complete range of premium plywood,
-              mica, veneers, and decorative solutions. Our team is ready to
-              assist you with personalized recommendations.
-            </motion.p>
-            <motion.div
-              className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center"
-              variants={containerVariants}
-            >
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Link
-                  to="/products"
-                  className="inline-block bg-white text-primary px-4 sm:px-6 py-2 sm:py-3
-                 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base
-                 hover:bg-gray-100 focus:ring-2 focus:ring-white focus:outline-none
-                 transition-all duration-300 text-center"
-                  aria-label="Explore Ratan Decor Products"
-                >
-                  Explore Products
-                </Link>
-              </motion.div>
+          <div className="relative group overflow-hidden rounded-[2.5rem] shadow-2xl border border-white/10">
+            {/* Background Image with Red Overlay */}
+            <div className="absolute inset-0 z-0">
+              <img 
+                src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1200&q=80" 
+                alt="Modern Interior" 
+                className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
+              />
+              {/* Complex overlay: dark gradient + red tint */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-primary/20"></div>
+            </div>
 
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Link
-                  to="/contact"
-                  className="inline-block border-2 border-white text-white px-4 sm:px-6
-                 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold text-sm
-                 sm:text-base hover:bg-white hover:text-primary focus:ring-2
-                 focus:ring-white focus:outline-none transition-all duration-300
-                 text-center"
-                  aria-label="Get in Touch with Ratan Decor"
-                >
-                  Get in Touch
-                </Link>
-              </motion.div>
-            </motion.div>
-          </motion.div>
+            <div className="relative z-10 p-8 sm:p-16 flex flex-col lg:flex-row items-center justify-start gap-10 lg:gap-24">
+              <div className="text-center lg:text-left max-w-2xl">
+                <div className="w-12 h-1 bg-primary mb-6 mx-auto lg:mx-0 rounded-full"></div>
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-4 leading-tight tracking-tight">
+                  Ready to transform <br className="hidden sm:block" />
+                  your <span className="text-primary italic">next project?</span>
+                </h2>
+                <p className="text-gray-300 text-sm sm:text-base font-light leading-relaxed">
+                  Partner with the leaders in premium interior solutions. 
+                  Our experts are ready to guide you towards excellence and bring your vision to life.
+                </p>
+              </div>
+
+              <div className="flex flex-row flex-wrap justify-center gap-4 shrink-0 w-full lg:w-auto">
+                  <Link
+                    to="/contact"
+                    className="bg-primary text-white px-6 sm:px-10 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-1 active:translate-y-0 text-center flex items-center justify-center min-w-[140px]"
+                  >
+                    Get a quote
+                  </Link>
+                  <Link
+                    to="/products"
+                    className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-6 sm:px-10 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all hover:bg-white/20 hover:-translate-y-1 active:translate-y-0 text-center flex items-center justify-center min-w-[140px]"
+                  >
+                    Explore products
+                  </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </motion.section>
 

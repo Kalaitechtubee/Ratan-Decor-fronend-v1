@@ -84,6 +84,9 @@ function AppRoutes() {
 
       {/* Products */}
       <Route path="/products" element={<ProductPage />} />
+      <Route path="/products/category/:categorySlug" element={<ProductPage />} />
+      <Route path="/products/category/:categorySlug/:subSlug" element={<ProductPage />} />
+
       <Route path="/products/:id/:slug?" element={<ProductDetail />} />
       <Route path="/enquiry-form" element={<EnquiryFormPage />} />
 
