@@ -7,6 +7,7 @@ import {
 import { MdCategory, MdKitchen, MdTableRestaurant, MdOutdoorGrill } from 'react-icons/md';
 import { motion, AnimatePresence } from 'framer-motion';
 import useProducts from '../features/product/hooks/useProducts';
+import { slugify } from '../utils/slugify';
 
 const CategoryDropdown = ({
   isOpen,
@@ -70,7 +71,10 @@ const CategoryDropdown = ({
     if (onCategoryClick) onCategoryClick(category);
 
     if (category && category.id) {
-      navigate(`/products?categoryIds=${category.id}&categoryName=${encodeURIComponent(category.name)}`);
+      const slug = slugify(category.name);
+      navigate(`/products/category/${slug}`, {
+        state: { categoryId: category.id }
+      });
     } else if (category && category.name) {
       navigate(`/products?search=${encodeURIComponent(category.name)}`);
     } else {
@@ -90,7 +94,15 @@ const CategoryDropdown = ({
     if (onCategoryClick) onCategoryClick(subcategory);
 
     if (subcategory && subcategory.id) {
-      navigate(`/products?categoryIds=${subcategory.id}&categoryName=${encodeURIComponent(subcategory.name)}`);
+      const parentSlug = slugify(parentCategory.name);
+      const subSlug = slugify(subcategory.name);
+
+      navigate(`/products/category/${parentSlug}/${subSlug}`, {
+        state: {
+          categoryId: parentCategory.id,
+          subcategoryId: subcategory.id
+        }
+      });
     } else if (subcategory && subcategory.name) {
       navigate(`/products?search=${encodeURIComponent(subcategory.name)}`);
     }

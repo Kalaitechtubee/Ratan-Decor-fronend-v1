@@ -18,6 +18,7 @@ import LogoutConfirmModal from './navbar/LogoutConfirmModal';
 import FloatingActionButtons from './navbar/FloatingActionButtons';
 import CategoryDropdown from './CategoryDropdown';
 import CartSidePanel from '../features/cart/components/CartSidePanel';
+import { slugify } from '../utils/slugify';
 
 export default function Navbar() {
   const dispatch = useDispatch();
@@ -211,9 +212,10 @@ export default function Navbar() {
 
     // Navigate based on category data
     if (category && category.id) {
-      const url = `/products?categoryId=${category.id}&categoryName=${encodeURIComponent(category.name)}`;
-      console.log('Navbar: Navigating to:', url);
-      navigate(url);
+      const slug = slugify(category.name);
+      const url = `/products/category/${slug}`;
+      console.log('Navbar: Navigating to slug URL:', url);
+      navigate(url, { state: { categoryId: category.id } });
     } else if (category && category.name) {
       const url = `/products?search=${encodeURIComponent(category.name)}`;
       console.log('Navbar: Fallback navigation to:', url);

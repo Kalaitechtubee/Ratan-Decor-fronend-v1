@@ -65,9 +65,8 @@ export default function AdvancedProductFilters({
     const filterCategoryIds = Array.isArray(filters.categoryIds)
       ? filters.categoryIds.map(String)
       : [];
-    const currentSelected = selectedCategories.join(',');
-    const filterSelected = filterCategoryIds.join(',');
-    if (filterSelected !== currentSelected) {
+    // Sync categoryIds from filters
+    if (filterCategoryIds.join(',') !== selectedCategories.join(',')) {
       setSelectedCategories(filterCategoryIds);
     }
 
@@ -110,7 +109,7 @@ export default function AdvancedProductFilters({
       };
 
       // Expand paths for all selected categories
-      const allPaths = new Set();
+      const allPaths = new Set(expandedCategories); // Preserve existing expansions
       selectedCategories.forEach(categoryId => {
         const path = findCategoryPath(categories, categoryId);
         if (path) {
@@ -265,23 +264,72 @@ export default function AdvancedProductFilters({
         break;
     }
   };
-  // Handle category selection (multi-select toggle)
+  // Handle category selection (multi-select toggle with exclusionary refinement)
   const handleCategorySelect = (categoryId) => {
     const categoryIdStr = categoryId.toString();
     const isSelected = selectedCategories.includes(categoryIdStr);
 
-    let newSelectedCategories;
+    let newSelectedCategories = [...selectedCategories];
+
     if (isSelected) {
-      // Remove if already selected
-      newSelectedCategories = selectedCategories.filter(id => id !== categoryIdStr);
+      // Just remove it
+      newSelectedCategories = newSelectedCategories.filter(id => id !== categoryIdStr);
     } else {
-      // Add if not selected
-      newSelectedCategories = [...selectedCategories, categoryIdStr];
+      // Helper to get all descendant IDs
+      const getDescendants = (cats, targetId) => {
+        const findCat = (items, id) => {
+          for (const item of items) {
+            if (item.id.toString() === id.toString()) return item;
+            if (item.subCategories) {
+              const found = findCat(item.subCategories, id);
+              if (found) return found;
+            }
+          }
+          return null;
+        };
+        const collect = (item, ids = []) => {
+          if (item.subCategories) {
+            item.subCategories.forEach(sub => {
+              ids.push(sub.id.toString());
+              collect(sub, ids);
+            });
+          }
+          return ids;
+        };
+        const target = findCat(cats, targetId);
+        return target ? collect(target) : [];
+      };
+
+      // Helper to get all ancestor IDs
+      const getAncestors = (cats, targetId, path = []) => {
+        for (const cat of cats) {
+          if (cat.id.toString() === targetId.toString()) return path;
+          if (cat.subCategories) {
+            const found = getAncestors(cat.subCategories, targetId, [...path, cat.id.toString()]);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+
+      const descendants = getDescendants(categories, categoryIdStr);
+      const ancestors = getAncestors(categories, categoryIdStr);
+
+      // EXCLUSIONARY LOGIC:
+      // 1. If selecting this, remove its ancestors (refine the search)
+      if (ancestors) {
+        newSelectedCategories = newSelectedCategories.filter(id => !ancestors.includes(id));
+      }
+      // 2. If selecting this, remove its descendants (broaden the search)
+      if (descendants) {
+        newSelectedCategories = newSelectedCategories.filter(id => !descendants.includes(id));
+      }
+
+      newSelectedCategories.push(categoryIdStr);
     }
 
     setSelectedCategories(newSelectedCategories);
-    // Call onFilterChange with 'categoryId' which triggers toggle behavior in slice
-    onFilterChange('categoryId', categoryIdStr);
+    onFilterChange('categoryIds', newSelectedCategories);
   };
 
   // Check if a category is selected
@@ -344,12 +392,23 @@ export default function AdvancedProductFilters({
   // Recursive category tree rendering with checkboxes
   const renderCategoryTree = (cats, level = 0) => {
     return cats.map(category => {
-      const isSelected = isCategorySelected(category.id);
+      const isDirectlySelected = isCategorySelected(category.id);
+      
+      // Check if any descendant is selected
+      const hasSelectedDescendant = (cat) => {
+        if (!cat.subCategories) return false;
+        return cat.subCategories.some(sub => 
+          isCategorySelected(sub.id) || hasSelectedDescendant(sub)
+        );
+      };
+
+      const isPartiallySelected = !isDirectlySelected && hasSelectedDescendant(category);
+      const isActive = isDirectlySelected || isPartiallySelected;
 
       return (
         <div key={category.id} className="mb-1">
           <div
-            className={`flex items-center justify-between p-2 rounded-lg transition-all duration-200 ${isSelected
+            className={`flex items-center justify-between p-2 rounded-lg transition-all duration-200 ${isActive
               ? 'bg-accent/10 border border-accent/20'
               : 'hover:bg-gray-50 border border-transparent'
               }`}
@@ -360,17 +419,19 @@ export default function AdvancedProductFilters({
               onClick={() => handleCategorySelect(category.id)}
             >
               {/* Checkbox */}
-              <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${isSelected
+              <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${isActive
                 ? 'bg-accent border-accent'
                 : 'border-gray-300 hover:border-accent'
                 }`}>
-                {isSelected && (
+                {isDirectlySelected ? (
                   <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                   </svg>
-                )}
+                ) : isPartiallySelected ? (
+                  <div className="w-2 h-0.5 bg-white rounded-full" />
+                ) : null}
               </div>
-              <span className={`text-sm font-medium truncate ${isSelected ? 'text-accent' : 'text-gray-700'
+              <span className={`text-sm font-medium truncate ${isActive ? 'text-accent' : 'text-gray-700'
                 }`}>
                 {category.name}
               </span>
@@ -384,9 +445,9 @@ export default function AdvancedProductFilters({
                 className="p-1 hover:bg-gray-200 rounded transition-colors flex items-center gap-1"
               >
                 {expandedCategories.has(category.id) ? (
-                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                  <ChevronDown className={`w-4 h-4 ${isActive ? 'text-accent' : 'text-gray-500'}`} />
                 ) : (
-                  <ChevronRight className="w-4 h-4 text-gray-500" />
+                  <ChevronRight className={`w-4 h-4 ${isActive ? 'text-accent' : 'text-gray-500'}`} />
                 )}
               </button>
             )}

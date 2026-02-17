@@ -1,11 +1,14 @@
 import React, { useEffect } from 'react';
 import { Loader2, ArrowRight, ShoppingBag, Image } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import useProducts from '../../features/product/hooks/useProducts';
+import { slugify } from '../../utils/slugify';
 
 const primaryColor = "#ff4747";
 
 const PopularCategories = ({ onCategoryClick }) => {
+  const navigate = useNavigate();
   const { categories, loadCategories, isLoading, error } = useProducts();
 
   useEffect(() => {
@@ -42,7 +45,8 @@ const PopularCategories = ({ onCategoryClick }) => {
       onCategoryClick(category);
     } else {
       console.log('Category clicked:', category);
-      window.location.href = `/products?categoryId=${category.id}`;
+      const slug = slugify(category.name);
+      navigate(`/products/category/${slug}`, { state: { categoryId: category.id } });
     }
   };
 
