@@ -4,6 +4,7 @@ import DetailsForm from '../components/DetailsForm';
 import logo from '../../../assets/images/ratan-decor.png';
 import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import loginBg from '../../../assets/login.png';
 
 function DetailsPage() {
   const navigate = useNavigate();
@@ -13,15 +14,14 @@ function DetailsPage() {
       {/* Left Section - Image with Content */}
       <div className="hidden lg:flex lg:w-1/4 relative overflow-hidden">
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage:
-              'url("https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80")',
+            backgroundImage: `url(${loginBg})`,
           }}
         >
-          <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-black/80 via-black/50 to-transparent"></div>
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
         </div>
-        <div className="relative z-10 flex flex-col justify-start p-5 text-white">
+        <div className="relative z-10 flex flex-col justify-end p-5 text-white">
           <div className="space-y-4">
           <h1 className="text-2xl font-bold leading-tight">
             Create the Home You've Always Imagined
@@ -41,7 +41,7 @@ function DetailsPage() {
             <img
               src={logo}
               alt="Ratan Decor Logo"
-              className="h-7 transition-transform duration-300 hover:scale-105"
+              className="h-10 transition-transform duration-300 hover:scale-105"
             />
           </div>
           <button

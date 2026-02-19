@@ -8,6 +8,7 @@ import { MdCategory, MdKitchen, MdTableRestaurant, MdOutdoorGrill } from 'react-
 import { motion, AnimatePresence } from 'framer-motion';
 import useProducts from '../features/product/hooks/useProducts';
 import { slugify } from '../utils/slugify';
+import categoryimage from '../assets/category-list.jpg';
 
 const CategoryDropdown = ({
   isOpen,
@@ -146,7 +147,7 @@ const CategoryDropdown = ({
   };
 
   const getStaticImageUrl = () => {
-    return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1200&q=90&fit=crop';
+    return categoryimage;
   };
 
   const handleCategoryHover = (category) => {
@@ -258,18 +259,18 @@ const CategoryDropdown = ({
                     </div>
 
                     {/* Image Section - Right Side */}
-                    <div className="col-span-1 md:col-span-4">
+                    <div className="col-span-1 md:col-span-4 self-center">
                       <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.3 }}
-                        className="bg-white rounded-2xl overflow-hidden shadow-xl h-full"
+                        className="bg-white rounded-2xl overflow-hidden shadow-2xl"
                       >
-                        <div className="relative h-full min-h-[400px] overflow-hidden">
+                        <div className="relative h-[530px] overflow-hidden group">
                           <img
                             src={getStaticImageUrl()}
                             alt="Premium Furniture Collection"
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             onError={(e) => {
                               e.target.src = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&q=90';
                             }}

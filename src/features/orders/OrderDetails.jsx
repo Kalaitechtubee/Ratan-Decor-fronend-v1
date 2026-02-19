@@ -586,7 +586,7 @@ const OrderDetails = () => {
               </h2>
               <div className='space-y-2 sm:space-y-3'>
                 <a
-                  href='tel:+919123456789'
+                  href='tel:+919381059678'
                   className='flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 text-left bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors'
                 >
                   <Phone className='w-4 h-4 sm:w-5 sm:h-5 text-primary' />
@@ -595,12 +595,12 @@ const OrderDetails = () => {
                       Call Support
                     </p>
                     <p className='text-xs sm:text-sm text-gray-600'>
-                      +91 91234 56789
+                      +91 93810 59678
                     </p>
                   </div>
                 </a>
                 <a
-                  href='https://wa.me/919123456789'
+                  href='https://wa.me/919381059678'
                   target='_blank'
                   rel='noopener noreferrer'
                   className='flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 text-left bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors'

@@ -57,10 +57,7 @@ const Footer = () => {
                     Monday - Friday: 8am-9pm
                   </p>
                   <p className="text-[15px] sm:text-[14px] font-medium text-white">
-                    +91-XXXXXXXXXX
-                  </p>
-                  <p className="text-[15px] sm:text-[14px] font-medium text-white mt-0.5">
-                    +91-YYYYYYYYYY
+                    +91 93810 59678
                   </p>
                 </div>
               </div>
@@ -76,7 +73,7 @@ const Footer = () => {
                     Need help with your order?
                   </p>
                   <p className="text-[15px] sm:text-[14px] font-medium text-white">
-                    support@ratandecor.com
+                    info@ratandecor.com
                   </p>
                 </div>
               </div>

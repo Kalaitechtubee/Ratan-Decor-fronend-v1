@@ -127,7 +127,7 @@ export default function EnhancedProductCard({ product, viewMode = 'grid' }) {
               >
                 {/* CALL */}
                 <a
-                  href="tel:+919876543210"
+                  href="tel:+919381059678"
                   aria-label="Call Now"
                   className="flex items-center space-x-2 px-3 py-1.5 rounded-full
                            bg-white/90 hover:bg-white shadow-lg text-gray-900
@@ -138,7 +138,7 @@ export default function EnhancedProductCard({ product, viewMode = 'grid' }) {
                 </a>
                 {/* WHATSAPP */}
                 <a
-                  href={`https://wa.me/919884000000?text=Hi,%20I%20want%20to%20know%20more%20about%20${encodeURIComponent(
+                  href={`https://wa.me/919381059678?text=Hi,%20I%20want%20to%20know%20more%20about%20${encodeURIComponent(
                     product.name
                   )}`}
                   target="_blank"
@@ -277,7 +277,7 @@ export default function EnhancedProductCard({ product, viewMode = 'grid' }) {
 
                 {/* CALL */}
                 <a
-                  href="tel:+919876543210"
+                  href="tel:+919381059678"
                   className="flex items-center space-x-2 px-4 py-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 transition-colors font-medium text-sm"
                 >
                   <Phone className="w-4 h-4 text-primary" />
@@ -286,7 +286,7 @@ export default function EnhancedProductCard({ product, viewMode = 'grid' }) {
 
                 {/* WHATSAPP */}
                 <a
-                  href={`https://wa.me/919884000000?text=Hi,%20I%20want%20to%20know%20more%20about%20${encodeURIComponent(
+                  href={`https://wa.me/919381059678?text=Hi,%20I%20want%20to%20know%20more%20about%20${encodeURIComponent(
                     product.name
                   )}`}
                   target="_blank"

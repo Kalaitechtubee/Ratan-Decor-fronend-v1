@@ -108,7 +108,7 @@ export default function MobileNavbar({
             <div className="flex items-center gap-2 flex-shrink-0">
               {/* WhatsApp Button */}
               <motion.a
-                href="https://wa.me/918360636885"
+                href="https://wa.me/919381059678"
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.1 }}

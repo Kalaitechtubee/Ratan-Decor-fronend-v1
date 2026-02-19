@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { History, UsersRound, Handshake, Layers } from 'lucide-react';
 import PropTypes from 'prop-types';
+import showroomImage from '../../assets/home-ratandecor.jpg';
 
 const defaultStats = [
   {
@@ -124,7 +125,7 @@ const CounterComponent = ({ apiStats }) => {
               <div className="absolute inset-0 bg-[#ff4747] rounded-3xl transform rotate-3 opacity-20 group-hover:rotate-6 transition-transform duration-500"></div>
               <div className="relative bg-white rounded-3xl p-2 shadow-2xl">
                 <img
-                  src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=100"
+                  src={showroomImage}
                   alt="Luxury furniture showroom with wooden products and interior design"
                   className="w-full h-80 md:h-96 object-cover rounded-2xl"
                   onError={(e) => {
