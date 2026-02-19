@@ -1,4 +1,3 @@
-
 import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -12,6 +11,8 @@ import {
   MessagesSquare, 
   CheckCircle2 
 } from "lucide-react";
+import aboutrathan from "../assets/about-ratan.jpg";
+import ratancta from "../assets/ratan-cta.jpg";
 
 // Animation variants
 const containerVariants = {
@@ -267,7 +268,7 @@ const About = () => {
             <motion.div className="lg:w-1/2" variants={slideInFromLeft}>
               <div className="relative">
                 <motion.img
-                  src="https://images.unsplash.com/photo-1615873968403-89e068629265?w=800&q=80"
+                  src={aboutrathan}
                   alt="Ratan Decor Showroom"
                   className="w-full h-48 sm:h-64 lg:h-96 object-cover rounded-xl sm:rounded-2xl shadow-2xl border border-gray-200"
                   whileHover={{ scale: 1.03 }}
@@ -490,7 +491,7 @@ const About = () => {
             {/* Background Image with Red Overlay */}
             <div className="absolute inset-0 z-0">
               <img 
-                src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1200&q=80" 
+                src={ratancta}
                 alt="Modern Interior" 
                 className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
               />

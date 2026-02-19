@@ -3,6 +3,7 @@ import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../../../assets/images/ratan-decor.png';
 import RegisterForm from '../components/RegisterForm';
+import loginBg from '../../../assets/login.png';
 
 function RegisterPage() {
   const navigate = useNavigate();
@@ -12,10 +13,9 @@ function RegisterPage() {
       {/* Left Section - Image with Content */}
       <div className="hidden lg:flex lg:w-3/5 relative overflow-hidden">
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage:
-              'url("https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2032&q=80")',
+            backgroundImage: `url(${loginBg})`,
           }}
         >
           <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-black/80 via-black/50 to-transparent"></div>
@@ -40,7 +40,7 @@ function RegisterPage() {
             <img
               src={logo}
               alt="Ratan Decor Logo"
-              className="h-7 transition-transform duration-300 hover:scale-105"
+              className="h-10 transition-transform duration-300 hover:scale-105"
             />
           </div>
           <button

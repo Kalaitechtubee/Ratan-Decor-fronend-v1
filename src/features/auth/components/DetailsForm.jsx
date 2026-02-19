@@ -282,7 +282,7 @@ function DetailsForm() {
                 name="name"
                 value={formData.name}
                 disabled
-                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
+                className="w-full px-3 py-2 border border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed transition-colors text-sm"
               />
               {errors.name && (
                 <p className="text-xs text-red-500 mt-1">{errors.name}</p>
@@ -299,7 +299,7 @@ function DetailsForm() {
                 name="email"
                 value={formData.email}
                 disabled
-                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
+                className="w-full px-3 py-2 border border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed transition-colors text-sm"
               />
               {errors.email && (
                 <p className="text-xs text-red-500 mt-1">{errors.email}</p>
@@ -325,7 +325,7 @@ function DetailsForm() {
         setFormData({ ...formData, mobile: value });
       }
     }}
-    className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
+    className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#e2202b] focus:border-[#e2202b] transition-all text-sm"
   />
 
   {errors.mobile && (
@@ -345,7 +345,7 @@ function DetailsForm() {
                 value={formData.company}
                 onChange={handleInputChange}
                 placeholder="Enter your company name"
-                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
+                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#e2202b] focus:border-[#e2202b] transition-all text-sm"
               />
             </div>
           </div>
@@ -368,7 +368,7 @@ function DetailsForm() {
                 onChange={handleInputChange}
                 placeholder="Enter your address"
                 rows="3"
-                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
+                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#e2202b] focus:border-[#e2202b] transition-all text-sm"
               ></textarea>
               {errors.address && (
                 <p className="text-xs text-red-500 mt-1">{errors.address}</p>
@@ -387,7 +387,7 @@ function DetailsForm() {
                 value={formData.city}
                 onChange={handleInputChange}
                 placeholder="Enter city"
-                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
+                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#e2202b] focus:border-[#e2202b] transition-all text-sm"
               />
               {errors.city && (
                 <p className="text-xs text-red-500 mt-1">{errors.city}</p>
@@ -405,7 +405,7 @@ function DetailsForm() {
                 value={formData.state}
                 onChange={handleInputChange}
                 placeholder="Enter state"
-                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
+                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#e2202b] focus:border-[#e2202b] transition-all text-sm"
               />
               {errors.state && (
                 <p className="text-xs text-red-500 mt-1">{errors.state}</p>
@@ -424,7 +424,7 @@ function DetailsForm() {
                 onChange={handleInputChange}
                 placeholder="604408"
                 maxLength="6"
-                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
+                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#e2202b] focus:border-[#e2202b] transition-all text-sm"
               />
               {loading && (
                 <p className="text-xs text-gray-500 mt-1">Loading...</p>
@@ -445,7 +445,7 @@ function DetailsForm() {
                 value={formData.country}
                 onChange={handleInputChange}
                 placeholder="Enter country"
-                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:border-[#e2202b] transition-colors text-sm"
+                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#e2202b] focus:border-[#e2202b] transition-all text-sm"
               />
               {errors.country && (
                 <p className="text-xs text-red-500 mt-1">{errors.country}</p>
@@ -462,9 +462,9 @@ function DetailsForm() {
             whileHover="hover"
             whileTap="tap"
             disabled={loading}
-            className={`w-full md:w-auto px-8 py-2.5 rounded-none font-medium text-white transition-all duration-300 ${loading
+            className={`w-full md:w-auto px-12 py-3.5 rounded-none font-bold text-white shadow-lg transition-all duration-300 active:scale-[0.98] ${loading
               ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-[#e2202b] hover:bg-[#c41d26]'
+              : 'bg-[#e2202b] hover:bg-[#c01b24] focus:ring-2 focus:ring-offset-2 focus:ring-[#e2202b]'
               }`}
           >
             {loading ? (
@@ -472,7 +472,7 @@ function DetailsForm() {
                 <FaSpinner className="animate-spin" /> Submitting...
               </span>
             ) : (
-              'Submit'
+              'Save & Complete Profile'
             )}
           </motion.button>
         </motion.div>

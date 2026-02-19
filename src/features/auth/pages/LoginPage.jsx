@@ -7,6 +7,8 @@ import { FaSpinner } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import logo from '../../../assets/images/ratan-decor.png';
 
+import loginBg from '../../../assets/login.png';
+
 function LoginPage() {
   const { login, isAuthenticated, user, status, error } = useAuth();
   const navigate = useNavigate();
@@ -69,12 +71,12 @@ function LoginPage() {
       {/* Left Section - Image with Content */}
       <div className="hidden lg:flex lg:w-3/5 relative overflow-hidden">
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: 'url("https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2158&q=80")'
+            backgroundImage: `url(${loginBg})`
           }}
         >
-          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/50 to-transparent"></div>
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
         </div>
         <div className="relative z-10 flex flex-col justify-end p-12 text-white">
           <div className="space-y-4">
@@ -96,7 +98,7 @@ function LoginPage() {
             <img
               src={logo}
               alt="Ratan Decor Logo"
-              className="h-7 transition-transform duration-300 hover:scale-105"
+              className="h-10 transition-transform duration-300 hover:scale-105"
             />
           </div>
           <button
@@ -120,7 +122,7 @@ function LoginPage() {
 
             </div>
 
-            <div className="space-y-6 mt-6">
+            <form onSubmit={handleSubmit} className="space-y-6 mt-6">
               {formError && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
@@ -141,7 +143,7 @@ function LoginPage() {
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-[#e2202b] focus:border-1 transition-colors"
+                  className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#e2202b] focus:border-[#e2202b] transition-all"
                   placeholder="info.ratandecor@gmail.com"
                   required
                 />
@@ -158,14 +160,14 @@ function LoginPage() {
                     type={showPassword ? 'text' : 'password'}
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-[#e2202b] focus:border-1 transition-colors pr-12"
+                    className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#e2202b] focus:border-[#e2202b] transition-all pr-12"
                     placeholder="••••••••"
                     required
                   />
                   <button
                     type="button"
                     onClick={togglePasswordVisibility}
-                    className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600"
+                    className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600 focus:outline-none"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -179,9 +181,9 @@ function LoginPage() {
                     id="remember-me"
                     name="remember-me"
                     type="checkbox"
-                    className="h-4 w-4 text-[#e2202b] focus:ring-[#e2202b] border-gray-300 rounded"
+                    className="h-4 w-4 text-[#e2202b] focus:ring-[#e2202b] border-gray-300 rounded cursor-pointer"
                   />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 cursor-pointer">
                     Remember Me
                   </label>
                 </div>
@@ -189,7 +191,7 @@ function LoginPage() {
                 <div className="text-sm">
                   <a
                     href="/forgot-password"
-                    className="font-medium text-[#e2202b] hover:text-[#c01b24]"
+                    className="font-medium text-[#e2202b] hover:text-[#c01b24] transition-colors"
                     onClick={(e) => {
                       e.preventDefault();
                       navigate('/forgot-password');
@@ -202,12 +204,11 @@ function LoginPage() {
 
               <div>
                 <button
-                  type="button"
-                  onClick={handleSubmit}
+                  type="submit"
                   disabled={status === 'loading'}
-                  className={`w-full flex justify-center py-3 px-4 border border-transparent shadow-sm text-sm font-medium text-white transition-all duration-200 ${status === 'loading'
+                  className={`w-full flex justify-center py-3.5 px-4 border border-transparent shadow-sm text-sm font-semibold text-white transition-all duration-300 ${status === 'loading'
                     ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-[#e2202b] hover:bg-[#c01b24] focus:ring-2 focus:ring-offset-2 focus:ring-[#e2202b]'
+                    : 'bg-[#e2202b] hover:bg-[#c01b24] active:scale-[0.98] focus:ring-2 focus:ring-offset-2 focus:ring-[#e2202b]'
                     }`}
                 >
                   {status === 'loading' ? (
@@ -216,11 +217,11 @@ function LoginPage() {
                       <span>Logging in...</span>
                     </div>
                   ) : (
-                    'Login'
+                    'Login to Account'
                   )}
                 </button>
               </div>
-            </div>
+            </form>
 
             <div className="mt-6 mb-10 text-center">
               <p className="text-sm text-gray-600">

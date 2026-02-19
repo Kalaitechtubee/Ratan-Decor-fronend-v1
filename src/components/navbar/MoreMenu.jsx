@@ -43,7 +43,7 @@ export default function MoreMenu({
       color: "#ff4747"
     },
     {
-      path: "https://wa.me/918360636885",
+      path: "https://wa.me/919381059678",
       icon: FaWhatsapp,
       label: "WhatsApp Us",
       isExternal: true,

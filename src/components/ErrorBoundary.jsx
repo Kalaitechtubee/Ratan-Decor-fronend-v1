@@ -174,8 +174,8 @@ class ErrorBoundary extends Component {
                       <FaHeadset className="h-6 w-6 text-blue-600" />
                     </div>
                     <p className="text-sm font-medium text-gray-700 mb-1 font-roboto">24/7 Support</p>
-                    <a href="tel:+1-800-378-6478" className="text-[#ff4747] text-sm font-roboto">
-                      1-800-FURNITURE
+                    <a href="tel:+919381059678" className="text-[#ff4747] text-sm font-roboto">
+                      +91 93810 59678
                     </a>
                   </div>
                   
@@ -184,7 +184,7 @@ class ErrorBoundary extends Component {
                       <FaWhatsapp className="h-6 w-6 text-green-600" />
                     </div>
                     <p className="text-sm font-medium text-gray-700 mb-1 font-roboto">Chat with Us</p>
-                    <a href="https://wa.me/1234567890" className="text-[#ff4747] text-sm font-roboto">
+                    <a href="https://wa.me/919381059678" className="text-[#ff4747] text-sm font-roboto">
                       WhatsApp Support
                     </a>
                   </div>
@@ -234,7 +234,7 @@ class ErrorBoundary extends Component {
             <div className="bg-gray-50 px-8 py-4 border-t border-gray-200">
               <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-500 font-roboto">
                 <div className="flex items-center gap-4 mb-2 md:mb-0">
-                  <span>© 2024 FurniStore</span>
+                  <span>© {new Date().getFullYear()} Ratan Decor</span>
                   <span className="hidden md:block">•</span>
                   <span>All rights reserved</span>
                 </div>

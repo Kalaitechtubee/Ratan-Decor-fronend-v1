@@ -299,7 +299,7 @@ const Contact = ({ isHome = false }) => {
                 <div className="flex items-start space-x-3 sm:space-x-4">
                   <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 mt-1 flex-shrink-0" />
                   <p className="text-gray-900 font-medium text-sm sm:text-base md:text-lg">
-                    08046076687
+                    +91 93810 59678
                   </p>
                 </div>
 

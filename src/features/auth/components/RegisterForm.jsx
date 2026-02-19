@@ -164,10 +164,10 @@ function RegisterForm() {
                 type="text"
                 value={formData.name}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border transition-colors focus:outline-none focus:border-1 ${
+                className={`w-full px-4 py-3 border transition-all focus:outline-none focus:ring-1 ${
                   fieldErrors.name 
-                    ? 'border-red-300 focus:border-red-500' 
-                    : 'border-gray-300 focus:border-[#e2202b]'
+                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                    : 'border-gray-300 focus:ring-[#e2202b] focus:border-[#e2202b]'
                 }`}
                 placeholder="Enter your full name"
                 required
@@ -193,10 +193,10 @@ function RegisterForm() {
                 type="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border transition-colors focus:outline-none focus:border-1 ${
+                className={`w-full px-4 py-3 border transition-all focus:outline-none focus:ring-1 ${
                   fieldErrors.email 
-                    ? 'border-red-300 focus:border-red-500' 
-                    : 'border-gray-300 focus:border-[#e2202b]'
+                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                    : 'border-gray-300 focus:ring-[#e2202b] focus:border-[#e2202b]'
                 }`}
                 placeholder="your.email@example.com"
                 required
@@ -219,10 +219,10 @@ function RegisterForm() {
                 type={showPassword ? 'text' : 'password'}
                 value={formData.password}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 pr-12 border transition-colors focus:outline-none focus:border-1 ${
+                className={`w-full px-4 py-3 pr-12 border transition-all focus:outline-none focus:ring-1 ${
                   fieldErrors.password 
-                    ? 'border-red-300 focus:border-red-500' 
-                    : 'border-gray-300 focus:border-[#e2202b]'
+                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                    : 'border-gray-300 focus:ring-[#e2202b] focus:border-[#e2202b]'
                 }`}
                 placeholder="Create a strong password"
                 required
@@ -230,7 +230,7 @@ function RegisterForm() {
               <button
                 type="button"
                 onClick={togglePasswordVisibility}
-                className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -276,10 +276,10 @@ function RegisterForm() {
                 name="role"
                 value={formData.role}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border transition-colors focus:outline-none focus:border-1 ${
+                className={`w-full px-4 py-3 border transition-all focus:outline-none focus:ring-1 ${
                   fieldErrors.role 
-                    ? 'border-red-300 focus:border-red-500' 
-                    : 'border-gray-300 focus:border-[#e2202b]'
+                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                    : 'border-gray-300 focus:ring-[#e2202b] focus:border-[#e2202b]'
                 }`}
                 required
               >
@@ -304,18 +304,18 @@ function RegisterForm() {
                   type="checkbox"
                   checked={termsAccepted}
                   onChange={handleTermsChange}
-                  className="h-4 w-4 text-[#e2202b] focus:ring-[#e2202b] border-gray-200"
+                  className="h-4 w-4 text-[#e2202b] focus:ring-[#e2202b] border-gray-200 cursor-pointer"
                   required
                 />
               </div>
               <div className="ml-3 text-sm">
-                <label htmlFor="terms" className="text-gray-700">
+                <label htmlFor="terms" className="text-gray-700 cursor-pointer">
                   I agree to the{' '}
-                  <a href="/Terms" className="font-medium text-[#e2202b] hover:text-[#c01b24] underline">
+                  <a href="/Terms" className="font-medium text-[#e2202b] hover:text-[#c01b24] underline transition-colors">
                     Terms of Service
                   </a>{' '}
                   and{' '}
-                  <a href="/Privacy" className="font-medium text-[#e2202b] hover:text-[#c01b24] underline">
+                  <a href="/Privacy" className="font-medium text-[#e2202b] hover:text-[#c01b24] underline transition-colors">
                     Privacy Policy
                   </a>
                 </label>
@@ -330,10 +330,10 @@ function RegisterForm() {
         <motion.button
           type="submit"
           disabled={loading || !termsAccepted}
-          whileHover={{ scale: 1.02 }}
+          whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}
-          className={`w-full flex justify-center items-center py-4 px-6 border border-transparent text-base font-semibold text-white shadow-lg transition-all duration-200 ${
-            loading || !termsAccepted ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#e2202b] hover:bg-[#c01b24]'
+          className={`w-full flex justify-center items-center py-4 px-6 border border-transparent text-base font-bold text-white shadow-lg transition-all duration-300 active:scale-[0.98] ${
+            loading || !termsAccepted ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#e2202b] hover:bg-[#c01b24] focus:ring-2 focus:ring-offset-2 focus:ring-[#e2202b]'
           }`}
         >
           {loading ? 'Processing...' : 'Create Account'}
